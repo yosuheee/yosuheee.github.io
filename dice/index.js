@@ -1,5 +1,5 @@
-import { mat4 } from "../lib/gl-matrix/index.js";
-import { program } from "../lib/webgl.js";
+import { mat4 } from "/lib/gl-matrix/index.js";
+import { program } from "/lib/webgl.js";
 import { dice, uniformMatrix4, uniform3 } from "./module.js";
 
 const vss = `

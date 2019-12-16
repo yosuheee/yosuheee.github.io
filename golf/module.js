@@ -1,4 +1,4 @@
-import { Polygon } from "../lib/webgl.js";
+import { Polygon } from "/lib/webgl.js";
 
 export function rect(x, y, c = [1, 1, 1]) {
   const data = [], index = [];

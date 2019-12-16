@@ -1,6 +1,6 @@
 import { Vec3,
          intersection_of_plane_and_line,
-         triangle_contains_point } from "../lib/geometry.js";
+         triangle_contains_point } from "/lib/geometry.js";
 
 export const make_positions = function*(v0, h0, ground, {
   r = 0.04267,            // ボールの半径

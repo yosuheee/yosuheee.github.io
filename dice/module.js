@@ -1,5 +1,5 @@
-import { vec3, mat4 } from "../lib/gl-matrix/index.js";
-import { Vec3 } from "../lib/geometry.js";
+import { vec3, mat4 } from "/lib/gl-matrix/index.js";
+import { Vec3 } from "/lib/geometry.js";
 
 class Polygon {
   constructor(data = [], index = []) {

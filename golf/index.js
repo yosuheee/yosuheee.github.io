@@ -1,5 +1,5 @@
-import { Vec3 } from "../lib/geometry.js";
-import { VERTEX_SOURCE, FRAGMENT_SOURCE, program } from "../lib/webgl.js";
+import { Vec3 } from "/lib/geometry.js";
+import { VERTEX_SOURCE, FRAGMENT_SOURCE, program } from "/lib/webgl.js";
 import { make_positions } from "./calculate.js";
 import { sphere, 
          display_bar, create_ground, display_distance, xz_distance } from "./module.js";
