@@ -1,10 +1,10 @@
 import { Vec3 } from "/lib/geometry.js";
 import { VERTEX_SOURCE, FRAGMENT_SOURCE, program } from "/lib/webgl.js";
 import { make_positions } from "./calculate.js";
-import { sphere, 
-         display_bar, create_ground, display_distance, xz_distance } from "./module.js";
+import { Game, loop, BAR_STATUS, DISTANCE_STATUS } from "./game.js";
+import { sphere, create_ground, xz_distance } from "./module.js";
 
-window.addEventListener("load", () => {
+window.addEventListener("DOMContentLoaded", () => {
   const gl = document.getElementById("canvas").getContext("webgl");
   const ctx = document.getElementById("text").getContext("2d");
   const prg = program(gl, VERTEX_SOURCE, FRAGMENT_SOURCE);
@@ -12,106 +12,82 @@ window.addEventListener("load", () => {
   gl.enable(gl.CULL_FACE);
   gl.enable(gl.DEPTH_TEST);
 
-  const radius = 0.04267;
   const speed = 12;
-
   const ground = create_ground();
-  const ball = sphere(radius).model(gl);
-  const land = ground.model(gl);
 
-  let h0 = Vec3(0, -10 + radius, 0);
+  Game.world.ball = sphere(0.04267).model(gl);
+  Game.world.land = ground.model(gl);
 
-  let status = 0;
-  let hit = false;
-
-  let start = new Date().getTime();
-  let power = -1;
-
-  window.addEventListener("keydown", e => {
+  window.addEventListener("keydown", async e => {
     if (e.keyCode === 32) {
-      switch (status) {
-      case 0:
-        status = 1;
-        start = new Date().getTime();
+      switch (Game.bar.status) {
+
+      case BAR_STATUS.initial:
+        Game.bar.status = BAR_STATUS.power_undecided;
+        Game.bar.start = new Date().getTime();
         bar_tick();
         break;
-      case 1:
-        const now = new Date().getTime();
-        const pow = (speed * 100 - Math.abs((now - start) - speed * 110)) / speed;
-        power = pow;
-        status = 2;
-        break;
-      case 2:
-        status = 3;
-        hit = true;
-        const p = power * 2 / 100;
-        const v = Vec3(
-          -p * Math.cos(Math.PI / 180 * 30),
-          p * Math.sin(Math.PI / 180 * 30),
-          0
-        );
-        const positions = make_positions(v, h0, ground, {
-          W: 0,
-          D: Math.PI / 180 * 0,
-        });
 
-        scene_tick(positions, h0);
+      case BAR_STATUS.power_undecided:
+        Game.bar.status = BAR_STATUS.power_decided;
+        const now = new Date().getTime() - Game.bar.start;
+        const pow = (speed * 100 - Math.abs(now - speed * 110)) / speed;
+        Game.bar.power = pow;
+        break;
+
+      case BAR_STATUS.power_decided:
+        Game.bar.status = BAR_STATUS.hide;
+        Game.distance.status = DISTANCE_STATUS.show;
+
+        await calculate();
+
+        Game.world.positions = Game.world.positions.slice(-1);
+        Game.bar.status = BAR_STATUS.initial;
+        Game.distance.status = DISTANCE_STATUS.hide;
         break;
       }
     }
   });
 
   const bar_tick = () => {
-    const now = new Date().getTime();
-    const pow = (speed * 100 - Math.abs((now - start) - speed * 110)) / speed;
+    const now = new Date().getTime() - Game.bar.start;
+    const pow = (speed * 100 - Math.abs(now - speed * 110)) / speed;
     if (pow < -10) {
-      status = 0;
-      power = -1;
-      display_bar(ctx, -10, -10);
+      Game.bar.status = BAR_STATUS.initial;
       return;
     }
-    display_bar(ctx, power === -1 ? pow : power, pow);
-    
-    if (status >= 1 && status <= 2) {
-      requestAnimationFrame(bar_tick);
+    Game.bar.current = pow;
+    if (Game.bar.status === BAR_STATUS.power_undecided ||
+        Game.bar.status === BAR_STATUS.power_decided) {
+      window.setTimeout(bar_tick, 0);
     }
   };
 
-  const scene_tick = (positions, _h) => {
-    let stop = true;
-    let p = _h;
-    if (hit) {
-      const [_, h] = positions.next().value;
-
-      display_distance(ctx, xz_distance(h, h0) / 0.9144);
-
-      if (!_h.equals(h)) stop = false;
-      p = h;
-    }
-
-    const models = [
-      land,
-      ball.translate(p),
-    ];
-
-    gl.clearColor(160 / 255, 216 / 255, 239 / 255, 1);
-    gl.clear(gl.COLOR_BUFFER_BIT);
-
-    models.forEach(mo =>
-      mo.lookAt(p.add(Vec3(3, 2, 3)), p, Vec3(0, 1, 0))
-        .perspective(45, gl.canvas.width / gl.canvas.height, 0.1, 500)
-        .draw(gl, prg));
-
-    if (!stop) {
-      requestAnimationFrame(() => scene_tick(positions, p));
-    } else {
-      h0 = p;
-      status = 0;
-      power = -1;
-      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      display_bar(ctx, -10, -10);
-    }
+  const calculate = async () => {
+    const h0 = Game.world.positions[Game.world.positions.length - 1];
+    const func = (positions, prev, callback) => {
+      const h = positions.next().value;
+      if (h.equals(prev)) {
+        callback();
+        return;
+      }
+      Game.world.positions.push(h);
+      Game.distance.xz = xz_distance(h0, h);
+      window.setTimeout(() => func(positions, h, callback), 0);
+    };
+    return new Promise(resolve => {
+      const p = Game.bar.power * 2 / 100;
+      const v = Vec3(
+        -p * Math.cos(Math.PI / 180 * 30),
+        p * Math.sin(Math.PI / 180 * 30),
+        0
+      );
+      func(make_positions(v, h0, ground, {
+        W: 0,
+        D: Math.PI / 180 * 0,
+      }), h0, resolve);
+    });
   };
 
-  scene_tick(null, h0);
+  loop(gl, ctx, prg);
 });

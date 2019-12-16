@@ -124,7 +124,6 @@ export function create_ground() {
 export function display_distance(ctx, dist) {
   const str = (Math.round(dist * 100) / 100).toFixed(2) + " y";
 
-  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   ctx.font = "bold 32px sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";

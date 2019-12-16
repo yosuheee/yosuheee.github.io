@@ -2,7 +2,7 @@ import { Vec3,
          intersection_of_plane_and_line,
          triangle_contains_point } from "/lib/geometry.js";
 
-export const make_positions = function*(v0, h0, ground, {
+export function* make_positions(v0, h0, ground, {
   r = 0.04267,            // ボールの半径
   m = 0.04593,            // ボールの質量
   W = 0,                  // 風の強さ
@@ -91,7 +91,7 @@ export const make_positions = function*(v0, h0, ground, {
       along_the_ground = false;
     }
 
-    yield [vout, hout];
+    yield hout;
 
     v = vout;
     h = hout;
