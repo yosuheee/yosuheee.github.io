@@ -107,7 +107,7 @@ export function display_bar(ctx, power, now) {
 
 export function create_ground() {
   const rects = [];
-  const R = 1000 * 0.9144;
+  const R = 1000;
   for (let i = 0; i < 50; i++) {
     for (let j = 0; j < 50; j++) {
       let color = [0.6, 0.6, 0.6];

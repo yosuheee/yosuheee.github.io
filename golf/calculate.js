@@ -71,10 +71,10 @@ export function* make_positions(v0, h0, ground, {
     let hout = h.add(vout);
 
     const arrs = qt.search(
-      Math.min(h.x, hout.x),
-      Math.min(h.z, hout.z),
-      Math.max(h.x, hout.x),
-      Math.max(h.z, hout.z),
+      Math.min(h.x, hout.x) - 1,
+      Math.min(h.z, hout.z) - 1,
+      Math.max(h.x, hout.x) + 1,
+      Math.max(h.z, hout.z) + 1,
     );
 
     let collision = false;
@@ -86,13 +86,14 @@ export function* make_positions(v0, h0, ground, {
       if (n.dot(hout.sub(A)) > r) {
         continue;
       }
-      
+
       const P = intersection_of_plane_and_line(A, B, C, h, hout);
 
       const _OQ = r;
       const _hS = n.dot(h.sub(P));
       const PS = h.add(n.scale(-_hS)).sub(P);
       const Q = PS.scale(_OQ / _hS).add(P);
+
       if (!triangle_contains_point(A, B, C, Q)) {
         continue;
       }

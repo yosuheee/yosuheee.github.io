@@ -14,6 +14,11 @@ export const DISTANCE_STATUS = {
   show: 1,
 };
 
+export const WORLD_STATUS = {
+  normal: 0,
+  animation: 1,
+};
+
 export const Game = {
   bar: {
     status: BAR_STATUS.initial,
@@ -26,12 +31,18 @@ export const Game = {
     xz: 0,
   },
   world: {
+    status: WORLD_STATUS.normal,
     models: [],
     camera: Vec3(3, 3, 3),
     sky_color: [160 / 255, 216 / 255, 239 / 255],
     positions: [Vec3(0, 0, 0)],
     ball: null,
     land: null,
+  },
+  hit: {
+    angle: 0,
+    left_key: false,
+    right_key: false,
   },
 };
 
@@ -67,9 +78,10 @@ export function loop(gl, ctx, prg) {
     Game.world.land,
     Game.world.ball.translate(p),
   ];
+  const direction = Vec3(-3, 1, 0).rotate(Vec3(0, 1, 0), Game.hit.angle);
 
   models.forEach(mo =>
-    mo.lookAt(p.add(Vec3(3, 2, 3)), p, Vec3(0, 1, 0))
+    mo.lookAt(p.add(direction), p, Vec3(0, 1, 0))
       .perspective(45, gl.canvas.width / gl.canvas.height, 0.1, 1000)
       .draw(gl, prg));
 }

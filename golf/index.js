@@ -12,6 +12,7 @@ window.addEventListener("DOMContentLoaded", () => {
   gl.enable(gl.CULL_FACE);
   gl.enable(gl.DEPTH_TEST);
 
+  const key_interval = 20;
   const speed = 12;
   const ground = create_ground();
 
@@ -47,6 +48,28 @@ window.addEventListener("DOMContentLoaded", () => {
         Game.distance.status = DISTANCE_STATUS.hide;
         break;
       }
+    } else if (e.keyCode === 37) {
+      if (!Game.hit.left_key) {
+        Game.hit.left_key = true;
+        window.setTimeout(() => left_key_tick(new Date().getTime()), 0);
+      }
+    } else if (e.keyCode === 39) {
+      if (!Game.hit.right_key) {
+        Game.hit.right_key = true;
+        window.setTimeout(() => right_key_tick(new Date().getTime()), 0);
+      }
+    }
+  });
+
+  window.addEventListener("keyup", e => {
+    if (e.keyCode === 37) {
+      if (Game.hit.left_key) {
+        Game.hit.left_key = false;
+      }
+    } else if (e.keyCode === 39) {
+      if (Game.hit.right_key) {
+        Game.hit.right_key = false;
+      }
     }
   });
 
@@ -72,25 +95,39 @@ window.addEventListener("DOMContentLoaded", () => {
         callback();
         return;
       }
-      if (h.y <= -100) {
-        return;
-      }
       Game.world.positions.push(h);
       Game.distance.xz = xz_distance(h0, h) / 0.9144;
       window.setTimeout(() => func(positions, h, callback), 0);
     };
     return new Promise(resolve => {
       const p = Game.bar.power * 2 / 100;
+      const xz = p * Math.cos(Math.PI / 180 * 30);
+      const y  = p * Math.sin(Math.PI / 180 * 30);
       const v = Vec3(
-        -p * Math.cos(Math.PI / 180 * 30),
-        p * Math.sin(Math.PI / 180 * 30),
-        0
+        xz *  Math.cos(Math.PI / 180 * Game.hit.angle),
+        y,
+        xz * -Math.sin(Math.PI / 180 * Game.hit.angle),
       );
-      func(make_positions(v, h0, ground, {
+      const positions = make_positions(v, h0, ground, {
         W: 0,
         D: Math.PI / 180 * 0,
-      }), h0, resolve);
+      });
+      func(positions, h0, resolve);
     });
+  };
+
+  const left_key_tick = (prev) => {
+    if (!Game.hit.left_key) return;
+    const now = new Date().getTime();
+    Game.hit.angle += (now - prev) / key_interval;
+    window.setTimeout(() => left_key_tick(now), 0);
+  };
+
+  const right_key_tick = (prev) => {
+    if (!Game.hit.right_key) return;
+    const now = new Date().getTime();
+    Game.hit.angle -= (now - prev) / key_interval;
+    window.setTimeout(() => right_key_tick(now), 0);
   };
 
   loop(gl, ctx, prg);
