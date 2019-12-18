@@ -17,6 +17,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   Game.world.ball = sphere(0.04267).model(gl);
   Game.world.land = ground.model(gl);
+  Game.world.positions = [Vec3(0, -10 + 0.04267, 0)];
 
   window.addEventListener("keydown", async e => {
     if (e.keyCode === 32) {
@@ -64,15 +65,18 @@ window.addEventListener("DOMContentLoaded", () => {
   };
 
   const calculate = async () => {
-    const h0 = Game.world.positions[Game.world.positions.length - 1];
+    const h0 = Game.world.positions.slice(-1)[0];
     const func = (positions, prev, callback) => {
       const h = positions.next().value;
       if (h.equals(prev)) {
         callback();
         return;
       }
+      if (h.y <= -100) {
+        return;
+      }
       Game.world.positions.push(h);
-      Game.distance.xz = xz_distance(h0, h);
+      Game.distance.xz = xz_distance(h0, h) / 0.9144;
       window.setTimeout(() => func(positions, h, callback), 0);
     };
     return new Promise(resolve => {

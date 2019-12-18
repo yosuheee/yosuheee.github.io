@@ -62,7 +62,7 @@ export function loop(gl, ctx, prg) {
   gl.clearColor(...Game.world.sky_color, 1);
   gl.clear(gl.COLOR_BUFFER_BIT);
 
-  const p = Game.world.positions[Game.world.positions.length - 1];
+  const p = Game.world.positions.slice(-1)[0];
   const models = [
     Game.world.land,
     Game.world.ball.translate(p),
