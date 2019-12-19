@@ -49,6 +49,13 @@ export const Game = {
   top: {
     up_key: false,
     down_key: false,
+    up_shift_key: false,
+    down_shift_key: false,
+  },
+  camera: {
+    position: Vec3(0, 0, 0),
+    up: Vec3(0, 0, 0),
+    center: Vec3(0, 0, 0),
   },
 };
 
@@ -84,16 +91,10 @@ export function loop(gl, ctx, prg) {
     Game.world.land,
     Game.world.ball.translate(p),
   ];
-  const direction = Vec3(-3, 1, 0).rotate(Vec3(0, 1, 0), Game.hit.angle);
-  const camera = Game.world.status === WORLD_STATUS.top
-                 ? Game.world.camera_center.add(Vec3(0, 10, 0))
-                 : Game.world.camera_center.add(direction);
-  const camera_up = Game.world.status === WORLD_STATUS.top
-                    ? Vec3(1, 0, 0).rotate(Vec3(0, 1, 0), Game.hit.angle)
-                    : Vec3(0, 1, 0);
 
   models.forEach(mo =>
-    mo.lookAt(camera, Game.world.camera_center, camera_up)
-      .perspective(45, gl.canvas.width / gl.canvas.height, 0.1, 1000)
+    mo.lookAt(Game.camera.position, Game.camera.center, Game.camera.up)
+      .perspective(45, gl.canvas.width / gl.canvas.height, 0.1, 1111)
       .draw(gl, prg));
+  gl.flush();
 }
