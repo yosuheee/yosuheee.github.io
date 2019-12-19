@@ -34,8 +34,6 @@ export const Game = {
   world: {
     status: WORLD_STATUS.normal,
     models: [],
-    camera: Vec3(-3, -9 + 0.04267, 0),
-    camera_center: Vec3(0, -10 + 0.04267, 0),
     sky_color: [160 / 255, 216 / 255, 239 / 255],
     positions: [Vec3(0, 0, 0)],
     ball: null,
@@ -96,5 +94,4 @@ export function loop(gl, ctx, prg) {
     mo.lookAt(Game.camera.position, Game.camera.center, Game.camera.up)
       .perspective(45, gl.canvas.width / gl.canvas.height, 0.1, 1111)
       .draw(gl, prg));
-  gl.flush();
 }

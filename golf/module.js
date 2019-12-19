@@ -107,14 +107,15 @@ export function display_bar(ctx, power, now) {
 
 export function create_ground() {
   const rects = [];
-  const R = 1000;
-  for (let i = 0; i < 50; i++) {
-    for (let j = 0; j < 50; j++) {
+  const R = 2000;
+  const C = 50;
+  for (let i = 0; i < C; i++) {
+    for (let j = 0; j < C; j++) {
       let color = [0.6, 0.6, 0.6];
       if ((i + j) % 2 === 0) {
         color = [60 / 255, 179 / 255, 113 / 255];
       }
-      rects.push(rect(R / 50, R / 50, color).translate(R / 50 * i, R / 50 * j, 0));
+      rects.push(rect(R / C, R / C, color).translate(R / C * i, R / C * j, 0));
     }
   }
 

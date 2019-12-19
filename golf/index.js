@@ -14,11 +14,10 @@ window.addEventListener("DOMContentLoaded", () => {
 
   const speed = 12;
   const ground = create_ground();
+  const R = 0.04267 * 2;
+  const P = Vec3(0, -10 + R, 0);
   
   {
-    const R = 0.04267;
-    const P = Vec3(0, -10 + R, 0);
-
     Game.world.ball = sphere(R).model(gl);
     Game.world.land = ground.model(gl);
     Game.world.positions = [P];
@@ -57,6 +56,7 @@ window.addEventListener("DOMContentLoaded", () => {
           Game.world.status = WORLD_STATUS.normal;
           Game.bar.status = BAR_STATUS.initial;
           Game.distance.status = DISTANCE_STATUS.hide;
+
           break;
         }
       }
@@ -115,32 +115,41 @@ window.addEventListener("DOMContentLoaded", () => {
         Game.camera.up = Vec3(0, 1, 0);
         Game.camera.position = p.add(Vec3(-3, 1, 0).rotate(Vec3(0, 1, 0), Game.hit.angle));
       }
+    } else if (e.code === "ShiftLeft" || e.code === "ShiftRight") {
+      if (Game.top.up_key) {
+        Game.top.up_key = false;
+        Game.top.up_shift_key = true;
+        window.setTimeout(() => top_up_shift_key_tick(new Date().getTime()), 0);
+      }
+      if (Game.top.down_key) {
+        Game.top.down_key = false;
+        Game.top.down_shift_key = true;
+        window.setTimeout(() => top_down_shift_key_tick(new Date().getTime()), 0);
+      }
     }
   });
 
   window.addEventListener("keyup", e => {
-    if (e.code === "ArrowLeft") {
-      if (Game.hit.left_key) {
-        Game.hit.left_key = false;
-      }
-    } else if (e.code === "ArrowRight") {
-      if (Game.hit.right_key) {
-        Game.hit.right_key = false;
-      }
-    } else if (e.code === "ArrowUp") {
-      if (Game.top.up_key) {
-        Game.top.up_key = false;
-      }
-      if (Game.top.up_shift_key) {
-        Game.top.up_shift_key = false;
-      }
-    } else if (e.code === "ArrowDown") {
-      if (Game.top.down_key) {
-        Game.top.down_key = false;
-      }
-      if (Game.top.down_shift_key) {
-        Game.top.down_shift_key = false;
-      }
+    switch (e.code) {
+      case "ArrowLeft"  : Game.hit.left_key       = false; break;
+      case "ArrowRight" : Game.hit.right_key      = false; break;
+      case "ArrowUp"    : Game.top.up_key         = false;
+                          Game.top.up_shift_key   = false; break;
+      case "ArrowDown"  : Game.top.down_key       = false;
+                          Game.top.down_shift_key = false; break;
+      case "ShiftLeft"  :
+      case "ShiftRight" :
+        if (Game.top.up_shift_key) {
+          Game.top.up_shift_key = false;
+          Game.top.up_key = true;
+          window.setTimeout(() => top_up_key_tick(new Date().getTime()), 0);
+        }
+        if (Game.top.down_shift_key) {
+          Game.top.down_shift_key = false;
+          Game.top.down_key = true;
+          window.setTimeout(() => top_down_key_tick(new Date().getTime()), 0);
+        }
+        break;
     }
   });
 
@@ -160,19 +169,19 @@ window.addEventListener("DOMContentLoaded", () => {
 
   const calculate = async () => {
     const h0 = Game.world.positions.slice(-1)[0];
-    const func = (positions, prev, callback) => {
+    const func = (positions, prev, resolve) => {
       const h = positions.next().value;
       if (h.equals(prev)) {
-        callback();
+        resolve();
         return;
       }
       Game.world.positions.push(h);
       Game.distance.xz = xz_distance(h0, h) / 0.9144;
 
       Game.camera.center = h;
-      Game.camera.position = h.add(Vec3(2, 2, 2));
+      Game.camera.position = h.add(Vec3(-3, 1, 0).rotate(Vec3(0, 1, 0), Game.hit.angle));
 
-      window.setTimeout(() => func(positions, h, callback), 0);
+      window.setTimeout(() => func(positions, h, resolve), 0);
     };
     
     return new Promise(resolve => {
@@ -185,6 +194,7 @@ window.addEventListener("DOMContentLoaded", () => {
         xz * -Math.sin(Math.PI / 180 * Game.hit.angle),
       );
       const positions = make_positions(v, h0, ground, {
+        r: R,
         W: 0,
         D: Math.PI / 180 * 0,
       });
