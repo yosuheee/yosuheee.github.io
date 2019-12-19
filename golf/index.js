@@ -203,6 +203,7 @@ window.addEventListener("DOMContentLoaded", () => {
   };
 
   const left_key_tick = prev => {
+    if (Game.bar.status !== BAR_STATUS.initial) return;
     if (!Game.hit.left_key) return;
 
     const now = new Date().getTime();
@@ -217,6 +218,7 @@ window.addEventListener("DOMContentLoaded", () => {
   };
 
   const right_key_tick = prev => {
+    if (Game.bar.status !== BAR_STATUS.initial) return;
     if (!Game.hit.right_key) return;
 
     const now = new Date().getTime();
