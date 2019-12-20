@@ -1,8 +1,11 @@
 import { Vec3 } from "/lib/geometry.js";
 import { VERTEX_SOURCE, FRAGMENT_SOURCE, program } from "/lib/webgl.js";
 import { make_positions } from "./calculate.js";
-import { Game, loop, BAR_STATUS, DISTANCE_STATUS, WORLD_STATUS } from "./game.js";
-import { sphere, create_ground, xz_distance } from "./module.js";
+import { Game, animation_loop, BAR_STATUS, DISTANCE_STATUS, WORLD_STATUS } from "./game.js";
+import { sphere, create_ground, xz_distance, create_quad_tree } from "./module.js";
+import { top_view_loop } from "./top_view.js";
+import { normal_view_loop } from "./normal_view.js";
+import { intersection_of_plane_and_line, triangle_contains_point } from "../lib/geometry.js";
 
 window.addEventListener("DOMContentLoaded", () => {
   const gl = document.getElementById("canvas").getContext("webgl");
@@ -13,23 +16,58 @@ window.addEventListener("DOMContentLoaded", () => {
   gl.enable(gl.DEPTH_TEST);
 
   const speed = 12;
-  const ground = create_ground();
+  const ground = create_ground().rotate([1, 0, 0], 5);
   const R = 0.04267 * 2;
-  const P = Vec3(0, -10 + R, 0);
+  const qt = create_quad_tree(ground)
+
+  const position_from_xz = (x, z) => {
+    const { position, index } = ground.primitive();
   
-  {
-    Game.world.ball = sphere(R).model(gl);
-    Game.world.land = ground.model(gl);
-    Game.world.positions = [P];
-  
-    Game.camera.center = P;
-    Game.camera.position = P.add(Vec3(-3, 1, 0));
-    Game.camera.up = Vec3(0, 1, 0);
-  }
+    const vecs = (i) => {
+      return [
+        Vec3(position.slice(index[i + 0] * 3, index[i + 0] * 3 + 3)),
+        Vec3(position.slice(index[i + 1] * 3, index[i + 1] * 3 + 3)),
+        Vec3(position.slice(index[i + 2] * 3, index[i + 2] * 3 + 3)),
+      ];
+    };
+
+    const arrs = qt.search(x, z, x, z);
+
+    for (const arr of arrs) for (const i of arr) {
+      const [A, B, C] = vecs(i);
+      const D = Vec3(x, 0, z);
+      const E = Vec3(x, 1, z);
+
+      const Q = intersection_of_plane_and_line(A, B, C, D, E);
+      if (triangle_contains_point(A, B, C, Q)) {
+        const n = B.sub(A).cross(C.sub(A)).normalize();
+        return Vec3(x, Q.y + R / n.y, z);
+      }
+    }
+  };
+
+  const P = position_from_xz(0, 0);
+
+  Game.world.ball = sphere(R).model(gl);
+  Game.world.land = ground.model(gl);
+  Game.world.positions = [P];
+  Game.world.quad_tree = qt;
+
+  Game.camera.center = P;
+  Game.camera.position = P.add(Vec3(-3, 1, 0));
+  Game.camera.up = Vec3(0, 1, 0);
 
   window.addEventListener("keydown", async e => {
     if (e.code === "Space") {
-      if (Game.world.status === WORLD_STATUS.normal) {
+      if (Game.world.status === WORLD_STATUS.top) {
+        Game.world.status = WORLD_STATUS.normal;
+        Game.bar.status = BAR_STATUS.initial;
+
+        const p = Game.world.positions.slice(-1)[0];
+        Game.camera.center = p;
+        Game.camera.up = Vec3(0, 1, 0);
+        Game.camera.position = p.add(Vec3(-3, 1, 0).rotate(Vec3(0, 1, 0), Game.hit.angle));
+      } else if (Game.world.status === WORLD_STATUS.normal) {
         switch (Game.bar.status) {
   
         case BAR_STATUS.initial:
@@ -63,44 +101,35 @@ window.addEventListener("DOMContentLoaded", () => {
     } else if (e.code === "ArrowLeft") {
       if (Game.world.status === WORLD_STATUS.normal ||
           Game.world.status === WORLD_STATUS.top) {
-        if (Game.hit.left_key) return;
         Game.hit.left_key = true;
-        window.setTimeout(() => left_key_tick(new Date().getTime()), 0);
       }
     } else if (e.code === "ArrowRight") {
       if (Game.world.status === WORLD_STATUS.normal ||
           Game.world.status === WORLD_STATUS.top) {
-        if (Game.hit.right_key) return;
         Game.hit.right_key = true;
-        window.setTimeout(() => right_key_tick(new Date().getTime()), 0);
       }
     } else if (e.code === "ArrowUp") {
       if (Game.world.status === WORLD_STATUS.top) {
         if (e.shiftKey) {
-          if (Game.top.up_shift_key) return;
           Game.top.up_shift_key = true;
-          window.setTimeout(() => top_up_shift_key_tick(new Date().getTime()), 0);
         } else {
-          if (Game.top.up_key) return;
           Game.top.up_key = true;
-          window.setTimeout(() => top_up_key_tick(new Date().getTime()), 0);
         }
       }
     } else if (e.code === "ArrowDown") {
       if (Game.world.status === WORLD_STATUS.top) {
         if (e.shiftKey) {
-          if (Game.top.down_shift_key) return;
           Game.top.down_shift_key = true;
-          window.setTimeout(() => top_down_shift_key_tick(new Date().getTime()), 0);
         } else {
-          if (Game.top.down_key) return;
           Game.top.down_key = true;
-          window.setTimeout(() => top_down_key_tick(new Date().getTime()), 0);
         }
       }
     } else if (e.code === "Digit0") {
       if (Game.world.status === WORLD_STATUS.normal) {
+        if (Game.bar.status !== BAR_STATUS.initial) return;
+
         Game.world.status = WORLD_STATUS.top;
+        Game.bar.status = BAR_STATUS.hide;
 
         const p = Game.world.positions.slice(-1)[0];
         Game.camera.center = p;
@@ -109,6 +138,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
       } else if (Game.world.status === WORLD_STATUS.top) {
         Game.world.status = WORLD_STATUS.normal;
+        Game.bar.status = BAR_STATUS.initial;
 
         const p = Game.world.positions.slice(-1)[0];
         Game.camera.center = p;
@@ -119,12 +149,10 @@ window.addEventListener("DOMContentLoaded", () => {
       if (Game.top.up_key) {
         Game.top.up_key = false;
         Game.top.up_shift_key = true;
-        window.setTimeout(() => top_up_shift_key_tick(new Date().getTime()), 0);
       }
       if (Game.top.down_key) {
         Game.top.down_key = false;
         Game.top.down_shift_key = true;
-        window.setTimeout(() => top_down_shift_key_tick(new Date().getTime()), 0);
       }
     }
   });
@@ -142,12 +170,10 @@ window.addEventListener("DOMContentLoaded", () => {
         if (Game.top.up_shift_key) {
           Game.top.up_shift_key = false;
           Game.top.up_key = true;
-          window.setTimeout(() => top_up_key_tick(new Date().getTime()), 0);
         }
         if (Game.top.down_shift_key) {
           Game.top.down_shift_key = false;
           Game.top.down_key = true;
-          window.setTimeout(() => top_down_key_tick(new Date().getTime()), 0);
         }
         break;
     }
@@ -169,9 +195,14 @@ window.addEventListener("DOMContentLoaded", () => {
 
   const calculate = async () => {
     const h0 = Game.world.positions.slice(-1)[0];
+
     const func = (positions, prev, resolve) => {
       const h = positions.next().value;
       if (h.equals(prev)) {
+        resolve();
+        return;
+      }
+      if (h.sub(prev).length() < 0.0001) {
         resolve();
         return;
       }
@@ -193,7 +224,7 @@ window.addEventListener("DOMContentLoaded", () => {
         y,
         xz * -Math.sin(Math.PI / 180 * Game.hit.angle),
       );
-      const positions = make_positions(v, h0, ground, {
+      const positions = make_positions(v, h0, ground, Game.world.quad_tree, {
         r: R,
         W: 0,
         D: Math.PI / 180 * 0,
@@ -202,112 +233,7 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   };
 
-  const left_key_tick = prev => {
-    if (Game.bar.status !== BAR_STATUS.initial) return;
-    if (!Game.hit.left_key) return;
-
-    const now = new Date().getTime();
-    const O = Game.world.positions.slice(-1)[0];
-
-    const dist = xz_distance(O, Game.camera.center) + 1;
-    Game.hit.angle += 120 * (now - prev) / 1000 / dist;
-    
-    camera();
-
-    window.setTimeout(() => left_key_tick(now), 0);
-  };
-
-  const right_key_tick = prev => {
-    if (Game.bar.status !== BAR_STATUS.initial) return;
-    if (!Game.hit.right_key) return;
-
-    const now = new Date().getTime();
-    const O = Game.world.positions.slice(-1)[0];
-
-    const dist = xz_distance(O, Game.camera.center) + 1;
-    Game.hit.angle -= 120 * (now - prev) / 1000 / dist;
-    
-    camera();
-
-    window.setTimeout(() => right_key_tick(now), 0);
-  };
-
-  const camera = () => {
-    const O = Game.world.positions.slice(-1)[0];
-    
-    if (Game.world.status === WORLD_STATUS.top) {
-      Game.camera.up = Vec3(1, 0, 0).rotate(Vec3(0, 1, 0), Game.hit.angle);
-        
-      const a = Vec3(1, 0 ,0).rotate(Vec3(0, 1, 0), Game.hit.angle);
-      const b = Game.camera.center.sub(O);
-      
-      if (a.dot(b) >= 0) {
-        Game.camera.center = Vec3(xz_distance(O, Game.camera.center), 0, 0).rotate(Vec3(0, 1, 0), Game.hit.angle).add(O);
-      } else {
-        Game.camera.center = Vec3(-xz_distance(O, Game.camera.center), 0, 0).rotate(Vec3(0, 1, 0), Game.hit.angle).add(O);
-      }
-      const y = Game.camera.position.y - Game.camera.center.y;
-      Game.camera.position = Game.camera.center.add(Vec3(0, y, 0));
-    } else if (Game.world.status === WORLD_STATUS.normal) {
-      Game.camera.position = Vec3(-3, 1, 0).rotate(Vec3(0, 1, 0), Game.hit.angle).add(O);
-    }
-  };
-
-  const top_up_key_tick = prev => {
-    if (Game.world.status !== WORLD_STATUS.top) return;
-    if (!Game.top.up_key) return;
-
-    const now = new Date().getTime();
-    const move = Vec3((now - prev) / 30, 0, 0).rotate(Vec3(0, 1, 0), Game.hit.angle);
-
-    Game.camera.position = Game.camera.position.add(move);
-    Game.camera.center = Game.camera.center.add(move);
-
-    window.setTimeout(() => top_up_key_tick(now), 0);
-  };
-
-  const top_down_key_tick = prev => {
-    if (Game.world.status !== WORLD_STATUS.top) return;
-    if (!Game.top.down_key) return;
-
-    const now = new Date().getTime();
-    const move = Vec3((now - prev) / 30, 0, 0).rotate(Vec3(0, 1, 0), Game.hit.angle);
-    
-    Game.camera.position = Game.camera.position.sub(move);
-    Game.camera.center = Game.camera.center.sub(move);
-
-    window.setTimeout(() => top_down_key_tick(now), 0);
-  };
-
-  const top_up_shift_key_tick = prev => {
-    if (Game.world.status !== WORLD_STATUS.top) return;
-    if (!Game.top.up_shift_key) return;
-
-    const p = Game.world.positions.slice(-1)[0];
-    const now = new Date().getTime();
-    const move = (now - prev) / 10;
-    const temp = Game.camera.position.sub(Vec3(0, move, 0));
-    
-    if (temp.y < p.y + 10) temp.y = p.y + 10;
-    Game.camera.position = temp;
-
-    window.setTimeout(() => top_up_shift_key_tick(now), 0);
-  };
-  
-  const top_down_shift_key_tick = prev => {
-    if (Game.world.status !== WORLD_STATUS.top) return;
-    if (!Game.top.down_shift_key) return;
-
-    const p = Game.world.positions.slice(-1)[0];
-    const now = new Date().getTime();
-    const move = (now - prev) / 10;
-    const temp = Game.camera.position.add(Vec3(0, move, 0));
-    
-    if (temp.y > p.y + 1000) temp.y = p.y + 1000;
-    Game.camera.position = temp;
-
-    window.setTimeout(() => top_down_shift_key_tick(now), 0);
-  };
-  
-  loop(gl, ctx, prg);
+  top_view_loop(Game);
+  normal_view_loop(Game);
+  animation_loop(gl, ctx, prg);
 });

@@ -1,4 +1,6 @@
 import { Polygon } from "/lib/webgl.js";
+import { QuadTree } from "/lib/quad-tree.js";
+import { Vec3 } from "/lib/geometry.js";
 
 export function rect(x, y, c = [1, 1, 1]) {
   const data = [], index = [];
@@ -136,4 +138,42 @@ export function display_distance(ctx, dist) {
 
 export function xz_distance(a, b) {
   return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.z - b.z, 2));
+}
+
+export function create_quad_tree(ground) {
+  const { position, index } = ground.primitive();
+
+  const vecs = (i) => {
+    return [
+      Vec3(position.slice(index[i + 0] * 3, index[i + 0] * 3 + 3)),
+      Vec3(position.slice(index[i + 1] * 3, index[i + 1] * 3 + 3)),
+      Vec3(position.slice(index[i + 2] * 3, index[i + 2] * 3 + 3)),
+    ];
+  };
+
+  const qt = new QuadTree(...(() => {
+    let minx = 1e9;
+    let maxx = -1;
+    let minz = 1e9;
+    let maxz = -1;
+    for (let i = 0; i < index.length; i += 3) {
+      const [A, B, C] = vecs(i);
+      minx = Math.min(minx, ...[A.x, B.x, C.x]);
+      maxx = Math.max(maxx, ...[A.x, B.x, C.x]);
+      minz = Math.min(minz, ...[A.z, B.z, C.z]);
+      maxz = Math.max(maxz, ...[A.z, B.z, C.z]);
+    }
+    return [ minx, maxx + 1, minz, maxz + 1 ];
+  })(), 5);
+
+  for (let i = 0; i < index.length; i += 3) {
+    const [A, B, C] = vecs(i);
+    const minx = Math.min(...[A.x, B.x, C.x]);
+    const maxx = Math.max(...[A.x, B.x, C.x]);
+    const minz = Math.min(...[A.z, B.z, C.z]);
+    const maxz = Math.max(...[A.z, B.z, C.z]);
+    qt.register(i, minx, minz, maxx, maxz);
+  }
+
+  return qt;
 }

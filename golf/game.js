@@ -38,6 +38,7 @@ export const Game = {
     positions: [Vec3(0, 0, 0)],
     ball: null,
     land: null,
+    quad_tree: null,
   },
   hit: {
     angle: 0,
@@ -57,8 +58,8 @@ export const Game = {
   },
 };
 
-export function loop(gl, ctx, prg) {
-  requestAnimationFrame(() => loop(gl, ctx, prg));
+export function animation_loop(gl, ctx, prg) {
+  requestAnimationFrame(() => animation_loop(gl, ctx, prg));
 
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
