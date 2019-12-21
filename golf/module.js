@@ -121,7 +121,8 @@ export function create_ground() {
     }
   }
 
-  return rects.reduce((a, c) => a.add(c)).rotate([1, 0, 0], -90.0).translate(-R / 2, -10, R / 2);
+  return rects.reduce((a, c) => a.add(c))
+    .rotate(Vec3(1, 0, 0), -90.0).translate(-R / 2, -10, R / 2);
 }
 
 export function display_distance(ctx, dist) {
@@ -154,7 +155,6 @@ export function create_quad_tree(ground) {
     }
     return [ minx, maxx + 1, minz, maxz + 1 ];
   })(), 5);
-
   for (const [A, B, C, i] of ground.triangles()) {
     const minx = Math.min(...[A.x, B.x, C.x]);
     const maxx = Math.max(...[A.x, B.x, C.x]);
@@ -162,6 +162,5 @@ export function create_quad_tree(ground) {
     const maxz = Math.max(...[A.z, B.z, C.z]);
     qt.register(i, minx, minz, maxx, maxz);
   }
-
   return qt;
 }

@@ -16,7 +16,7 @@ window.addEventListener("DOMContentLoaded", () => {
   gl.enable(gl.DEPTH_TEST);
 
   const speed = 12;
-  const ground = create_ground().rotate([1, 0, 0], 0);
+  const ground = create_ground().rotate(Vec3(1, 0, 0), 0);
   const R = 0.04267 * 2;
   const qt = create_quad_tree(ground)
 
