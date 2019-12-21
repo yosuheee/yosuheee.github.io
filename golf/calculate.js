@@ -18,16 +18,6 @@ export function* make_positions(v0, h0, ground, qt, {
     W * 0.08 * Math.sin(D) * m / 3600
   );
 
-  const { position, index } = ground.primitive();
-
-  const vecs = (i) => {
-    return [
-      Vec3(position.slice(index[i + 0] * 3, index[i + 0] * 3 + 3)),
-      Vec3(position.slice(index[i + 1] * 3, index[i + 1] * 3 + 3)),
-      Vec3(position.slice(index[i + 2] * 3, index[i + 2] * 3 + 3)),
-    ];
-  };
-
   let v = v0;
   let h = h0;
 
@@ -55,7 +45,7 @@ export function* make_positions(v0, h0, ground, qt, {
     let collision = false;
 
     for (const arr of arrs) for (const i of arr) {
-      const [A, B, C] = vecs(i);
+      const [A, B, C] = ground.triangle(i);
 
       const n = B.sub(A).cross(C.sub(A)).normalize();
       if (n.dot(hout.sub(A)) > r) {

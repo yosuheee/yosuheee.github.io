@@ -4,12 +4,12 @@ import { Vec3 } from "/lib/geometry.js";
 
 export function rect(x, y, c = [1, 1, 1]) {
   const data = [], index = [];
-  data.push({ position: [0, 0, 0], color: c, normal: [0, 0, 1] });
-  data.push({ position: [x, 0, 0], color: c, normal: [0, 0, 1] });
-  data.push({ position: [0, y, 0], color: c, normal: [0, 0, 1] });
-  data.push({ position: [x, y, 0], color: c, normal: [0, 0, 1] });
-  index.push(0, 1, 2);
-  index.push(2, 1, 3);
+  data.push({ position: Vec3(0, 0, 0), color: c });
+  data.push({ position: Vec3(x, 0, 0), color: c });
+  data.push({ position: Vec3(0, y, 0), color: c });
+  data.push({ position: Vec3(x, y, 0), color: c });
+  index.push([0, 1, 2]);
+  index.push([2, 1, 3]);
   return new Polygon(data, index);
 }
 
@@ -23,15 +23,15 @@ export function sphere(radius, c = [1, 1, 1], row = 32, col = 32) {
       const sangle = Math.PI * 2 / col * j;
       const x = rad * Math.cos(sangle);
       const z = rad * Math.sin(sangle);
-      data.push({ position: [x, y, z], color: c, normal: [x, y, z] });
+      data.push({ position: Vec3(x, y, z), color: c });
     }
   }
   for (let i = 0; i < row; i++) {
     for (let j = 0; j < col; j++) {
       const std1 = i * (col + 1) + j;
       const std2 = (i + 1) * (col + 1) + j;
-      index.push(std1, std1 + 1, std2);
-      index.push(std1 + 1, std2 + 1, std2);
+      index.push([std1, std1 + 1, std2]);
+      index.push([std1 + 1, std2 + 1, std2]);
     }
   }
   return new Polygon(data, index);
@@ -141,23 +141,12 @@ export function xz_distance(a, b) {
 }
 
 export function create_quad_tree(ground) {
-  const { position, index } = ground.primitive();
-
-  const vecs = (i) => {
-    return [
-      Vec3(position.slice(index[i + 0] * 3, index[i + 0] * 3 + 3)),
-      Vec3(position.slice(index[i + 1] * 3, index[i + 1] * 3 + 3)),
-      Vec3(position.slice(index[i + 2] * 3, index[i + 2] * 3 + 3)),
-    ];
-  };
-
   const qt = new QuadTree(...(() => {
     let minx = 1e9;
     let maxx = -1;
     let minz = 1e9;
     let maxz = -1;
-    for (let i = 0; i < index.length; i += 3) {
-      const [A, B, C] = vecs(i);
+    for (const [A, B, C] of ground.triangles()) {
       minx = Math.min(minx, ...[A.x, B.x, C.x]);
       maxx = Math.max(maxx, ...[A.x, B.x, C.x]);
       minz = Math.min(minz, ...[A.z, B.z, C.z]);
@@ -166,8 +155,7 @@ export function create_quad_tree(ground) {
     return [ minx, maxx + 1, minz, maxz + 1 ];
   })(), 5);
 
-  for (let i = 0; i < index.length; i += 3) {
-    const [A, B, C] = vecs(i);
+  for (const [A, B, C, i] of ground.triangles()) {
     const minx = Math.min(...[A.x, B.x, C.x]);
     const maxx = Math.max(...[A.x, B.x, C.x]);
     const minz = Math.min(...[A.z, B.z, C.z]);

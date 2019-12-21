@@ -16,25 +16,15 @@ window.addEventListener("DOMContentLoaded", () => {
   gl.enable(gl.DEPTH_TEST);
 
   const speed = 12;
-  const ground = create_ground().rotate([1, 0, 0], 5);
+  const ground = create_ground().rotate([1, 0, 0], 0);
   const R = 0.04267 * 2;
   const qt = create_quad_tree(ground)
 
   const position_from_xz = (x, z) => {
-    const { position, index } = ground.primitive();
-  
-    const vecs = (i) => {
-      return [
-        Vec3(position.slice(index[i + 0] * 3, index[i + 0] * 3 + 3)),
-        Vec3(position.slice(index[i + 1] * 3, index[i + 1] * 3 + 3)),
-        Vec3(position.slice(index[i + 2] * 3, index[i + 2] * 3 + 3)),
-      ];
-    };
-
     const arrs = qt.search(x, z, x, z);
 
     for (const arr of arrs) for (const i of arr) {
-      const [A, B, C] = vecs(i);
+      const [A, B, C] = ground.triangle(i);
       const D = Vec3(x, 0, z);
       const E = Vec3(x, 1, z);
 
