@@ -1,6 +1,6 @@
 import { Vec3 } from "/lib/geometry.js";
-import { WORLD_STATUS } from "./game.js";
-import { xz_distance } from "./module.js";
+import { WORLD_STATUS } from "../game.js";
+import { xz_distance } from "../module.js";
 
 export function top_view_loop(Game, prev = new Date().getTime()) {
   const now = new Date().getTime();

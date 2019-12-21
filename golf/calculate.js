@@ -1,8 +1,50 @@
 import { Vec3,
          intersection_of_plane_and_line,
          triangle_contains_point } from "/lib/geometry.js";
+import { Env } from "./game.js";
+import { xz_distance } from "./module.js";
 
-export function* make_positions(v0, h0, ground, qt, {
+export const calculate = async Game => {
+  const h0 = Game.world.positions.slice(-1)[0];
+
+  const func = (positions, prev, resolve) => {
+    const h = positions.next().value;
+    if (h.equals(prev)) {
+      resolve();
+      return;
+    }
+    if (h.sub(prev).length() < 0.001) {
+      resolve();
+      return;
+    }
+    Game.world.positions.push(h);
+    Game.distance.xz = xz_distance(h0, h) / 0.9144;
+
+    Game.camera.center = h;
+    Game.camera.position = h.add(Vec3(-3, 1, 0).rotate(Vec3(0, 1, 0), Game.hit.angle));
+
+    window.setTimeout(() => func(positions, h, resolve), 0);
+  };
+  
+  return new Promise(resolve => {
+    const p = Game.bar.power * 2 / 100;
+    const xz = p * Math.cos(Math.PI / 180 * 30);
+    const y  = p * Math.sin(Math.PI / 180 * 30);
+    const v = Vec3(
+      xz *  Math.cos(Math.PI / 180 * Game.hit.angle),
+      y,
+      xz * -Math.sin(Math.PI / 180 * Game.hit.angle),
+    );
+    const positions = make_positions(v, h0, Game.world.stage, Game.world.qtree, {
+      r: Env.ball.radius,
+      W: 0,
+      D: Math.PI / 180 * 0,
+    });
+    func(positions, h0, resolve);
+  });
+};
+
+function* make_positions(v0, h0, stage, qt, {
   r = 0.04267,            // ボールの半径
   m = 0.04593,            // ボールの質量
   W = 0,                  // 風の強さ
@@ -45,7 +87,7 @@ export function* make_positions(v0, h0, ground, qt, {
     let collision = false;
 
     for (const arr of arrs) for (const i of arr) {
-      const [A, B, C] = ground.triangle(i);
+      const [A, B, C] = stage.triangle(i);
 
       const n = B.sub(A).cross(C.sub(A)).normalize();
       if (n.dot(hout.sub(A)) > r) {
@@ -65,7 +107,8 @@ export function* make_positions(v0, h0, ground, qt, {
 
       const O = h.sub(P).scale(_OQ / _hS).add(P);
       const s = O.sub(h).length() / hout.sub(h).length();
-      console.assert(0 <= s && s <= 1);
+      // console.assert(0 <= s && s <= 1);
+      if (!(0 <= s && s <= 1)) continue;
 
       const v = vout.scale(-1).rotate(n, 180);
       const w = n.scale(n.dot(v));

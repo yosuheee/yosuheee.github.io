@@ -1,41 +1,8 @@
-import { Polygon } from "/lib/webgl.js";
 import { QuadTree } from "/lib/quad-tree.js";
 import { Vec3 } from "/lib/geometry.js";
-
-export function rect(x, y, c = [1, 1, 1]) {
-  const data = [], index = [];
-  data.push({ position: Vec3(0, 0, 0), color: c });
-  data.push({ position: Vec3(x, 0, 0), color: c });
-  data.push({ position: Vec3(0, y, 0), color: c });
-  data.push({ position: Vec3(x, y, 0), color: c });
-  index.push([0, 1, 2]);
-  index.push([2, 1, 3]);
-  return new Polygon(data, index);
-}
-
-export function sphere(radius, c = [1, 1, 1], row = 32, col = 32) {
-  const data = [], index = [];
-  for (let i = 0; i <= row; i++) {
-    const langle = Math.PI / row * i;
-    const rad = radius * Math.sin(langle);
-    const y = radius * Math.cos(langle);
-    for (let j = 0; j <= col; j++) {
-      const sangle = Math.PI * 2 / col * j;
-      const x = rad * Math.cos(sangle);
-      const z = rad * Math.sin(sangle);
-      data.push({ position: Vec3(x, y, z), color: c });
-    }
-  }
-  for (let i = 0; i < row; i++) {
-    for (let j = 0; j < col; j++) {
-      const std1 = i * (col + 1) + j;
-      const std2 = (i + 1) * (col + 1) + j;
-      index.push([std1, std1 + 1, std2]);
-      index.push([std1 + 1, std2 + 1, std2]);
-    }
-  }
-  return new Polygon(data, index);
-}
+import { Polygon } from "/lib/webgl.js";
+import { Env } from "./game.js";
+import { intersection_of_plane_and_line, triangle_contains_point } from "/lib/geometry.js";
 
 export function display_bar(ctx, power, now) {
   const INNER_Y = 417;
@@ -107,22 +74,26 @@ export function display_bar(ctx, power, now) {
   }
 }
 
-export function create_ground() {
-  const rects = [];
-  const R = 2000;
-  const C = 50;
-  for (let i = 0; i < C; i++) {
-    for (let j = 0; j < C; j++) {
-      let color = [0.6, 0.6, 0.6];
-      if ((i + j) % 2 === 0) {
-        color = [60 / 255, 179 / 255, 113 / 255];
-      }
-      rects.push(rect(R / C, R / C, color).translate(R / C * i, R / C * j, 0));
+export function make_random_stage(r) {
+  const data = [], index = [];
+  const diff = 10;
+  for (let i = 0; i <= r; i++) {
+    for (let j = 0; j <= r; j++) {
+      const x = i * r;
+      const z = j * r;
+      const y = (Math.random() * diff * 2) - diff;
+      data.push({ position: Vec3(x, y, z), color: [Math.random() / 5, (y + 1) / 3, Math.random() / 5] });
     }
   }
-
-  return rects.reduce((a, c) => a.add(c))
-    .rotate(Vec3(1, 0, 0), -90.0).translate(-R / 2, -10, R / 2);
+  for (let i = 0; i < r; i++) {
+    for (let j = 0; j < r; j++) {
+      const s = i * (r + 1) + j;
+      const t = (i + 1) * (r + 1) + j;
+      index.push([s, s + 1, t + 1]);
+      index.push([t, s, t + 1]);
+    }
+  }
+  return new Polygon(data, index).translate(-r * r / 2, 0, -r * r / 2);
 }
 
 export function display_distance(ctx, dist) {
@@ -141,13 +112,13 @@ export function xz_distance(a, b) {
   return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.z - b.z, 2));
 }
 
-export function create_quad_tree(ground) {
+export function make_qtree(stage) {
   const qt = new QuadTree(...(() => {
     let minx = 1e9;
     let maxx = -1;
     let minz = 1e9;
     let maxz = -1;
-    for (const [A, B, C] of ground.triangles()) {
+    for (const [A, B, C] of stage.triangles()) {
       minx = Math.min(minx, ...[A.x, B.x, C.x]);
       maxx = Math.max(maxx, ...[A.x, B.x, C.x]);
       minz = Math.min(minz, ...[A.z, B.z, C.z]);
@@ -155,7 +126,7 @@ export function create_quad_tree(ground) {
     }
     return [ minx, maxx + 1, minz, maxz + 1 ];
   })(), 5);
-  for (const [A, B, C, i] of ground.triangles()) {
+  for (const [A, B, C, i] of stage.triangles()) {
     const minx = Math.min(...[A.x, B.x, C.x]);
     const maxx = Math.max(...[A.x, B.x, C.x]);
     const minz = Math.min(...[A.z, B.z, C.z]);
@@ -164,3 +135,19 @@ export function create_quad_tree(ground) {
   }
   return qt;
 }
+
+export function position_from_xz(stage, qtree, x, z) {
+  const arrs = qtree.search(x, z, x, z);
+
+  for (const arr of arrs) for (const i of arr) {
+    const [A, B, C] = stage.triangle(i);
+    const D = Vec3(x, 0, z);
+    const E = Vec3(x, 1, z);
+
+    const Q = intersection_of_plane_and_line(A, B, C, D, E);
+    if (triangle_contains_point(A, B, C, Q)) {
+      const n = B.sub(A).cross(C.sub(A)).normalize();
+      return Vec3(x, Q.y + Env.ball.radius / n.y, z);
+    }
+  }
+};
