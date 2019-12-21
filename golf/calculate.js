@@ -10,11 +10,15 @@ export const calculate = async Game => {
   const func = (positions, prev, resolve) => {
     const h = positions.next().value;
     if (h.equals(prev)) {
-      resolve();
+      resolve(true);
       return;
     }
     if (h.sub(prev).length() < 0.001) {
-      resolve();
+      resolve(true);
+      return;
+    }
+    if (h.y < -300) {
+      resolve(false);
       return;
     }
     Game.world.positions.push(h);
@@ -107,8 +111,9 @@ function* make_positions(v0, h0, stage, qt, {
 
       const O = h.sub(P).scale(_OQ / _hS).add(P);
       const s = O.sub(h).length() / hout.sub(h).length();
-      // console.assert(0 <= s && s <= 1);
-      if (!(0 <= s && s <= 1)) continue;
+      if (!(0 <= s && s <= 1)) {
+        continue;
+      }
 
       const v = vout.scale(-1).rotate(n, 180);
       const w = n.scale(n.dot(v));

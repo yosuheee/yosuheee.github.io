@@ -1,6 +1,7 @@
 import { Vec3 } from "/lib/geometry.js";
-import { Polygon, VERTEX_SOURCE, FRAGMENT_SOURCE, program } from "/lib/webgl.js";
+import { VERTEX_SOURCE, FRAGMENT_SOURCE, program } from "/lib/webgl.js";
 import { sphere } from "/lib/polygon.js";
+import { sleep } from "/lib/util.js";
 import { Game, Env, BAR_STATUS, DISTANCE_STATUS, WORLD_STATUS } from "./game.js";
 import { make_random_stage, make_qtree, position_from_xz } from "./module.js";
 import { calculate } from "./calculate.js";
@@ -67,7 +68,20 @@ window.addEventListener("DOMContentLoaded", () => {
           Game.bar.status = BAR_STATUS.hide;
           Game.distance.status = DISTANCE_STATUS.show;
   
-          await calculate(Game);
+          const ok = await calculate(Game);
+
+          if (!ok) {
+            await sleep(1000);
+
+            const p = position_from_xz(Game.world.stage, Game.world.qtree, 0, 0);
+
+            Game.world.positions = [p];
+            Game.hit.angle = 0;
+
+            Game.camera.center = p;
+            Game.camera.up = Vec3(0, 1, 0);
+            Game.camera.position = p.add(Vec3(-3, 1, 0).rotate(Vec3(0, 1, 0), Game.hit.angle));
+          }
   
           Game.world.positions = Game.world.positions.slice(-1);
           Game.world.status = WORLD_STATUS.normal;

@@ -137,6 +137,7 @@ export function make_qtree(stage) {
 }
 
 export function position_from_xz(stage, qtree, x, z) {
+  let sharp;
   const arrs = qtree.search(x, z, x, z);
 
   for (const arr of arrs) for (const i of arr) {
@@ -144,10 +145,17 @@ export function position_from_xz(stage, qtree, x, z) {
     const D = Vec3(x, 0, z);
     const E = Vec3(x, 1, z);
 
-    const Q = intersection_of_plane_and_line(A, B, C, D, E);
+    const P = intersection_of_plane_and_line(A, B, C, D, E);
+    if (triangle_contains_point(A, B, C, P)) {
+      sharp = P.add(Vec3(0, Env.ball.radius, 0));
+    }
+    const n = B.sub(A).cross(C.sub(A)).normalize();
+    const O = Vec3(0, Env.ball.radius / n.y, 0).add(P);
+    const Q = n.scale(-Env.ball.radius).add(O);
     if (triangle_contains_point(A, B, C, Q)) {
-      const n = B.sub(A).cross(C.sub(A)).normalize();
-      return Vec3(x, Q.y + Env.ball.radius / n.y, z);
+      return O;
     }
   }
+
+  return sharp;
 };
