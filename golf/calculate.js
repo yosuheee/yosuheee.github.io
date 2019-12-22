@@ -55,7 +55,7 @@ function* make_positions(v0, h0, stage, qt, {
   D = Math.PI / 180 * 0,  // 風の角度
   e = 0.3,                // 反発係数
   k = 0.00015,            // 空気抵抗係数
-  d = 0.50,               // 動摩擦係数
+  d = 0.30,               // 動摩擦係数
 }) {
   const g = Vec3(0, -9.8 / 3600, 0);
   const F = Vec3(
@@ -91,10 +91,10 @@ function* make_positions(v0, h0, stage, qt, {
     let hout = h.add(vout);
 
     const arrs = qt.target(
-      Math.min(h.x - r, hout.x - r),
-      Math.min(h.z - r, hout.z - r),
-      Math.max(h.x + r, hout.x + r),
-      Math.max(h.z + r, hout.z + r),
+      Math.min(h.x, hout.x) - r,
+      Math.min(h.z, hout.z) - r,
+      Math.max(h.x, hout.x) + r,
+      Math.max(h.z, hout.z) + r,
     );
 
     let collision = false;
