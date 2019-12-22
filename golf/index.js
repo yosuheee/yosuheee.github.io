@@ -3,7 +3,7 @@ import { VERTEX_SOURCE, FRAGMENT_SOURCE, program } from "/lib/webgl.js";
 import { sphere } from "/lib/polygon.js";
 import { sleep } from "/lib/util.js";
 import { Game, Env, BAR_STATUS, DISTANCE_STATUS, WORLD_STATUS } from "./game.js";
-import { make_random_stage, make_qtree, position_from_xz } from "./module.js";
+import { make_random_stage, make_qtree, xyz_from_xz } from "./module.js";
 import { calculate } from "./calculate.js";
 import { top_view_loop } from "./loop/top_view.js";
 import { normal_view_loop } from "./loop/normal_view.js";
@@ -25,7 +25,7 @@ window.addEventListener("DOMContentLoaded", () => {
     Game.world.stage = stage;
     Game.world.qtree = qtree;
   
-    const p = position_from_xz(stage, qtree, 0, 0);
+    const p = xyz_from_xz(stage, qtree, 0, 0);
 
     Game.world.ball = sphere(Env.ball.radius).model(gl);
     Game.world.land = stage.model(gl);
@@ -35,7 +35,6 @@ window.addEventListener("DOMContentLoaded", () => {
     Game.camera.position = p.add(Vec3(-3, 1, 0));
     Game.camera.up = Vec3(0, 1, 0);
   }
-
 
   window.addEventListener("keydown", async e => {
     if (e.code === "Space") {

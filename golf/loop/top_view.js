@@ -38,13 +38,13 @@ export function top_view_loop(Game, prev = new Date().getTime()) {
   }
   
   if (Game.top.up_key) {
-    const move = Vec3((now - prev) / 30, 0, 0).rotate(Vec3(0, 1, 0), Game.hit.angle);
+    const move = Vec3((now - prev) / 10, 0, 0).rotate(Vec3(0, 1, 0), Game.hit.angle);
     Game.camera.position = Game.camera.position.add(move);
     Game.camera.center = Game.camera.center.add(move);
   }
 
   if (Game.top.down_key) {
-    const move = Vec3((now - prev) / 30, 0, 0).rotate(Vec3(0, 1, 0), Game.hit.angle);
+    const move = Vec3((now - prev) / 10, 0, 0).rotate(Vec3(0, 1, 0), Game.hit.angle);
     Game.camera.position = Game.camera.position.sub(move);
     Game.camera.center = Game.camera.center.sub(move);
   }

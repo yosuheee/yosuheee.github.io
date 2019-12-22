@@ -134,9 +134,9 @@ export function make_qtree(stage) {
   return qt;
 }
 
-export function position_from_xz(stage, qtree, x, z) {
+export function xyz_from_xz(stage, qtree, x, z) {
   let sharp;
-  const arrs = qtree.search(x, z, x, z);
+  const arrs = qtree.target(x, z, x, z);
 
   for (const i of arrs) {
     const [A, B, C] = stage.triangle(i);

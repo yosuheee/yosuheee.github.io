@@ -81,7 +81,7 @@ function* make_positions(v0, h0, stage, qt, {
 
     let hout = h.add(vout);
 
-    const arrs = qt.search(
+    const arrs = qt.target(
       Math.min(h.x, hout.x),
       Math.min(h.z, hout.z),
       Math.max(h.x, hout.x),
