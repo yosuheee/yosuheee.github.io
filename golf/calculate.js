@@ -63,7 +63,7 @@ function* make_positions(v0, h0, stage, qt, {
     0,
     W * 0.08 * Math.sin(D) * m / 3600
   );
-const c = v => v.primitive().map(d => d.toFixed(3));
+
   let v = v0;
   let h = h0;
 
@@ -103,7 +103,7 @@ const c = v => v.primitive().map(d => d.toFixed(3));
       const [A, B, C] = stage.triangle(i);
       const n = B.sub(A).cross(C.sub(A)).normalize();
 
-      let min = { t: 1e9, O: null, H: null, I: null };
+      let min = { t: 1e9, O: null };
       for (const p of ps) {
         const H = h.add(p);
         const I = hout.add(p);
@@ -115,7 +115,7 @@ const c = v => v.primitive().map(d => d.toFixed(3));
           continue;
         }
         const t = P.sub(H).length() / I.sub(H).length();
-        if (t < min.t) min = { t, O: P.sub(p), H, I };
+        if (t < min.t) min = { t, O: P.sub(p) };
       }
       if (min.t === 1e9) continue;
       collision = true;
