@@ -72,7 +72,7 @@ window.addEventListener("DOMContentLoaded", () => {
           if (!ok) {
             await sleep(1000);
 
-            const p = position_from_xz(Game.world.stage, Game.world.qtree, 0, 0);
+            const p = xyz_from_xz(Game.world.stage, Game.world.qtree, 0, 0);
 
             Game.world.positions = [p];
             Game.hit.angle = 0;

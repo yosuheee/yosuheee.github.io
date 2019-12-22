@@ -36,6 +36,6 @@ export function animation_loop(Game, gl, ctx, prg) {
 
   models.forEach(mo =>
     mo.lookAt(Game.camera.position, Game.camera.center, Game.camera.up)
-      .perspective(45, gl.canvas.width / gl.canvas.height, 0.01, 1000)
+      .perspective(45, gl.canvas.width / gl.canvas.height, 0.01, 1200)
       .draw(gl, prg));
 }

@@ -1,6 +1,6 @@
 import { Vec3,
          intersection_of_plane_and_line,
-         triangle_contains_point } from "/lib/geometry.js";
+         triangle_contains_point } from "../lib/geometry.js";
 import { Env } from "./game.js";
 import { xz_distance } from "./module.js";
 
@@ -55,7 +55,7 @@ function* make_positions(v0, h0, stage, qt, {
   D = Math.PI / 180 * 0,  // 風の角度
   e = 0.3,                // 反発係数
   k = 0.00015,            // 空気抵抗係数
-  d = 0.30,               // 動摩擦係数
+  d = 0.50,               // 動摩擦係数
 }) {
   const g = Vec3(0, -9.8 / 3600, 0);
   const F = Vec3(
@@ -63,11 +63,20 @@ function* make_positions(v0, h0, stage, qt, {
     0,
     W * 0.08 * Math.sin(D) * m / 3600
   );
-
+const c = v => v.primitive().map(d => d.toFixed(3));
   let v = v0;
   let h = h0;
 
   let along_the_ground = false;
+
+  const ps = [
+    Vec3( r,  0,  0),
+    Vec3( 0,  r,  0),
+    Vec3( 0,  0,  r),
+    Vec3(-r,  0,  0),
+    Vec3( 0, -r,  0),
+    Vec3( 0,  0, -r),
+  ];
 
   while (true) {
     let vout;
@@ -82,60 +91,54 @@ function* make_positions(v0, h0, stage, qt, {
     let hout = h.add(vout);
 
     const arrs = qt.target(
-      Math.min(h.x, hout.x),
-      Math.min(h.z, hout.z),
-      Math.max(h.x, hout.x),
-      Math.max(h.z, hout.z),
+      Math.min(h.x - r, hout.x - r),
+      Math.min(h.z - r, hout.z - r),
+      Math.max(h.x + r, hout.x + r),
+      Math.max(h.z + r, hout.z + r),
     );
 
     let collision = false;
 
     for (const i of arrs) {
       const [A, B, C] = stage.triangle(i);
-
       const n = B.sub(A).cross(C.sub(A)).normalize();
-      if (n.dot(hout.sub(A)) > r) {
-        continue;
-      }
 
-      const P = intersection_of_plane_and_line(A, B, C, h, hout);
-
-      const _OQ = r;
-      const _hS = n.dot(h.sub(P));
-      const PS = h.add(n.scale(-_hS)).sub(P);
-      const Q = PS.scale(_OQ / _hS).add(P);
-
-      if (!triangle_contains_point(A, B, C, Q)) {
-        continue;
-      }
-
-      const O = h.sub(P).scale(_OQ / _hS).add(P);
-      const s = O.sub(h).length() / hout.sub(h).length();
-      if (!(0 <= s && s <= 1)) {
-        continue;
-      }
-
-      const v = vout.scale(-1).rotate(n, 180);
-      const w = n.scale(n.dot(v));
-      const u = v.sub(w);
-
-      if (along_the_ground) {
-        const N = n.scale(-g.dot(n));
-        const r = u.scale(-1).normalize();
-        const p = r.scale(N.length() * d);
-        if (u.add(p).dot(r) > 0) {
-          vout = w.scale(e);
-        } else {
-          vout = w.scale(e).add(u.add(p));
+      let min = { t: 1e9, O: null, H: null, I: null };
+      for (const p of ps) {
+        const H = h.add(p);
+        const I = hout.add(p);
+        if (H.sub(A).dot(n) <= 0 || I.sub(A).dot(n) >= 0) {
+          continue;
         }
-      } else {
-        vout = w.scale(e).add(u);
+        const P = intersection_of_plane_and_line(A, B, C, H, I);
+        if (!triangle_contains_point(A, B, C, P)) {
+          continue;
+        }
+        const t = P.sub(H).length() / I.sub(H).length();
+        if (t < min.t) min = { t, O: P.sub(p), H, I };
+      }
+      if (min.t === 1e9) continue;
+      collision = true;
+
+      const V = vout.scale(-1).rotate(n, 180);
+      const W = n.scale(V.dot(n));              // 速度を2つのベクトルに分解する
+      const U = V.sub(W);
+      const u = U.normalize();
+
+      if (!along_the_ground) {
         along_the_ground = true;
+        vout = W.scale(e).add(U);
+      } else {
+        const N = n.scale(g.scale(1).dot(n));   // 垂直抗力
+        const D = u.scale(N.length() * d);      // 動摩擦力
+        if (U.sub(D).dot(u) < 0) {              // 動摩擦力が大きすぎて速度がマイナスになれば
+          vout = W.scale(e);                    // U 方向の速度を 0 にする
+        } else {
+          vout = W.scale(e).add(U.sub(D));
+        }
       }
 
-      hout = O.add(vout.scale(1 - s));
-
-      collision = true;
+      hout = min.O.add(vout.scale(1 - min.t));
       break;
     }
 
@@ -145,7 +148,6 @@ function* make_positions(v0, h0, stage, qt, {
 
     yield hout;
 
-    v = vout;
-    h = hout;
+    v = vout, h = hout;
   }
 }

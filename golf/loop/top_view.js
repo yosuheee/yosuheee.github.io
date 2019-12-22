@@ -50,7 +50,7 @@ export function top_view_loop(Game, prev = new Date().getTime()) {
   }
 
   if (Game.top.up_shift_key) {
-    const move = (now - prev) / 10;
+    const move = (now - prev) / 5;
     const temp = Game.camera.position.sub(Vec3(0, move, 0));
     const p = Game.world.positions.slice(-1)[0];
     if (temp.y < p.y + 10) temp.y = p.y + 10;
@@ -58,7 +58,7 @@ export function top_view_loop(Game, prev = new Date().getTime()) {
   }
 
   if (Game.top.down_shift_key) {
-    const move = (now - prev) / 10;
+    const move = (now - prev) / 5;
     const temp = Game.camera.position.add(Vec3(0, move, 0));
     const p = Game.world.positions.slice(-1)[0];
     if (temp.y > p.y + 1000) temp.y = p.y + 1000;

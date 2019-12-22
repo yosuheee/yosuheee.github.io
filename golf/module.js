@@ -76,7 +76,7 @@ export function display_bar(ctx, power, now) {
 
 export function make_random_stage(r) {
   const data = [], index = [];
-  const diff = 10;
+  const diff = 5;
   for (let i = 0; i <= r; i++) {
     for (let j = 0; j <= r; j++) {
       const x = i * r;
@@ -154,6 +154,5 @@ export function xyz_from_xz(stage, qtree, x, z) {
       return O;
     }
   }
-
   return sharp;
 };
