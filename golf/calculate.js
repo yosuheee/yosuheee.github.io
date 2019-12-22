@@ -118,6 +118,7 @@ function* make_positions(v0, h0, stage, qt, {
         if (t < min.t) min = { t, O: P.sub(p) };
       }
       if (min.t === 1e9) continue;
+      
       collision = true;
 
       const V = vout.scale(-1).rotate(n, 180);
