@@ -114,24 +114,22 @@ export function xz_distance(a, b) {
 
 export function make_qtree(stage) {
   const qt = new QuadTree(...(() => {
-    let minx = 1e9;
-    let maxx = -1;
-    let minz = 1e9;
-    let maxz = -1;
+    const x = { min: 1e9, max: -1 };
+    const z = { min: 1e9, max: -1 };
     for (const [A, B, C] of stage.triangles()) {
-      minx = Math.min(minx, ...[A.x, B.x, C.x]);
-      maxx = Math.max(maxx, ...[A.x, B.x, C.x]);
-      minz = Math.min(minz, ...[A.z, B.z, C.z]);
-      maxz = Math.max(maxz, ...[A.z, B.z, C.z]);
+      x.min = Math.min(x.min, ...[A.x, B.x, C.x]);
+      z.min = Math.min(z.min, ...[A.z, B.z, C.z]);
+      x.max = Math.max(x.max, ...[A.x, B.x, C.x]);
+      z.max = Math.max(z.max, ...[A.z, B.z, C.z]);
     }
-    return [ minx, maxx + 1, minz, maxz + 1 ];
+    return [ x.min, z.min, x.max + 1, z.max + 1 ];
   })(), 5);
   for (const [A, B, C, i] of stage.triangles()) {
-    const minx = Math.min(...[A.x, B.x, C.x]);
-    const maxx = Math.max(...[A.x, B.x, C.x]);
-    const minz = Math.min(...[A.z, B.z, C.z]);
-    const maxz = Math.max(...[A.z, B.z, C.z]);
-    qt.register(i, minx, minz, maxx, maxz);
+    const x = { min: Math.min(...[A.x, B.x, C.x]),
+                max: Math.max(...[A.x, B.x, C.x]) };
+    const z = { min: Math.min(...[A.z, B.z, C.z]),
+                max: Math.max(...[A.z, B.z, C.z]) };
+    qt.register(i, x.min, z.min, x.max, z.max);
   }
   return qt;
 }
@@ -140,7 +138,7 @@ export function position_from_xz(stage, qtree, x, z) {
   let sharp;
   const arrs = qtree.search(x, z, x, z);
 
-  for (const arr of arrs) for (const i of arr) {
+  for (const i of arrs) {
     const [A, B, C] = stage.triangle(i);
     const D = Vec3(x, 0, z);
     const E = Vec3(x, 1, z);

@@ -90,7 +90,7 @@ function* make_positions(v0, h0, stage, qt, {
 
     let collision = false;
 
-    for (const arr of arrs) for (const i of arr) {
+    for (const i of arrs) {
       const [A, B, C] = stage.triangle(i);
 
       const n = B.sub(A).cross(C.sub(A)).normalize();
