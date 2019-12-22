@@ -1,6 +1,6 @@
 import { QuadTree } from "/lib/quad-tree.js";
 import { Vec3 } from "/lib/geometry.js";
-import { Polygon } from "/lib/webgl.js";
+import { Polygon } from "/lib/polygon.js";
 import { Env } from "./game.js";
 import { intersection_of_plane_and_line, triangle_contains_point } from "/lib/geometry.js";
 

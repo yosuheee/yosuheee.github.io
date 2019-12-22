@@ -1,5 +1,5 @@
 import { Vec3 } from "/lib/geometry.js";
-import { Polygon } from "/lib/webgl.js";
+import { Polygon } from "/lib/polygon.js";
 
 export function ana(radius, count = 32, c = [1, 1, 1]) {
   const data = [], index = [];
