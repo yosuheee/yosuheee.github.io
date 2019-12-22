@@ -131,7 +131,7 @@ function* make_positions(v0, h0, stage, qt, {
       } else {
         const N = n.scale(g.scale(1).dot(n));   // 垂直抗力
         const D = u.scale(N.length() * d);      // 動摩擦力
-        if (U.sub(D).dot(u) < 0) {              // 動摩擦力が大きすぎて速度がマイナスになれば
+        if (U.sub(D).dot(u) < 0) {              // 動摩擦力が大きすぎて U 方向の速度がマイナスになれば
           vout = W.scale(e);                    // U 方向の速度を 0 にする
         } else {
           vout = W.scale(e).add(U.sub(D));
