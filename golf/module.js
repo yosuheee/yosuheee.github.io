@@ -100,9 +100,9 @@ export function make_random_stage(r = 50, e = 50) {
       const s = i * (r + 1) + j;
       const t = (i + 1) * (r + 1) + j;
       index.push([s, s + 1, t + 1]);
-      tridata.push({ e: Math.random(), d: Math.random() });
+      tridata.push({ e: 0.3, d: 0 });
       index.push([t, s, t + 1]);
-      tridata.push({ e: Math.random(), d: Math.random() });
+      tridata.push({ e: 0.3, d: 0 });
     }
   }
   return new Polygon(data, index, tridata).translate(-e * r / 2, 0, -e * r / 2);

@@ -31,13 +31,14 @@ export const Game = {
   },
   world: {
     status: WORLD_STATUS.normal,
-    models: [],
     sky_color: [160 / 255, 216 / 255, 239 / 255],
     positions: [Vec3(0, 0, 0)],
     stage: null,
     qtree: null,
     ball: null,
     land: null,
+    wind_power: 0,
+    wind_angle: 0,
   },
   hit: {
     angle: 0,

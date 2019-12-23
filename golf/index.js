@@ -34,6 +34,9 @@ window.addEventListener("DOMContentLoaded", () => {
     Game.camera.center = p;
     Game.camera.position = p.add(Vec3(-3, 1, 0));
     Game.camera.up = Vec3(0, 1, 0);
+
+    Game.world.wind_power = Math.floor(Math.random() * 9) + 1;
+    Game.world.wind_angle = Math.random() * 360;
   }
 
   window.addEventListener("keydown", async e => {

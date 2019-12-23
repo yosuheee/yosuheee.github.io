@@ -31,17 +31,15 @@ export const calculate = async Game => {
   
   return new Promise(resolve => {
     const p = Game.bar.power * 2 / 100;
-    const xz = p * Math.cos(Math.PI / 180 * 30);
-    const y  = p * Math.sin(Math.PI / 180 * 30);
-    const v = Vec3(
-      xz *  Math.cos(Math.PI / 180 * Game.hit.angle),
-      y,
-      xz * -Math.sin(Math.PI / 180 * Game.hit.angle),
+    const v0 = Vec3(
+      p * Math.cos(Math.PI / 180 * 30) * Math.cos(Math.PI / 180 * Game.hit.angle),
+      p * Math.sin(Math.PI / 180 * 30),
+      p * Math.cos(Math.PI / 180 * 30) * Math.sin(Math.PI / 180 * Game.hit.angle) * -1,
     );
-    const positions = make_positions(v, h0, Game.world.stage, Game.world.qtree, {
+    const positions = make_positions(v0, h0, Game.world.stage, Game.world.qtree, {
       r: Env.ball.radius,
-      W: 0,
-      D: Math.PI / 180 * 0,
+      wind_power: Game.world.wind_power,
+      wind_angle: Game.world.wind_angle,
     });
     func(positions, h0, resolve);
   });
