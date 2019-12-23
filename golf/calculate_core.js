@@ -2,15 +2,17 @@ import { Vec3,
          intersection_of_plane_and_line,
          triangle_contains_point } from "../lib/geometry.js";
 
-function next_position(stage, qtree, points, v, h, t, g, F, k, r, m, along_the_ground) {
-  let vout;
-  let hout = h.add(v.scale(t));
-
-  if (along_the_ground) {
-    vout = v.add(g.scale(t));
-  } else {
-    vout = v.add(g.scale(t)).add(F.scale(t)).sub(v.scale(k).scale(t));
-  }
+function next_position(stage, qtree, points, v, h, t, g, F, k, r, along_the_ground) {
+  const vout = (() => {
+    if (t !== 1) {
+      return v;
+    } else if (along_the_ground) {
+      return v.add(g);
+    } else {
+      return v.add(g).add(F).sub(v.scale(k));
+    }
+  })();
+  const hout = h.add(vout.scale(t));
 
   const targets = qtree.target(
     Math.min(h.x, hout.x) - r,
@@ -19,8 +21,7 @@ function next_position(stage, qtree, points, v, h, t, g, F, k, r, m, along_the_g
     Math.max(h.z, hout.z) + r,
   );
 
-  let colls = [];
-
+  const colls = [];
   for (const i of targets) {
     const { positions: [A, B, C], e, d } = stage.triangle(i);
     const n = B.sub(A).cross(C.sub(A)).normalize();
@@ -48,24 +49,28 @@ function next_position(stage, qtree, points, v, h, t, g, F, k, r, m, along_the_g
 
   const { O, t: tout, n, e, d } = colls.reduce((a, c) => a.t < c.t ? a : c);
 
-  const V = vout.inverse().rotate(n, 180);
-  const W = n.scale(V.dot(n));              // 速度を2つのベクトルに分解する
-  const U = V.sub(W);
-  const u = U.normalize();
+  return {
+    tout,
+    vout: (() => {
+      const V = vout.inverse().rotate(n, 180);
+      const W = n.scale(V.dot(n));
+      const U = V.sub(W);
+      const u = U.normalize();
 
-  if (!along_the_ground) {
-    vout = W.scale(e).add(U);
-  } else {
-    const N = n.scale(g.dot(n));            // 垂直抗力
-    const D = u.scale(N.length() * d);      // 動摩擦力
-    if (U.sub(D).dot(u) < 0) {              // 動摩擦力が大きすぎて U 方向の速度がマイナスになれば
-      vout = W.scale(e);                    // U 方向の速度を 0 にする
-    } else {
-      vout = W.scale(e).add(U.sub(D));
-    }
-  }
-
-  return { tout, vout, hout: O, collision: true };
+      if (!along_the_ground) {
+        return W.scale(e).add(U);
+      }
+      const N = n.scale(g.dot(n));          // 垂直抗力
+      const D = u.scale(N.length() * d);    // 動摩擦力
+      if (U.sub(D).dot(u) < 0) {            // 動摩擦力が大きすぎて U 方向の速度がマイナスになれば
+        return W.scale(e);                  // U 方向の速度を 0 にする
+      } else {
+        return W.scale(e).add(U.sub(D));
+      }
+    })(),
+    hout: O,
+    collision: true,
+  };
 }
 
 export function* make_positions(v0, h0, stage, qtree, {
@@ -82,11 +87,6 @@ export function* make_positions(v0, h0, stage, qtree, {
     wind_power * 0.08 * Math.sin(Math.PI * wind_angle / 180) * m / 3600
   ).scale(1 / m);
 
-  let v = v0;
-  let h = h0;
-
-  let along_the_ground = false;
-
   const points = [
     Vec3( r,  0,  0),
     Vec3( 0,  r,  0),
@@ -96,14 +96,25 @@ export function* make_positions(v0, h0, stage, qtree, {
     Vec3( 0,  0, -r),
   ];
   
+  let v = v0;
+  let h = h0;
+  let along_the_ground = false;
+
   while (true) {
-    const { tout, vout, hout, collision } =
-      next_position(stage, qtree, points, v, h, 1, g, F, k, r, m, along_the_ground);
+    let tacc = 0;
+    let coll = false;
 
-    along_the_ground = collision;
+    while (tacc < 1) {
+      const { tout, vout, hout, collision } =
+        next_position(stage, qtree, points, v, h, 1 - tacc, g, F, k, r, along_the_ground);
+      v = vout;
+      h = hout;
+      tacc += tout;
+      if (collision) coll = true;
+    }
 
-    yield hout;
+    along_the_ground = coll;
 
-    v = vout, h = hout;
+    yield h;
   }
 }
