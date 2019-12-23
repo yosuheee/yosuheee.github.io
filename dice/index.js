@@ -9,7 +9,7 @@ window.addEventListener("DOMContentLoaded", () => {
   gl.enable(gl.CULL_FACE);
   gl.enable(gl.DEPTH_TEST);
 
-  const mo = dice().translate(-6, -6, 6).scale(Vec3(0.7, 0.7, 0.7)).model(gl);
+  const mo = dice().translate(-6, -6, 6).scale(Vec3(1.6, 1.6, 1.6)).model(gl);
   
   let count = 0;
   const tick = () => {
