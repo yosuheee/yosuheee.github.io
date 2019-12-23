@@ -66,7 +66,7 @@ export function* make_positions(v0, h0, stage, qt, {
           continue;
         }
         const t = P.sub(H).length() / I.sub(H).length();
-        if (t < min.t) min = { t, O: P.sub(p), H, I, P };
+        if (t < min.t) min = { t, O: P.sub(p) };
       }
       if (min.t === 1e9) continue;
       
