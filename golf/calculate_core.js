@@ -7,9 +7,7 @@ export function* make_positions(v0, h0, stage, qt, {
   m = 0.04593,            // ボールの質量
   W = 0,                  // 風の強さ
   D = Math.PI / 180 * 0,  // 風の角度
-  e = 0.3,                // 反発係数
   k = 0.00015,            // 空気抵抗係数
-  d = 0.30,               // 動摩擦係数
 }) {
   const g = Vec3(0, -9.8 / 3600, 0);
   const F = Vec3(
@@ -54,7 +52,7 @@ export function* make_positions(v0, h0, stage, qt, {
     let collision = false;
 
     for (const i of arrs) {
-      const [A, B, C] = stage.triangle(i);
+      const { positions: [A, B, C], e, d } = stage.triangle(i);
       const n = B.sub(A).cross(C.sub(A)).normalize();
 
       let min = { t: 1e9, O: null };

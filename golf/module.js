@@ -75,7 +75,7 @@ export function display_bar(ctx, power, now) {
 }
 
 export function make_random_stage(r) {
-  const data = [], index = [];
+  const data = [], index = [], tridata = [];
   const diff = 5;
   for (let i = 0; i <= r; i++) {
     for (let j = 0; j <= r; j++) {
@@ -90,10 +90,12 @@ export function make_random_stage(r) {
       const s = i * (r + 1) + j;
       const t = (i + 1) * (r + 1) + j;
       index.push([s, s + 1, t + 1]);
+      tridata.push({ e: Math.random(), d: Math.random() });
       index.push([t, s, t + 1]);
+      tridata.push({ e: Math.random(), d: Math.random() });
     }
   }
-  return new Polygon(data, index).translate(-r * r / 2, 0, -r * r / 2);
+  return new Polygon(data, index, tridata).translate(-r * r / 2, 0, -r * r / 2);
 }
 
 export function display_distance(ctx, dist) {
@@ -116,7 +118,7 @@ export function make_qtree(stage) {
   const qt = new QuadTree(...(() => {
     const x = { min: 1e9, max: -1 };
     const z = { min: 1e9, max: -1 };
-    for (const [A, B, C] of stage.triangles()) {
+    for (const { positions: [A, B, C] } of stage.triangles()) {
       x.min = Math.min(x.min, ...[A.x, B.x, C.x]);
       z.min = Math.min(z.min, ...[A.z, B.z, C.z]);
       x.max = Math.max(x.max, ...[A.x, B.x, C.x]);
@@ -124,12 +126,12 @@ export function make_qtree(stage) {
     }
     return [ x.min, z.min, x.max + 1, z.max + 1 ];
   })(), 5);
-  for (const [A, B, C, i] of stage.triangles()) {
+  for (const { positions: [A, B, C], index } of stage.triangles()) {
     const x = { min: Math.min(...[A.x, B.x, C.x]),
                 max: Math.max(...[A.x, B.x, C.x]) };
     const z = { min: Math.min(...[A.z, B.z, C.z]),
                 max: Math.max(...[A.z, B.z, C.z]) };
-    qt.register(i, x.min, z.min, x.max, z.max);
+    qt.register(index, x.min, z.min, x.max, z.max);
   }
   return qt;
 }
@@ -138,7 +140,7 @@ export function xyz_from_xz(stage, qtree, x, z) {
   const arrs = qtree.target(x, z, x, z);
 
   for (const i of arrs) {
-    const [A, B, C] = stage.triangle(i);
+    const [A, B, C] = stage.triangle(i).positions;
     const D = Vec3(x, 0, z);
     const E = Vec3(x, 1, z);
     const P = intersection_of_plane_and_line(A, B, C, D, E);
