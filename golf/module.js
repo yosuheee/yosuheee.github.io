@@ -74,15 +74,25 @@ export function display_bar(ctx, power, now) {
   }
 }
 
-export function make_random_stage(r) {
+export function make_random_stage(r = 50, e = 50) {
+  console.assert(r % 2 === 0);
   const data = [], index = [], tridata = [];
   const diff = 5;
   for (let i = 0; i <= r; i++) {
     for (let j = 0; j <= r; j++) {
-      const x = i * r;
-      const z = j * r;
-      const y = (Math.random() * diff * 2) - diff;
-      data.push({ position: Vec3(x, y, z), color: [Math.random() / 5, (y + 1) / 3, Math.random() / 5] });
+      const x = i * e;
+      const z = j * e;
+      let y;
+      let color;
+      if (i >= r / 2 - 1 && i <= r / 2 + 1 &&
+          j >= r / 2 - 1 && j <= r / 2 + 1) {
+        y = diff;
+        color = [0, 0.3, 0];
+      } else {
+        y = (Math.random() * diff * 2) - diff;
+        color = [Math.random() / 5, (y + 1) / 3, Math.random() / 5];
+      }
+      data.push({ position: Vec3(x, y, z), color });
     }
   }
   for (let i = 0; i < r; i++) {
@@ -95,7 +105,7 @@ export function make_random_stage(r) {
       tridata.push({ e: Math.random(), d: Math.random() });
     }
   }
-  return new Polygon(data, index, tridata).translate(-r * r / 2, 0, -r * r / 2);
+  return new Polygon(data, index, tridata).translate(-e * r / 2, 0, -e * r / 2);
 }
 
 export function display_distance(ctx, dist) {

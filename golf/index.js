@@ -19,7 +19,7 @@ window.addEventListener("DOMContentLoaded", () => {
   gl.enable(gl.DEPTH_TEST);
 
   {
-    const stage = make_random_stage(50);
+    const stage = make_random_stage();
     const qtree = make_qtree(stage);
 
     Game.world.stage = stage;
