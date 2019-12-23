@@ -3,18 +3,18 @@ import { Vec3,
          triangle_contains_point } from "../lib/geometry.js";
 
 export function* make_positions(v0, h0, stage, qt, {
-  r = 0.04267,            // ボールの半径
-  m = 0.04593,            // ボールの質量
-  W = 0,                  // 風の強さ
-  D = Math.PI / 180 * 0,  // 風の角度
-  k = 0.00015,            // 空気抵抗係数
+  r = 0.04267,      // ボールの半径
+  m = 0.04593,      // ボールの質量
+  wind_power = 0,   // 風の強さ
+  wind_angle = 0,   // 風の角度
+  k = 0.003,        // 空気抵抗係数
 }) {
   const g = Vec3(0, -9.8 / 3600, 0);
   const F = Vec3(
-    W * 0.08 * Math.cos(D) * m / 3600,
+    wind_power * 0.08 * Math.cos(Math.PI * wind_angle / 180) * m / 3600,
     0,
-    W * 0.08 * Math.sin(D) * m / 3600
-  );
+    wind_power * 0.08 * Math.sin(Math.PI * wind_angle / 180) * m / 3600
+  ).scale(1 / m);
 
   let v = v0;
   let h = h0;
@@ -36,8 +36,7 @@ export function* make_positions(v0, h0, stage, qt, {
     if (along_the_ground) {
       vout = v.add(g);
     } else {
-      const v_ = v.add(g).add(F.scale(1 / m));
-      vout = v_.sub(v_.scale(k).scale(1 / m));
+      vout = v.add(g).add(F).sub(v.scale(k));
     }
 
     let hout = h.add(vout);
