@@ -1,4 +1,4 @@
-import { Vec3 } from "/lib/geometry.js";
+import { V3 } from "/lib/geometry.js";
 
 export const BAR_STATUS = {
   initial: 0,
@@ -32,7 +32,7 @@ export const Game = {
   world: {
     status: WORLD_STATUS.normal,
     sky_color: [160 / 255, 216 / 255, 239 / 255],
-    positions: [Vec3(0, 0, 0)],
+    positions: [V3(0, 0, 0)],
     stage: null,
     qtree: null,
     ball: null,
@@ -52,9 +52,9 @@ export const Game = {
     down_shift_key: false,
   },
   camera: {
-    position: Vec3(0, 0, 0),
-    up: Vec3(0, 0, 0),
-    center: Vec3(0, 0, 0),
+    position: V3(0, 0, 0),
+    up: V3(0, 0, 0),
+    center: V3(0, 0, 0),
   },
 };
 

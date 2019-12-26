@@ -31,7 +31,7 @@ export function animation_loop(Game, gl, ctx, prg) {
   const p = Game.world.positions.slice(-1)[0];
   const models = [
     Game.world.land,
-    Game.world.ball.translate(p),
+    Game.world.ball.translate(...p.primitive()),
   ];
 
   models.forEach(mo =>

@@ -1,4 +1,4 @@
-import { Vec3 } from "../lib/geometry.js";
+import { V3 } from "../lib/geometry.js";
 import { Env } from "./game.js";
 import { xz_distance } from "./module.js";
 import { make_positions } from "./calculate_core.js";
@@ -24,14 +24,14 @@ export const calculate = async Game => {
     Game.distance.xz = xz_distance(h0, h) / 0.9144;
 
     Game.camera.center = h;
-    Game.camera.position = h.add(Vec3(-3, 1, 0).rotate(Vec3(0, 1, 0), Game.hit.angle));
+    Game.camera.position = h.add(V3(-3, 1, 0).rotate(V3(0, 1, 0), Game.hit.angle));
 
     window.setTimeout(() => func(positions, h, resolve), 0);
   };
   
   return new Promise(resolve => {
     const p = Game.bar.power * 2 / 100;
-    const v0 = Vec3(
+    const v0 = V3(
       p * Math.cos(Math.PI / 180 * 30) * Math.cos(Math.PI / 180 * Game.hit.angle),
       p * Math.sin(Math.PI / 180 * 30),
       p * Math.cos(Math.PI / 180 * 30) * Math.sin(Math.PI / 180 * Game.hit.angle) * -1,

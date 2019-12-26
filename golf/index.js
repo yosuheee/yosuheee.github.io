@@ -1,4 +1,4 @@
-import { Vec3 } from "/lib/geometry.js";
+import { V3 } from "/lib/geometry.js";
 import { VERTEX_SOURCE, FRAGMENT_SOURCE, program } from "/lib/webgl.js";
 import { sphere } from "/lib/polygon.js";
 import { sleep } from "/lib/util.js";
@@ -32,8 +32,8 @@ window.addEventListener("DOMContentLoaded", () => {
     Game.world.positions = [p];
   
     Game.camera.center = p;
-    Game.camera.position = p.add(Vec3(-3, 1, 0));
-    Game.camera.up = Vec3(0, 1, 0);
+    Game.camera.position = p.add(V3(-3, 1, 0));
+    Game.camera.up = V3(0, 1, 0);
 
     Game.world.wind_power = Math.floor(Math.random() * 9) + 1;
     Game.world.wind_angle = Math.random() * 360;
@@ -47,8 +47,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
         const p = Game.world.positions.slice(-1)[0];
         Game.camera.center = p;
-        Game.camera.up = Vec3(0, 1, 0);
-        Game.camera.position = p.add(Vec3(-3, 1, 0).rotate(Vec3(0, 1, 0), Game.hit.angle));
+        Game.camera.up = V3(0, 1, 0);
+        Game.camera.position = p.add(V3(-3, 1, 0).rotate(V3(0, 1, 0), Game.hit.angle));
       } else if (Game.world.status === WORLD_STATUS.normal) {
         switch (Game.bar.status) {
   
@@ -81,8 +81,8 @@ window.addEventListener("DOMContentLoaded", () => {
             Game.hit.angle = 0;
 
             Game.camera.center = p;
-            Game.camera.up = Vec3(0, 1, 0);
-            Game.camera.position = p.add(Vec3(-3, 1, 0).rotate(Vec3(0, 1, 0), Game.hit.angle));
+            Game.camera.up = V3(0, 1, 0);
+            Game.camera.position = p.add(V3(-3, 1, 0).rotate(V3(0, 1, 0), Game.hit.angle));
           }
   
           Game.world.positions = Game.world.positions.slice(-1);
@@ -128,8 +128,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
         const p = Game.world.positions.slice(-1)[0];
         Game.camera.center = p;
-        Game.camera.up = Vec3(1, 0, 0).rotate(Vec3(0, 1, 0), Game.hit.angle);
-        Game.camera.position = p.add(Vec3(0, 10, 0));
+        Game.camera.up = V3(1, 0, 0).rotate(V3(0, 1, 0), Game.hit.angle);
+        Game.camera.position = p.add(V3(0, 10, 0));
 
       } else if (Game.world.status === WORLD_STATUS.top) {
         Game.world.status = WORLD_STATUS.normal;
@@ -137,8 +137,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
         const p = Game.world.positions.slice(-1)[0];
         Game.camera.center = p;
-        Game.camera.up = Vec3(0, 1, 0);
-        Game.camera.position = p.add(Vec3(-3, 1, 0).rotate(Vec3(0, 1, 0), Game.hit.angle));
+        Game.camera.up = V3(0, 1, 0);
+        Game.camera.position = p.add(V3(-3, 1, 0).rotate(V3(0, 1, 0), Game.hit.angle));
       }
     } else if (e.code === "ShiftLeft" || e.code === "ShiftRight") {
       if (Game.top.up_key) {

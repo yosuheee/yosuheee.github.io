@@ -1,5 +1,5 @@
 import { QuadTree } from "/lib/quad-tree.js";
-import { Vec3 } from "/lib/geometry.js";
+import { V3 } from "/lib/geometry.js";
 import { Polygon } from "/lib/polygon.js";
 import { Env } from "./game.js";
 import { intersection_of_plane_and_line, triangle_contains_point } from "/lib/geometry.js";
@@ -92,7 +92,7 @@ export function make_random_stage(r = 50, e = 50) {
         y = (Math.random() * diff * 2) - diff;
         color = [Math.random() / 5, (y + 1) / 3, Math.random() / 5];
       }
-      data.push({ position: Vec3(x, y, z), color });
+      data.push({ position: V3(x, y, z), color });
     }
   }
   for (let i = 0; i < r; i++) {
@@ -151,11 +151,11 @@ export function xyz_from_xz(stage, qtree, x, z) {
 
   for (const i of arrs) {
     const [A, B, C] = stage.triangle(i).positions;
-    const D = Vec3(x, 0, z);
-    const E = Vec3(x, 1, z);
+    const D = V3(x, 0, z);
+    const E = V3(x, 1, z);
     const P = intersection_of_plane_and_line(A, B, C, D, E);
     if (triangle_contains_point(A, B, C, P)) {
-      return P.add(Vec3(0, Env.ball.radius, 0));
+      return P.add(V3(0, Env.ball.radius, 0));
     }
   }
 };

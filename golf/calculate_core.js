@@ -1,4 +1,4 @@
-import { Vec3,
+import { V3,
          intersection_of_plane_and_line,
          triangle_contains_point } from "../lib/geometry.js";
 
@@ -80,20 +80,20 @@ export function* make_positions(v0, h0, stage, qtree, {
   wind_angle = 0,   // 風の角度
   k = 0.003,        // 空気抵抗係数
 }) {
-  const g = Vec3(0, -9.8 / 3600, 0);
-  const F = Vec3(
+  const g = V3(0, -9.8 / 3600, 0);
+  const F = V3(
     wind_power * 0.08 * Math.cos(Math.PI * wind_angle / 180) * m / 3600,
     0,
     wind_power * 0.08 * Math.sin(Math.PI * wind_angle / 180) * m / 3600
   ).scale(1 / m);
 
   const points = [
-    Vec3( r,  0,  0),
-    Vec3( 0,  r,  0),
-    Vec3( 0,  0,  r),
-    Vec3(-r,  0,  0),
-    Vec3( 0, -r,  0),
-    Vec3( 0,  0, -r),
+    V3( r,  0,  0),
+    V3( 0,  r,  0),
+    V3( 0,  0,  r),
+    V3(-r,  0,  0),
+    V3( 0, -r,  0),
+    V3( 0,  0, -r),
   ];
   
   let v = v0;

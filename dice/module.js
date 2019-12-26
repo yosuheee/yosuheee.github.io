@@ -1,4 +1,4 @@
-import { Vec3 } from "/lib/geometry.js";
+import { V3 } from "/lib/geometry.js";
 import { Polygon } from "/lib/polygon.js";
 
 export function ana(radius, count = 32, c = [1, 1, 1]) {
@@ -13,8 +13,8 @@ export function ana(radius, count = 32, c = [1, 1, 1]) {
     if (j == 1 || j == 2) x = rx / Math.sin(angle), y = radius;
     if (j == 3 || j == 4) x = -radius, y = -ry / Math.cos(angle);
     if (j == 5 || j == 6) x = -rx / Math.sin(angle), y = -radius;
-    data.push({ position: Vec3(rx + radius, ry + radius, 0), color: c });
-    data.push({ position: Vec3(x + radius, y + radius, 0), color: c });
+    data.push({ position: V3(rx + radius, ry + radius, 0), color: c });
+    data.push({ position: V3(x + radius, y + radius, 0), color: c });
   }
   for (let i = 0; i < count; i++) {
     const std = i * 2;
@@ -34,7 +34,7 @@ export function naka(radius, c = [1, 1, 1], large = 32, small = 32) {
       const sangle = Math.PI * 2 / small * j;
       const x = rad * Math.cos(sangle);
       const y = rad * Math.sin(sangle);
-      data.push({ position: Vec3(x + radius, y + radius, z), color: c });
+      data.push({ position: V3(x + radius, y + radius, z), color: c });
     }
   }
   for (let i = 0; i < large; i++) {
@@ -50,10 +50,10 @@ export function naka(radius, c = [1, 1, 1], large = 32, small = 32) {
 
 export function rect(x, y, c = [1, 1, 1]) {
   const data = [], index = [];
-  data.push({ position: Vec3(0, 0, 0), color: c });
-  data.push({ position: Vec3(x, 0, 0), color: c });
-  data.push({ position: Vec3(0, y, 0), color: c });
-  data.push({ position: Vec3(x, y, 0), color: c });
+  data.push({ position: V3(0, 0, 0), color: c });
+  data.push({ position: V3(x, 0, 0), color: c });
+  data.push({ position: V3(0, y, 0), color: c });
+  data.push({ position: V3(x, y, 0), color: c });
   index.push([0, 1, 2]);
   index.push([2, 1, 3]);
   return new Polygon(data, index);
@@ -65,8 +65,8 @@ export function kamaboko(radius, length, c = [1, 1, 1], count = 32) {
     const angle = Math.PI / 180 * 90 / count * i;
     const x = radius * Math.cos(angle);
     const y = radius * Math.sin(angle);
-    data.push({ position: Vec3(x, y, 0), color: c });
-    data.push({ position: Vec3(x, y, -length), color: c });
+    data.push({ position: V3(x, y, 0), color: c });
+    data.push({ position: V3(x, y, -length), color: c });
   }
   for (let i = 0; i < count; i++) {
     const j = i * 2;
@@ -86,7 +86,7 @@ export function eight(radius, row, col, c = [1, 1, 1]) {
       const a = Math.PI / 180 * 90 / col * j;
       const x = r * Math.cos(a);
       const y = r * Math.sin(a);
-      data.push({ position: Vec3(x, y, z), color: c });
+      data.push({ position: V3(x, y, z), color: c });
     }
   }
   for (let i = 0; i < row; i++) {
@@ -126,7 +126,7 @@ export function dice(edge = 8, radius = 2) {
         { x: S,         y: S },
         { x: S + M + D, y: S + M + D },
       ], E, M, C)
-        .rotate(Vec3(0, 1, 0), 90)
+        .rotate(V3(0, 1, 0), 90)
         .translate(E + 2 * R, R, -R);
     })(),
     (() => {
@@ -140,7 +140,7 @@ export function dice(edge = 8, radius = 2) {
         { x: S + M + D,         y: S + M + D },
         { x: S + M + D + M + D, y: S },
       ], E, M, C)
-        .rotate(Vec3(1, 0, 0), -90)
+        .rotate(V3(1, 0, 0), -90)
         .translate(R, E + 2 * R, -R);
     })(),
     (() => {
@@ -155,7 +155,7 @@ export function dice(edge = 8, radius = 2) {
         { x: S + M + D, y: S },
         { x: S + M + D, y: S + M + D },
       ], E, M, C)
-        .rotate(Vec3(1, 0, 0), 90)
+        .rotate(V3(1, 0, 0), 90)
         .translate(R, 0, -E - R);
     })(),
     (() => {
@@ -171,7 +171,7 @@ export function dice(edge = 8, radius = 2) {
         { x: S + M + D + M + D, y: S },
         { x: S + M + D + M + D, y: S + M + D + M + D },
       ], E, M, C)
-        .rotate(Vec3(0, 1, 0), -90)
+        .rotate(V3(0, 1, 0), -90)
         .translate(0, R, -E - R);
     })(),
     (() => {
@@ -190,7 +190,7 @@ export function dice(edge = 8, radius = 2) {
         { x: S + M + X + M + X, y: T },
         { x: S + M + X + M + X, y: T + M + Y },
       ], E, M, C)
-        .rotate(Vec3(1, 0, 0), 180)
+        .rotate(V3(1, 0, 0), 180)
         .translate(R, E + R, -E - 2 * R);
     })(),
   ];
@@ -198,28 +198,28 @@ export function dice(edge = 8, radius = 2) {
   const kama = kamaboko(R, E);
   const borders = [
     kama.translate(E + R, E + R, -R),
-    kama.rotate(Vec3(1, 0, 0), -90).translate(E + R, E + R, -E - R),
-    kama.rotate(Vec3(1, 0, 0),  90).translate(E + R, R, -R),
-    kama.rotate(Vec3(0, 1, 0), -90).translate(R, E + R, -R),
-    kama.rotate(Vec3(0, 1, 0),  90).translate(E + R, E + R, -E - R),
-    kama.rotate(Vec3(0, 1, 0), 180).translate(R, E + R, -E - R),
-    kama.rotate(Vec3(0, 0, 1), -90).translate(E + R, R, -R),
-    kama.rotate(Vec3(0, 0, 1), 180).translate(R, R, -R),
-    kama.rotate(Vec3(1, 0, 0), -90).rotate(Vec3(0, 1, 0),  90).translate(R, E + R, -E - R),
-    kama.rotate(Vec3(1, 0, 0),  90).rotate(Vec3(0, 1, 0), -90).translate(R, R, -R),
-    kama.rotate(Vec3(0, 1, 0), -90).rotate(Vec3(1, 0, 0),  90).translate(R, R, -R),
-    kama.rotate(Vec3(0, 1, 0), -90).rotate(Vec3(1, 0, 0), 180).translate(R, R, -E - R),
+    kama.rotate(V3(1, 0, 0), -90).translate(E + R, E + R, -E - R),
+    kama.rotate(V3(1, 0, 0),  90).translate(E + R, R, -R),
+    kama.rotate(V3(0, 1, 0), -90).translate(R, E + R, -R),
+    kama.rotate(V3(0, 1, 0),  90).translate(E + R, E + R, -E - R),
+    kama.rotate(V3(0, 1, 0), 180).translate(R, E + R, -E - R),
+    kama.rotate(V3(0, 0, 1), -90).translate(E + R, R, -R),
+    kama.rotate(V3(0, 0, 1), 180).translate(R, R, -R),
+    kama.rotate(V3(1, 0, 0), -90).rotate(V3(0, 1, 0),  90).translate(R, E + R, -E - R),
+    kama.rotate(V3(1, 0, 0),  90).rotate(V3(0, 1, 0), -90).translate(R, R, -R),
+    kama.rotate(V3(0, 1, 0), -90).rotate(V3(1, 0, 0),  90).translate(R, R, -R),
+    kama.rotate(V3(0, 1, 0), -90).rotate(V3(1, 0, 0), 180).translate(R, R, -E - R),
   ];
   const kado = eight(R, 16, 16);
   const kado4 = [
     kado.translate(E + R, E + R, -R),
-    kado.rotate(Vec3(0, 1, 0), -90).translate(R, E + R, -R),
-    kado.rotate(Vec3(0, 0, 1), -90).translate(E + R, R, -R),
-    kado.rotate(Vec3(0, 0, 1), 180).translate(R, R, -R),
+    kado.rotate(V3(0, 1, 0), -90).translate(R, E + R, -R),
+    kado.rotate(V3(0, 0, 1), -90).translate(E + R, R, -R),
+    kado.rotate(V3(0, 0, 1), 180).translate(R, R, -R),
   ].reduce((a, c) => a.add(c));
   const corners = [
     kado4,
-    kado4.rotate(Vec3(1, 0, 0), 180).translate(0, E + R * 2, -E - R * 2),
+    kado4.rotate(V3(1, 0, 0), 180).translate(0, E + R * 2, -E - R * 2),
   ];
 
   return [ ...objects, ...borders, ...corners ].reduce((a, c) => a.add(c));
