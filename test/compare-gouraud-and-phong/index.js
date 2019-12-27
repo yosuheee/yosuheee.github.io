@@ -1,5 +1,6 @@
 import { program } from "/lib/webgl.js";
 import { sphere } from "/lib/polygon.js";
+import { V3 } from "/lib/geometry.js";
 
 const gouraud_vertex_source = `
 attribute vec3 position;
@@ -51,11 +52,11 @@ const po = sphere(0.8, [1, 1, 1], 64, 64);
 window.addEventListener("DOMContentLoaded", () => {
   const gl = document.getElementById("canvas1").getContext("webgl");
   const prg = program(gl, gouraud_vertex_source, gouraud_fragment_source);
-  po.model(gl).draw(gl, prg);
+  po.model(gl).draw(gl, prg, V3(1, 1, -1));
 });
 
 window.addEventListener("DOMContentLoaded", () => {
   const gl = document.getElementById("canvas2").getContext("webgl");
   const prg = program(gl, phong_vertex_source, phong_fragment_source);
-  po.model(gl).draw(gl, prg);
+  po.model(gl).draw(gl, prg, V3(1, 1, -1));
 });
