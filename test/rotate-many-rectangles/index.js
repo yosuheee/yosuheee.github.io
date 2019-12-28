@@ -27,7 +27,7 @@ window.addEventListener("DOMContentLoaded", () => {
       const y = j * S;
       gl.viewport(x, y, S, S);
       mo.rotate(V3(0, 1, 0), count * speeds[i * H + j])
-        .draw(gl, prg, V3(0, 0, 1));
+        .draw(gl, prg, { light: V3(0, 0, 1) });
     }
     gl.flush();
   };
@@ -49,7 +49,7 @@ window.addEventListener("DOMContentLoaded", () => {
               V3(0, 0, 0),
               V3(0, 1, 0).rotate(V3(-1, 0, 0), count))
       .perspective(45, gl.canvas.width / gl.canvas.height, 0.1, 100)
-      .draw(gl, prg, V3(1, 1, 1));
+      .draw(gl, prg, { light: V3(1, 1, 1) });
   };
   tick();
 });
@@ -66,7 +66,7 @@ window.addEventListener("DOMContentLoaded", () => {
     gl.clearColor(0, 0, 0, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
     mo.rotate(V3(0, 1, 0), count)
-      .draw(gl, prg, V3(0, 0, 1));
+      .draw(gl, prg, { light: V3(0, 0, 1) });
   };
   tick();
 });
@@ -83,7 +83,7 @@ window.addEventListener("DOMContentLoaded", () => {
     gl.clearColor(0, 0, 0, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
     mo.rotate(V3(0, 1, 0), count)
-      .draw(gl, prg, V3(0, 1, 0));
+      .draw(gl, prg, { light: V3(0, 1, 0) });
   };
   tick();
 });
@@ -100,7 +100,7 @@ window.addEventListener("DOMContentLoaded", () => {
     gl.clearColor(0, 0, 0, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
     mo.rotate(V3(0, 1, 0), count)
-      .draw(gl, prg, V3(1, 0, 0));
+      .draw(gl, prg, { light: V3(1, 0, 0) });
   };
   tick();
 });

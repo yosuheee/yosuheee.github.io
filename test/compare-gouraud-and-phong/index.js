@@ -52,11 +52,11 @@ const po = sphere(0.8, [1, 1, 1], 64, 64);
 window.addEventListener("DOMContentLoaded", () => {
   const gl = document.getElementById("canvas1").getContext("webgl");
   const prg = program(gl, gouraud_vertex_source, gouraud_fragment_source);
-  po.model(gl).draw(gl, prg, V3(1, 1, -1));
+  po.model(gl).draw(gl, prg, { light: V3(1, 1, -1) });
 });
 
 window.addEventListener("DOMContentLoaded", () => {
   const gl = document.getElementById("canvas2").getContext("webgl");
   const prg = program(gl, phong_vertex_source, phong_fragment_source);
-  po.model(gl).draw(gl, prg, V3(1, 1, -1));
+  po.model(gl).draw(gl, prg, { light: V3(1, 1, -1) });
 });
