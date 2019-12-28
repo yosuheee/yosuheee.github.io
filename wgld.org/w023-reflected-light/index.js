@@ -13,9 +13,15 @@ window.addEventListener("DOMContentLoaded", () => {
 
   uniform(gl, prg, "vec4", "ambient_color", [0.1, 0.1, 0.1, 1.0]);
 
-  gl.clearColor(0, 0, 0, 1);
-  gl.clear(gl.COLOR_BUFFER_BIT);
-  mo.draw(gl, prg, { light: V3(1, 1, 1) });
+  let count = 0;
+  const tick = () => {
+    requestAnimationFrame(tick);
+    count++;
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    mo.rotate(V3(1, 1, 1), count).draw(gl, prg);
+  };
+  tick();
 });
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -25,7 +31,7 @@ window.addEventListener("DOMContentLoaded", () => {
   gl.enable(gl.CULL_FACE);
   gl.enable(gl.DEPTH_TEST);
 
-  const mo = sphere(0.8).model(gl);
+  const mo = sphere(0.8).flatten().model(gl);
 
   uniform(gl, prg, "vec4", "ambient_color", [0.1, 0.1, 0.1, 1.0]);
   uniform(gl, prg, "vec3", "eye_direction", V3(0, 0, 1).normalize().primitive());

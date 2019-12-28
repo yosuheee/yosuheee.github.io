@@ -111,7 +111,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   gl.enable(gl.DEPTH_TEST);
 
-  const mo = sphere(0.6).model(gl);
+  const mo = sphere(0.6).flatten().model(gl);
   let count = 0;
   const tick = () => {
     requestAnimationFrame(tick);
