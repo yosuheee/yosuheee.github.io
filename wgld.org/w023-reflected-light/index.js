@@ -31,7 +31,7 @@ window.addEventListener("DOMContentLoaded", () => {
   gl.enable(gl.CULL_FACE);
   gl.enable(gl.DEPTH_TEST);
 
-  const po = sphere(0.8, [0.6, 0.6, 0.6]).flatten();
+  const po = sphere(0.8, [0.6, 0.6, 0.6], 32, 32).flatten();
   const mo = po.model(gl);
 
   uniform(gl, prg, "vec4", "ambient_color", [0.1, 0.1, 0.1, 1.0]);
