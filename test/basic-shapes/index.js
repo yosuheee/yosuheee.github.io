@@ -3,6 +3,27 @@ import { cube, quarter_cylinder_rect, one_eighth_sphere, rounded_corners_cube, s
 import { V3 } from "../../lib/geometry.js";
 
 window.addEventListener("DOMContentLoaded", () => {
+  const gl = document.getElementById("canvas6").getContext("webgl");
+  const prg = program(gl, VERTEX_SOURCE, FRAGMENT_SOURCE);
+
+  gl.enable(gl.DEPTH_TEST);
+
+  const mo = one_eighth_sphere(0.6).reverse().model(gl);
+  let count = 0;
+  const tick = () => {
+    requestAnimationFrame(tick);
+    count++;
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    mo.rotate(V3(1, 0, 0), count)
+      .lookAt(V3(1.6, 1.6, 1.6), V3(0, 0, 0), V3(0, 1, 0))
+      .perspective(45, 1.0, 0.1, 100)
+      .draw(gl, prg, { light: V3(1, 1, 1) });
+  };
+  tick();
+});
+
+window.addEventListener("DOMContentLoaded", () => {
   const gl = document.getElementById("canvas1").getContext("webgl");
   const prg = program(gl, VERTEX_SOURCE, FRAGMENT_SOURCE);
 
