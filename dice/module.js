@@ -1,5 +1,5 @@
 import { V3 } from "/lib/geometry.js";
-import { Polygon } from "/lib/polygon.js";
+import { Polygon, one_eighth_sphere, quarter_cylinder_rect, rect } from "../lib/polygon.js";
 
 export function ana(radius, count = 32, c = [1, 1, 1]) {
   const data = [], index = [];
@@ -24,80 +24,18 @@ export function ana(radius, count = 32, c = [1, 1, 1]) {
   return new Polygon(data, index);
 }
 
-export function naka(radius, c = [1, 1, 1], large = 32, small = 32) {
-  const data = [], index = [];
-  for (let i = 0; i <= large; i++) {
-    const langle = Math.PI / 2 / large * i;
-    const rad = radius * Math.cos(langle);
-    const z = -radius * Math.sin(langle);
-    for (let j = 0; j <= small; j++) {
-      const sangle = Math.PI * 2 / small * j;
-      const x = rad * Math.cos(sangle);
-      const y = rad * Math.sin(sangle);
-      data.push({ position: V3(x + radius, y + radius, z), color: c });
-    }
-  }
-  for (let i = 0; i < large; i++) {
-    for (let j = 0; j < small; j++) {
-      const std1 = i * (small + 1) + j;
-      const std2 = (i + 1) * (small + 1) + j;
-      index.push([std1, std1 + 1, std2]);
-      index.push([std1 + 1, std2 + 1, std2]);
-    }
-  }
-  return new Polygon(data, index);
-}
-
-export function rect(x, y, c = [1, 1, 1]) {
-  const data = [], index = [];
-  data.push({ position: V3(0, 0, 0), color: c });
-  data.push({ position: V3(x, 0, 0), color: c });
-  data.push({ position: V3(0, y, 0), color: c });
-  data.push({ position: V3(x, y, 0), color: c });
-  index.push([0, 1, 2]);
-  index.push([2, 1, 3]);
-  return new Polygon(data, index);
-}
-
-export function kamaboko(radius, length, c = [1, 1, 1], count = 32) {
-  const data = [], index = [];
-  for (let i = 0; i <= count; i++) {
-    const angle = Math.PI / 180 * 90 / count * i;
-    const x = radius * Math.cos(angle);
-    const y = radius * Math.sin(angle);
-    data.push({ position: V3(x, y, 0), color: c });
-    data.push({ position: V3(x, y, -length), color: c });
-  }
-  for (let i = 0; i < count; i++) {
-    const j = i * 2;
-    index.push([j, j + 1, j + 2]);
-    index.push([j + 2, j + 1, j + 3]);
-  }
-  return new Polygon(data, index);
-}
-
-export function eight(radius, row, col, c = [1, 1, 1]) {
-  const data = [], index = [];
-  for (let i = 0; i <= row; i++) {
-    const angle = Math.PI / 180 * 90 / row * i;
-    const r = radius * Math.cos(angle);
-    const z = radius * Math.sin(angle);
-    for (let j = 0; j <= col; j++) {
-      const a = Math.PI / 180 * 90 / col * j;
-      const x = r * Math.cos(a);
-      const y = r * Math.sin(a);
-      data.push({ position: V3(x, y, z), color: c });
-    }
-  }
-  for (let i = 0; i < row; i++) {
-    for (let j = 0; j < col; j++) {
-      const s = i * (col + 1) + j;
-      const t = (i + 1) * (col + 1) + j;
-      index.push([t, s, t + 1]);
-      index.push([t + 1, s, s + 1]);
-    }
-  }
-  return new Polygon(data, index);
+export function reverse_half_sphere(r, c = [1, 1, 1], row = 16, col = 16) {
+  const oes = one_eighth_sphere(r, c, row, col);
+  const parts = [
+    oes,
+    oes.rotate(V3(0, 0, 1),  90),
+    oes.rotate(V3(0, 0, 1), 180),
+    oes.rotate(V3(0, 0, 1), 270),
+  ];
+  return parts.reduce((a, c) => a.add(c))
+              .rotate(V3(1, 0, 0), 180)
+              .translate(r, r, 0)
+              .reverse();
 }
 
 export function dice(edge = 8, radius = 2) {
@@ -195,7 +133,7 @@ export function dice(edge = 8, radius = 2) {
     })(),
   ];
   
-  const kama = kamaboko(R, E);
+  const kama = quarter_cylinder_rect(E, R).rotate(V3(0, 1, 0), 90);
   const borders = [
     kama.translate(E + R, E + R, -R),
     kama.rotate(V3(1, 0, 0), -90).translate(E + R, E + R, -E - R),
@@ -210,7 +148,7 @@ export function dice(edge = 8, radius = 2) {
     kama.rotate(V3(0, 1, 0), -90).rotate(V3(1, 0, 0),  90).translate(R, R, -R),
     kama.rotate(V3(0, 1, 0), -90).rotate(V3(1, 0, 0), 180).translate(R, R, -E - R),
   ];
-  const kado = eight(R, 16, 16);
+  const kado = one_eighth_sphere(R, [1, 1, 1], 16, 16);
   const kado4 = [
     kado.translate(E + R, E + R, -R),
     kado.rotate(V3(0, 1, 0), -90).translate(R, E + R, -R),
@@ -262,7 +200,7 @@ function face(points, edge = 10, size = 1, color = [0, 0, 0]) {
       const w = xs[i + 1] - xs[i];
       const h = ys[j + 1] - ys[j];
       if (points.some(p => p.x === x && p.y === y)) {
-        objects.push({ o: ana(w / 2).add(naka(w / 2, C)), x, y });
+        objects.push({ o: ana(w / 2).add(reverse_half_sphere(w / 2, C)), x, y });
       } else {
         objects.push({ o: rect(w, h), x, y });
       }
