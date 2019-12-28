@@ -30,9 +30,15 @@ window.addEventListener("DOMContentLoaded", () => {
   uniform(gl, prg, "vec4", "ambient_color", [0.1, 0.1, 0.1, 1.0]);
   uniform(gl, prg, "vec3", "eye_direction", V3(0, 0, 1).normalize().primitive());
 
-  gl.clearColor(0, 0, 0, 1);
-  gl.clear(gl.COLOR_BUFFER_BIT);
-  mo.draw(gl, prg, { light: V3(1, 1, 1) });
+  let count = 0;
+  const tick = () => {
+    requestAnimationFrame(tick);
+    count++;
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    mo.rotate(V3(1, 1, 1), count).draw(gl, prg);
+  };
+  tick();
 });
 
 const vertex_source1 = `
