@@ -1,6 +1,28 @@
 import { program, VERTEX_SOURCE, FRAGMENT_SOURCE } from "../../lib/webgl.js";
-import { cube, quarter_cylinder_rect, one_eighth_sphere, rounded_corners_cube, sphere } from "../../lib/polygon.js";
+import { cube, quarter_cylinder_rect, one_eighth_sphere, rounded_corners_cube, sphere, torus } from "../../lib/polygon.js";
 import { V3 } from "../../lib/geometry.js";
+
+window.addEventListener("DOMContentLoaded", () => {
+  const gl = document.getElementById("canvas9").getContext("webgl");
+  const prg = program(gl, VERTEX_SOURCE, FRAGMENT_SOURCE);
+
+  gl.enable(gl.CULL_FACE);
+  gl.enable(gl.DEPTH_TEST);
+
+  const mo = torus().model(gl);
+  let count = 0;
+  const tick = () => {
+    requestAnimationFrame(tick);
+    count++;
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    mo.rotate(V3(1, 1, 1), count)
+      .lookAt(V3(0, 0, 2.4), V3(0, 0, 0), V3(0, 1, 0))
+      .perspective(45, 1.0, 0.1, 100)
+      .draw(gl, prg, { light: V3(1, 1, 1) });
+  };
+  tick();
+});
 
 window.addEventListener("DOMContentLoaded", () => {
   const gl = document.getElementById("canvas7").getContext("webgl");
