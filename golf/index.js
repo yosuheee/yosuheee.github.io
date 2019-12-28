@@ -1,5 +1,5 @@
 import { V3 } from "/lib/geometry.js";
-import { VERTEX_SOURCE, FRAGMENT_SOURCE, program } from "/lib/webgl.js";
+import { program } from "/lib/webgl.js";
 import { sphere } from "/lib/polygon.js";
 import { sleep } from "/lib/util.js";
 import { Game, Env, BAR_STATUS, DISTANCE_STATUS, WORLD_STATUS } from "./game.js";
@@ -10,10 +10,38 @@ import { normal_view_loop } from "./loop/normal_view.js";
 import { bar_loop } from "./loop/bar.js";
 import { animation_loop } from "./loop/animation.js";
 
+const vertex_source = `
+attribute vec3 position;
+attribute vec3 color;
+attribute vec3 normal;
+uniform mat4 m_matrix;
+uniform mat4 r_matrix;
+varying vec3 v_color;
+varying vec3 v_normal;
+
+void main(void) {
+  v_color = color;
+  v_normal = (r_matrix * vec4(normal, 0.0)).xyz;
+  gl_Position = m_matrix * vec4(position, 1.0);
+}
+`;
+
+const fragment_source = `
+precision mediump float;
+uniform vec3 light;
+varying vec3 v_color;
+varying vec3 v_normal;
+
+void main(void) {
+  gl_FragColor = vec4(v_color, 1.0);
+  gl_FragColor.rgb *= dot(light, v_normal) / 5.0 + 0.8;
+}
+`;
+
 window.addEventListener("DOMContentLoaded", () => {
   const gl = document.getElementById("canvas").getContext("webgl");
   const ctx = document.getElementById("text").getContext("2d");
-  const prg = program(gl, VERTEX_SOURCE, FRAGMENT_SOURCE);
+  const prg = program(gl, vertex_source, fragment_source);
 
   gl.enable(gl.CULL_FACE);
   gl.enable(gl.DEPTH_TEST);
