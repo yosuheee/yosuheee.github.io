@@ -36,7 +36,7 @@ window.addEventListener("DOMContentLoaded", () => {
   
   gl.clearColor(0.9, 0.9, 0.9, 1);
   gl.clear(gl.COLOR_BUFFER_BIT);
-  po.transform(m).model(gl).draw(gl, prg, { color: "", normal: "" });
+  po.transform(m).model(gl).draw(gl, prg, { col_name: "", nor_name: "" });
 });
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -52,5 +52,5 @@ window.addEventListener("DOMContentLoaded", () => {
 
   gl.clearColor(0.9, 0.9, 0.9, 1);
   gl.clear(gl.COLOR_BUFFER_BIT);
-  mo.draw(gl, prg, { color: "", normal: "" });
+  mo.draw(gl, prg, { col_name: "", nor_name: "" });
 });
