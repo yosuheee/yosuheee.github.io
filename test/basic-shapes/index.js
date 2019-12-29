@@ -1,6 +1,6 @@
-import { program, VERTEX_SOURCE, FRAGMENT_SOURCE } from "../../lib/webgl.js";
-import { cube, quarter_cylinder_rect, one_eighth_sphere, rounded_corners_cube, sphere, torus } from "../../lib/polygon.js";
-import { V3 } from "../../lib/geometry.js";
+import { program, VERTEX_SOURCE, FRAGMENT_SOURCE } from "/module/webgl.js";
+import { cube, quarter_cylinder_rect, one_eighth_sphere, rounded_corners_cube, sphere, torus } from "/module/polygon.js";
+import { V3 } from "/module/geometry.js";
 
 window.addEventListener("DOMContentLoaded", () => {
   const gl = document.getElementById("canvas9").getContext("webgl");

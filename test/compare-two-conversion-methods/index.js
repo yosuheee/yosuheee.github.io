@@ -1,6 +1,6 @@
-import { program } from "/lib/webgl.js";
-import { Polygon } from "/lib/polygon.js";
-import { V3, Mat4 } from "/lib/geometry.js";
+import { program } from "/module/webgl.js";
+import { Polygon } from "/module/polygon.js";
+import { V3, Mat4 } from "/module/geometry.js";
 
 const vertex_source = `
 attribute vec3 position;

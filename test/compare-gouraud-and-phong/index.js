@@ -1,6 +1,6 @@
-import { program } from "/lib/webgl.js";
-import { sphere } from "/lib/polygon.js";
-import { V3 } from "/lib/geometry.js";
+import { program } from "/module/webgl.js";
+import { sphere } from "/module/polygon.js";
+import { V3 } from "/module/geometry.js";
 
 const gouraud_vertex_source = `
 attribute vec3 position;

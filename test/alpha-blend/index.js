@@ -1,7 +1,7 @@
-import { program, VERTEX_SOURCE, FRAGMENT_SOURCE } from "../../lib/webgl.js";
-import { rect, cube } from "../../lib/polygon.js";
-import { range } from "../../lib/util.js";
-import { V3 } from "../../lib/geometry.js";
+import { program, VERTEX_SOURCE, FRAGMENT_SOURCE } from "/module/webgl.js";
+import { rect, cube } from "/module/polygon.js";
+import { range } from "/module/util.js";
+import { V3 } from "/module/geometry.js";
 
 window.addEventListener("DOMContentLoaded", () => {
   const gl = document.getElementById("canvas1").getContext("webgl");

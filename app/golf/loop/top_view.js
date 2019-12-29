@@ -1,4 +1,4 @@
-import { V3 } from "/lib/geometry.js";
+import { V3 } from "/module/geometry.js";
 import { WORLD_STATUS } from "../game.js";
 import { xz_distance } from "../module.js";
 

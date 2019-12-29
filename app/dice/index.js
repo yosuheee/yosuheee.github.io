@@ -1,5 +1,5 @@
-import { V3 } from "/lib/geometry.js";
-import { program } from "/lib/webgl.js";
+import { V3 } from "/module/geometry.js";
+import { program } from "/module/webgl.js";
 import { dice } from "./module.js";
 
 const vertex_source = `

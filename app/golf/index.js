@@ -1,7 +1,7 @@
-import { V3 } from "/lib/geometry.js";
-import { program } from "/lib/webgl.js";
-import { sphere } from "/lib/polygon.js";
-import { sleep } from "/lib/util.js";
+import { V3 } from "/module/geometry.js";
+import { program } from "/module/webgl.js";
+import { sphere } from "/module/polygon.js";
+import { sleep } from "/module/util.js";
 import { Game, Env, BAR_STATUS, DISTANCE_STATUS, WORLD_STATUS } from "./game.js";
 import { make_random_stage, make_qtree, xyz_from_xz } from "./module.js";
 import { calculate } from "./calculate.js";

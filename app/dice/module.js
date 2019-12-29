@@ -1,5 +1,5 @@
-import { V3 } from "/lib/geometry.js";
-import { Polygon, one_eighth_sphere, quarter_cylinder_rect, rect } from "../lib/polygon.js";
+import { V3 } from "/module/geometry.js";
+import { Polygon, one_eighth_sphere, quarter_cylinder_rect, rect } from "/module/polygon.js";
 
 export function ana(radius, count = 32, c = [1, 1, 1]) {
   const data = [], index = [];

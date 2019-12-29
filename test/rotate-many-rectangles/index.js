@@ -1,7 +1,7 @@
-import { program, VERTEX_SOURCE, FRAGMENT_SOURCE } from "/lib/webgl.js";
-import { rect } from "/lib/polygon.js";
-import { V3 } from "/lib/geometry.js";
-import { range } from "/lib/util.js";
+import { program, VERTEX_SOURCE, FRAGMENT_SOURCE } from "/module/webgl.js";
+import { rect } from "/module/polygon.js";
+import { V3 } from "/module/geometry.js";
+import { range } from "/module/util.js";
 
 const po = rect(1.6, 1.6).translate(-0.8, -0.8, 0);
 

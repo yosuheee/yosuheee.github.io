@@ -1,5 +1,5 @@
-import { program, VERTEX_SOURCE, FRAGMENT_SOURCE } from "../../lib/webgl.js";
-import { rect } from "../../lib/polygon.js";
+import { program, VERTEX_SOURCE, FRAGMENT_SOURCE } from "/module/webgl.js";
+import { rect } from "/module/polygon.js";
 
 window.addEventListener("DOMContentLoaded", () => {
   const gl = document.getElementById("canvas").getContext("webgl");
