@@ -7,15 +7,15 @@ attribute vec3 position;
 attribute vec4 color;
 attribute vec3 normal;
 uniform vec3 light;
-uniform mat4 m_matrix;
-uniform mat4 r_matrix;
+uniform mat4 mvp_matrix;
+uniform mat4 inv_matrix;
 uniform vec4 ambient_color;
 varying vec4 v_color;
 
 void main(void) {
-  float diffuse = clamp(dot(light, (r_matrix * vec4(normal, 0.0)).xyz), 0.0, 1.0);
+  float diffuse = clamp(dot(light, (inv_matrix * vec4(normal, 0.0)).xyz), 0.0, 1.0);
   v_color = color * vec4(diffuse) + ambient_color;
-  gl_Position = m_matrix * vec4(position, 1.0);
+  gl_Position = mvp_matrix * vec4(position, 1.0);
 }
 `;
 

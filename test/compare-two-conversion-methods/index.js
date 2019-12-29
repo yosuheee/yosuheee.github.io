@@ -4,9 +4,9 @@ import { V3, Mat4 } from "/lib/geometry.js";
 
 const vertex_source = `
 attribute vec3 position;
-uniform mat4 m_matrix;
+uniform mat4 mvp_matrix;
 void main(void) {
-  gl_Position = m_matrix * vec4(position, 1.0);
+  gl_Position = mvp_matrix * vec4(position, 1.0);
 }
 `;
 const fragment_source = `

@@ -53,14 +53,14 @@ const vertex_source1 = `
 attribute vec3 position;
 attribute vec4 color;
 attribute vec3 normal;
-uniform mat4 m_matrix;
+uniform mat4 mvp_matrix;
 varying vec4 v_color;
 varying vec3 v_normal;
 
 void main(void) {
   v_color = color;
   v_normal = normal;
-  gl_Position = m_matrix * vec4(position, 1.0);
+  gl_Position = mvp_matrix * vec4(position, 1.0);
 }
 `;
 
@@ -69,12 +69,12 @@ precision mediump float;
 uniform vec3 light;
 uniform vec4 ambient_color;
 uniform vec3 eye_direction;
-uniform mat4 r_matrix;
+uniform mat4 inv_matrix;
 varying vec4 v_color;
 varying vec3 v_normal;
 
 void main(void) {
-  vec3 nor = (r_matrix * vec4(v_normal, 0.0)).xyz;
+  vec3 nor = (inv_matrix * vec4(v_normal, 0.0)).xyz;
   float diffuse = clamp(dot(nor, light), 0.0, 1.0);
   gl_FragColor = v_color * vec4(vec3(diffuse), 1.0) + ambient_color;
 }
@@ -84,14 +84,14 @@ const vertex_source2 = `
 attribute vec3 position;
 attribute vec4 color;
 attribute vec3 normal;
-uniform mat4 m_matrix;
+uniform mat4 mvp_matrix;
 varying vec4 v_color;
 varying vec3 v_normal;
 
 void main(void) {
   v_color = color;
   v_normal = normal;
-  gl_Position = m_matrix * vec4(position, 1.0);
+  gl_Position = mvp_matrix * vec4(position, 1.0);
 }
 `;
 
@@ -100,13 +100,13 @@ precision mediump float;
 uniform vec3 light;
 uniform vec4 ambient_color;
 uniform vec3 eye_direction;
-uniform mat4 r_matrix;
+uniform mat4 inv_matrix;
 varying vec4 v_color;
 varying vec3 v_normal;
 
 void main(void) {
   vec3 hal = normalize(light + eye_direction);
-  vec3 nor = (r_matrix * vec4(v_normal, 0.0)).xyz;
+  vec3 nor = (inv_matrix * vec4(v_normal, 0.0)).xyz;
   float diffuse = clamp(dot(nor, light), 0.0, 1.0);
   float specular = pow(clamp(dot(nor, hal), 0.0, 1.0), 50.0);
   gl_FragColor = v_color * vec4(vec3(diffuse), 1.0) + vec4(vec3(specular), 1.0) + ambient_color;

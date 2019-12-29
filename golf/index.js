@@ -14,15 +14,15 @@ const vertex_source = `
 attribute vec3 position;
 attribute vec3 color;
 attribute vec3 normal;
-uniform mat4 m_matrix;
-uniform mat4 r_matrix;
+uniform mat4 mvp_matrix;
+uniform mat4 inv_matrix;
 varying vec3 v_color;
 varying vec3 v_normal;
 
 void main(void) {
   v_color = color;
-  v_normal = (r_matrix * vec4(normal, 0.0)).xyz;
-  gl_Position = m_matrix * vec4(position, 1.0);
+  v_normal = (inv_matrix * vec4(normal, 0.0)).xyz;
+  gl_Position = mvp_matrix * vec4(position, 1.0);
 }
 `;
 

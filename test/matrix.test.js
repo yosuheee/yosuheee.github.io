@@ -1,6 +1,25 @@
 import { Mat4, V3 } from "../lib/geometry.js";
 import { range } from "../lib/util.js";
 
+test("math", () => {
+  for (let i = 0; i < 100; i++) {
+    const m = Mat4.rotate(V3(Math.random(), Math.random(), Math.random()), Math.random() * 360);
+    const inv = m.invert().primitive();
+    const tra = m.transpose().primitive();
+    for (let j = 0; j < 16; j++) {
+      expect(inv[j]).toBeCloseTo(tra[j]);
+    }
+  }
+  for (let i = 0; i < 100; i++) {
+    const m = Mat4.scale(Math.random(), Math.random(), Math.random());
+    const own = m.primitive();
+    const tra = m.transpose().primitive();
+    for (let j = 0; j < 16; j++) {
+      expect(own[j]).toBeCloseTo(tra[j]);
+    }
+  }
+});
+
 test("translate()", () => {
   {
     const m = Mat4.translate(3, 4, 5).primitive();
