@@ -1,5 +1,5 @@
-import { Mat4, V3 } from "/module/geometry.js";
-import { range } from "/module/util.js";
+import { Mat4, V3 } from "../module/geometry.js";
+import { range } from "../module/util.js";
 
 test("math", () => {
   for (let i = 0; i < 100; i++) {
