@@ -206,9 +206,9 @@ class Model {
     });
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.index);
 
-    light_name && uniform(gl, prg, "vec3", light_name, light.normalize().primitive());
     mvp_mat_name && uniform(gl, prg, "mat4", mvp_mat_name, this.mvp_matrix.primitive());
     inv_mat_name && uniform(gl, prg, "mat4", inv_mat_name, this.m_matrix.invert().transpose().primitive());
+    light_name && uniform(gl, prg, "vec3", light_name, light.normalize().primitive());
 
     gl.drawElements(gl.TRIANGLES, this.index_length, gl.UNSIGNED_SHORT, 0);
   }

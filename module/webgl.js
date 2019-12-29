@@ -19,27 +19,15 @@ export function program(gl, vss, fss) {
 }
 
 export function uniform(gl, prg, type, name, value) {
+  const loc = gl.getUniformLocation(prg, name);
   switch (type) {
-    case "mat4": return uniformMatrix4fv(gl, prg, name, value);
-    case "vec3": return uniform3fv(gl, prg, name, value);
-    case "vec4": return uniform4fv(gl, prg, name, value);
+    case "float": return gl.uniform1f(loc, value);
+    case "mat4" : return gl.uniformMatrix4fv(loc, false, value);
+    case "vec2" : return gl.uniform2fv(loc, value);
+    case "vec3" : return gl.uniform3fv(loc, value);
+    case "vec4" : return gl.uniform4fv(loc, value);
     default: throw new Error(`unknown type name '${type}'`);
   }
-}
-
-export function uniformMatrix4fv(gl, prg, name, value) {
-  const loc = gl.getUniformLocation(prg, name);
-  gl.uniformMatrix4fv(loc, false, value);
-}
-
-export function uniform3fv(gl, prg, name, value) {
-  const loc = gl.getUniformLocation(prg, name);
-  gl.uniform3fv(loc, value);
-}
-
-export function uniform4fv(gl, prg, name, value) {
-  const loc = gl.getUniformLocation(prg, name);
-  gl.uniform4fv(loc, value);
 }
 
 export function buffer(gl, type, value) {
