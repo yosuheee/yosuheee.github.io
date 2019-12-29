@@ -3,6 +3,52 @@ import { cube, quarter_cylinder_rect, one_eighth_sphere, rounded_corners_cube, s
 import { V3 } from "/module/geometry.js";
 
 window.addEventListener("DOMContentLoaded", () => {
+  const gl = document.getElementById("canvas14").getContext("webgl");
+  const prg = program(gl, line_vertex_source, line_fragment_source);
+
+  gl.enable(gl.CULL_FACE);
+  gl.enable(gl.DEPTH_TEST);
+
+  const line = sphere(0.6).point();
+  const mo = line.model(gl);
+  let count = 0;
+  const tick = () => {
+    requestAnimationFrame(tick);
+    count++;
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    mo.rotate(V3(1, 1, 1), count)
+      .lookAt(V3(0, 0, 2.4), V3(0, 0, 0), V3(0, 1, 0))
+      .perspective(45, 1.0, 0.1, 100)
+      .draw(gl, prg, { light: V3(1, 1, 1) });
+  };
+  tick();
+});
+
+window.addEventListener("DOMContentLoaded", () => {
+  const gl = document.getElementById("canvas13").getContext("webgl");
+  const prg = program(gl, line_vertex_source, line_fragment_source);
+
+  gl.enable(gl.CULL_FACE);
+  gl.enable(gl.DEPTH_TEST);
+
+  const line = torus(0.55, 0.25, [1, 1, 1], 64, 16).point();
+  const mo = line.model(gl);
+  let count = 0;
+  const tick = () => {
+    requestAnimationFrame(tick);
+    count++;
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    mo.rotate(V3(1, 1, 1), count)
+      .lookAt(V3(0, 0, 2.4), V3(0, 0, 0), V3(0, 1, 0))
+      .perspective(45, 1.0, 0.1, 100)
+      .draw(gl, prg, { light: V3(1, 1, 1) });
+  };
+  tick();
+});
+
+window.addEventListener("DOMContentLoaded", () => {
   const gl = document.getElementById("canvas12").getContext("webgl");
   const prg = program(gl, line_vertex_source, line_fragment_source);
 
@@ -246,6 +292,7 @@ varying vec3 v_color;
 void main(void) {
   v_color = color;
   gl_Position = mvp_matrix * vec4(position, 1.0);
+  gl_PointSize = 1.0;
 }
 `;
 

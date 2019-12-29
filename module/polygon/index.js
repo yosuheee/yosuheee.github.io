@@ -4,6 +4,106 @@ import { power } from "../math.js";
 import { uniform, buffer } from "../webgl.js";
 import { UnionFind } from "../union-find.js";
 
+export class Point {
+  constructor(data = []) {
+    this.data = data;
+  }
+  scale(...args) {
+    return this.transform(Mat4.scale(...args));
+  }
+  rotate(...args) {
+    return this.transform(Mat4.rotate(...args));
+  }
+  translate(...args) {
+    return this.transform(Mat4.translate(...args));
+  }
+  transform(m) {
+    return new Point(this.data.map(d => {
+      return { ...d, position: d.position.transform(m)};
+    }));
+  }
+  primitive() {
+    const position = this.data.map(d => d.position.primitive()).flat();
+    const color = this.data.map(d => d.color.length === 3 ? d.color.concat([1.0]) : d.color).flat();
+    return { position, color };
+  }
+  model(gl) {
+    return new PointModel(gl, this);
+  }
+}
+
+export class PointModel {
+  constructor(a, b, c) {
+    if (a instanceof WebGLRenderingContext) {
+      const gl = a;
+      const point = b;
+      const { position, color } = point.primitive();
+      this.position   = buffer(gl, gl.ARRAY_BUFFER, new Float32Array(position));
+      this.color      = buffer(gl, gl.ARRAY_BUFFER, new Float32Array(color));
+      this.data_length = position.length;
+      this.mvp_matrix = M4();
+      this.m_matrix = M4();
+    } else if (a instanceof PointModel) {
+      const model = a;
+      const mvp_matrix = b;
+      const m_matrix = c;
+      this.position   = model.position;
+      this.color      = model.color;
+      this.data_length = model.data_length;
+      this.mvp_matrix = mvp_matrix;
+      this.m_matrix = m_matrix;
+    } else {
+      throw new Error("Unknown arguments");
+    }
+  }
+  draw(gl, prg, params = {}) {
+    this.draw_by_params(gl, prg, params);
+  }
+  draw_by_params(gl, prg, {
+    pos_name = "position",
+    col_name = "color",
+    mvp_mat_name = "mvp_matrix",
+    inv_mat_name = "inv_matrix",
+  }) {
+    const list = [];
+    pos_name && list.push([this.position, pos_name, 3]);
+    col_name && list.push([this.color,    col_name, 4]);
+
+    list.forEach(([vbo, name, stride]) => {
+      gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+      const loc = gl.getAttribLocation(prg, name);
+      gl.enableVertexAttribArray(loc);
+      gl.vertexAttribPointer(loc, stride, gl.FLOAT, false, 0, 0);
+    });
+
+    mvp_mat_name && uniform(gl, prg, "mat4", mvp_mat_name, this.mvp_matrix.primitive());
+    inv_mat_name && uniform(gl, prg, "mat4", inv_mat_name, this.m_matrix.invert().transpose().primitive());
+
+    gl.drawArrays(gl.POINTS, 0, this.data_length);
+  }
+  scale(...args) {
+    return this.merge(this.mvp_matrix.scale(...args), this.m_matrix.scale(...args));
+  }
+  rotate(...args) {
+    return this.merge(this.mvp_matrix.rotate(...args), this.m_matrix.rotate(...args));
+  }
+  translate(...args) {
+    return this.merge(this.mvp_matrix.translate(...args), this.m_matrix.translate(...args));
+  }
+  lookAt(...args) {
+    return this.merge(this.mvp_matrix.lookAt(...args));
+  }
+  ortho(...args) {
+    return this.merge(this.mvp_matrix.ortho(...args));
+  }
+  perspective(...args) {
+    return this.merge(this.mvp_matrix.perspective(...args));
+  }
+  merge(mvp_matrix, m_matrix = this.m_matrix) {
+    return new PointModel(this, mvp_matrix, m_matrix);
+  }
+}
+
 export class Line {
   constructor(data = [], index = []) {
     this.data = data;
@@ -176,6 +276,9 @@ export class Polygon {
       index.push([a, b], [b, c], [c, a]);
     }
     return new Line(data, index);
+  }
+  point() {
+    return new Point(this.data);
   }
   *triangles() {
     for (let i = 0; i < this.index.length; i++) {
