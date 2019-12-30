@@ -30,6 +30,13 @@ export function uniform(gl, prg, type, name, value) {
   }
 }
 
+export function attribute(gl, prg, vbo, name, stride) {
+  gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+  const loc = gl.getAttribLocation(prg, name);
+  gl.enableVertexAttribArray(loc);
+  gl.vertexAttribPointer(loc, stride, gl.FLOAT, false, 0, 0);
+}
+
 export function buffer(gl, type, value) {
   const vbo = gl.createBuffer();
   gl.bindBuffer(type, vbo);
