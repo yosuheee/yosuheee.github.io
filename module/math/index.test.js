@@ -1,4 +1,4 @@
-import { power, sum_of_geometric_progression } from "./math.js";
+import { power, sum_of_geometric_progression } from "./index.js";
 
 describe("power()", () => {
   test("standard", () => {

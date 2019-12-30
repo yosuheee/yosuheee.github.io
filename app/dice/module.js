@@ -1,4 +1,4 @@
-import { V3 } from "/module/geometry.js";
+import { V3 } from "/module/math/geometry/index.js";
 import { Triangles, one_eighth_sphere, quarter_cylinder_rect, rect } from "/module/triangles.js";
 
 export function ana(radius, count = 32, c = [1, 1, 1]) {

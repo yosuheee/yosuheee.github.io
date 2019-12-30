@@ -1,5 +1,5 @@
-import { Triangles } from "./triangles.js";
-import { V3 } from "./geometry.js";
+import { Triangles } from "./primitives.js";
+import { V3 } from "./math/geometry/index.js";
 
 describe("Triangles", () => {
   describe("add()", () => {
@@ -53,4 +53,20 @@ describe("Triangles", () => {
       expect(new_p.index).toEqual([[0, 1, 2], [2, 1, 3]]);
     });
   });
+
+  describe("rotate()", () => {
+    const p = new Triangles([
+      { position: V3(0, 0, 0), color: [1, 1, 1] },
+      { position: V3(0, 1, 0), color: [1, 1, 1] },
+      { position: V3(1, 0, 0), color: [1, 1, 1] },
+      { position: V3(1, 1, 0), color: [1, 1, 1] },
+    ], [[0, 1, 2], [1, 2, 3]]);
+    const t = p.rotate(V3(1, 1, 0),  45);
+    const r = t.rotate(V3(1, 1, 0), -45);
+    const { position: a } = p.primitive();
+    const { position: b } = r.primitive();
+    for (let i = 0; i < 3 * 4; i++) {
+      expect(b[i]).toBeCloseTo(a[i]);
+    }
+  })
 });

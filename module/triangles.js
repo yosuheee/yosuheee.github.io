@@ -1,5 +1,5 @@
-import { V3, x_axis, y_axis, z_axis } from "./geometry.js";
-import { Triangles } from "./primitives/index.js";
+import { V3, x_axis, y_axis, z_axis } from "./math/geometry/index.js";
+import { Triangles } from "./primitives.js";
 
 export { Triangles };
 

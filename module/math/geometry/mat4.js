@@ -1,4 +1,4 @@
-import { mat4 } from "../gl-matrix/index.js";
+import { mat4 } from "./gl-matrix/index.js";
 
 export function M4(data) {
   return new Mat4(data);

@@ -1,4 +1,4 @@
-import { V3 } from "/module/geometry.js";
+import { V3 } from "/module/math/geometry/index.js";
 import { program } from "/module/webgl.js";
 import { sphere } from "/module/triangles.js";
 import { sleep } from "/module/util.js";

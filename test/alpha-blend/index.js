@@ -1,7 +1,7 @@
 import { program, VERTEX_SOURCE, FRAGMENT_SOURCE } from "/module/webgl.js";
 import { rect, cube } from "/module/triangles.js";
 import { range } from "/module/util.js";
-import { V3 } from "/module/geometry.js";
+import { V3 } from "/module/math/geometry/index.js";
 
 window.addEventListener("DOMContentLoaded", () => {
   const gl = document.getElementById("canvas1").getContext("webgl");

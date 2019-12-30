@@ -1,6 +1,6 @@
 import { program, uniform } from "/module/webgl.js";
 import { sphere } from "/module/triangles.js";
-import { V3 } from "/module/geometry.js";
+import { V3 } from "/module/math/geometry/index.js";
 
 const vertex_source = `
 attribute vec3 position;

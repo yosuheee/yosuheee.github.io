@@ -1,6 +1,6 @@
 import { program } from "/module/webgl.js";
 import { Triangles } from "/module/triangles.js";
-import { V3, Mat4 } from "/module/geometry.js";
+import { V3, Mat4 } from "/module/math/geometry/index.js";
 
 const vertex_source = `
 attribute vec3 position;

@@ -1,4 +1,4 @@
-import { mat4 } from "/module/gl-matrix/index.js";
+import { mat4 } from "/module/math/geometry/gl-matrix/index.js";
 
 window.addEventListener("DOMContentLoaded", () => {
   const inputs = Array.from(document.querySelectorAll("#src input"));

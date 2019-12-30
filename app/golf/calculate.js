@@ -1,4 +1,4 @@
-import { V3 } from "/module/geometry.js";
+import { V3 } from "/module/math/geometry/index.js";
 import { Env } from "./game.js";
 import { xz_distance } from "./module.js";
 import { make_positions } from "./calculate_core.js";

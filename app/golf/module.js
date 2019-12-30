@@ -1,8 +1,8 @@
 import { QuadTree } from "/module/quad-tree.js";
-import { V3 } from "/module/geometry.js";
+import { V3 } from "/module/math/geometry/index.js";
 import { Triangles } from "/module/triangles.js";
 import { Env } from "./game.js";
-import { intersection_of_plane_and_line, triangle_contains_point } from "/module/geometry.js";
+import { intersection_of_plane_and_line, triangle_contains_point } from "/module/math/geometry/index.js";
 
 export function display_bar(ctx, power, now) {
   const INNER_Y = 417;

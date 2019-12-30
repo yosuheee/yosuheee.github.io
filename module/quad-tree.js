@@ -1,5 +1,5 @@
-import { power, sum_of_geometric_progression } from "./math.js";
-import { grid_rect_collision_lt } from "./geometry.js";
+import { power, sum_of_geometric_progression } from "./math/index.js";
+import { grid_rect_collision_lt } from "./math/geometry/index.js";
 
 export class QuadTree {
   constructor(L, U, R, D, n) {

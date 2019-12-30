@@ -1,6 +1,6 @@
 import { range } from "./util.js";
 import { QuadTree } from "./quad-tree.js";
-import { sum_of_geometric_progression, power } from "./math.js";
+import { sum_of_geometric_progression, power } from "./math/index.js";
 
 describe("QuadTree", () => {
   test("constructor()", () => {

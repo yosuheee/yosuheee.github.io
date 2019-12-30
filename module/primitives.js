@@ -1,8 +1,8 @@
-import { V3, Mat4, M4 } from "../geometry.js";
-import { range } from "../util.js";
-import { power } from "../math.js";
-import { uniform, buffer, attribute } from "../webgl.js";
-import { UnionFind } from "../union-find.js";
+import { V3, Mat4, M4 } from "./math/geometry/index.js";
+import { range } from "./util.js";
+import { power } from "./math/index.js";
+import { uniform, buffer, attribute } from "./webgl.js";
+import { UnionFind } from "./union-find.js";
 
 export class Points {
   constructor(data = [], index = []) {

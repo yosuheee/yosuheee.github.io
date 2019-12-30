@@ -1,4 +1,4 @@
-import { V3 } from "/module/geometry.js";
+import { V3 } from "/module/math/geometry/index.js";
 
 export const BAR_STATUS = {
   initial: 0,

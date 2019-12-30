@@ -1,5 +1,5 @@
-import { V3 } from "./geometry/vec3.js";
-import { M4, Mat4 } from "./geometry/mat4.js";
+import { V3 } from "./vec3.js";
+import { M4, Mat4 } from "./mat4.js";
 
 export { V3, M4, Mat4 };
 

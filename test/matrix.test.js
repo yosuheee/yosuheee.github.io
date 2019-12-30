@@ -1,4 +1,4 @@
-import { Mat4, V3 } from "../module/geometry.js";
+import { Mat4, V3 } from "../module/math/geometry/index.js";
 import { range } from "../module/util.js";
 
 test("math", () => {

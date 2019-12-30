@@ -1,6 +1,6 @@
 import { V3,
          intersection_of_plane_and_line,
-         triangle_contains_point } from "/module/geometry.js";
+         triangle_contains_point } from "/module/math/geometry/index.js";
 
 function next_position(stage, qtree, points, v, h, t, g, F, k, r, along_the_ground) {
   const vout = (() => {
