@@ -1,10 +1,10 @@
-import { V3, Mat4, M4 } from "../geometry.js";
+import { V3, Mat4, M4, x_axis } from "../geometry.js";
 import { range } from "../util.js";
 import { power } from "../math.js";
 import { uniform, buffer, attribute } from "../webgl.js";
 import { UnionFind } from "../union-find.js";
 
-export class Point {
+export class Points {
   constructor(data = [], index = []) {
     this.data = data;
     this.index = index;
@@ -19,7 +19,7 @@ export class Point {
     return this.transform(Mat4.translate(...args));
   }
   transform(m) {
-    return new Point(this.data.map(d => {
+    return new Points(this.data.map(d => {
       return { ...d, position: d.position.transform(m)};
     }), this.index);
   }
@@ -30,11 +30,11 @@ export class Point {
     return { index, position, color };
   }
   model(gl) {
-    return new Model({ gl, object: this, mode: gl.POINTS });
+    return new Model({ gl, primitives: this, type: gl.POINTS });
   }
 }
 
-export class Line {
+export class Lines {
   constructor(data = [], index = []) {
     this.data = data;
     this.index = index;
@@ -49,7 +49,7 @@ export class Line {
     return this.transform(Mat4.translate(...args));
   }
   transform(m) {
-    return new Line(this.data.map(d => {
+    return new Lines(this.data.map(d => {
       return { ...d, position: d.position.transform(m)};
     }), this.index);
   }
@@ -60,11 +60,11 @@ export class Line {
     return { index, position, color };
   }
   model(gl) {
-    return new Model({ gl, object: this, mode: gl.LINES });
+    return new Model({ gl, primitives: this, type: gl.LINES });
   }
 }
 
-export class Polygon {
+export class Triangles {
   constructor(data = [], index = [], tridata = []) {
     this.data = data;
     this.index = index;
@@ -79,7 +79,7 @@ export class Polygon {
     );
     const data = thi.data.concat(tha.data);
     const tridata = thi.tridata.concat(tha.tridata);
-    return new Polygon(data, index, tridata);
+    return new Triangles(data, index, tridata);
   }
   scale(...args) {
     return this.transform(Mat4.scale(...args));
@@ -91,12 +91,12 @@ export class Polygon {
     return this.transform(Mat4.translate(...args));
   }
   transform(m) {
-    return new Polygon(this.data.map(d => {
+    return new Triangles(this.data.map(d => {
       return { ...d, position: d.position.transform(m)};
     }), this.index, this.tridata);
   }
   reverse() {
-    return new Polygon(this.data, this.index.map(i => [i[0], i[2], i[1]]), this.tridata);
+    return new Triangles(this.data, this.index.map(i => [i[0], i[2], i[1]]), this.tridata);
   }
   primitive() {
     const index = this.index.flat();
@@ -116,10 +116,9 @@ export class Polygon {
     return { index, position, color, normal };
   }
   model(gl) {
-    return new Model({ gl, object: this, mode: gl.TRIANGLES });
+    return new Model({ gl, primitives: this, type: gl.TRIANGLES });
   }
   line() {
-    const data = this.data;
     const index = [];
     for (const indices of this.index) {
       const a = indices[0];
@@ -127,10 +126,10 @@ export class Polygon {
       const c = indices[2];
       index.push([a, b], [b, c], [c, a]);
     }
-    return new Line(data, index);
+    return new Lines(this.data, index);
   }
   point() {
-    return new Point(this.data, range(this.data.length));
+    return new Points(this.data, range(this.data.length));
   }
   *triangles() {
     for (let i = 0; i < this.index.length; i++) {
@@ -149,20 +148,20 @@ export class Polygon {
     
     const pos = this.data.map(d => d.position);
     const to_index = (() => {
-      const min = {
-        x: pos.reduce((a, c) => Math.min(a, c.x), 1e9),
-        y: pos.reduce((a, c) => Math.min(a, c.y), 1e9),
-        z: pos.reduce((a, c) => Math.min(a, c.z), 1e9),
-      };
-      const max = {
-        x: pos.reduce((a, c) => Math.max(a, c.x), -1e9) + 0.01,
-        y: pos.reduce((a, c) => Math.max(a, c.y), -1e9) + 0.01,
-        z: pos.reduce((a, c) => Math.max(a, c.z), -1e9) + 0.01,
-      };
+      const min = V3(
+        pos.reduce((a, c) => Math.min(a, c.x), 1e9),
+        pos.reduce((a, c) => Math.min(a, c.y), 1e9),
+        pos.reduce((a, c) => Math.min(a, c.z), 1e9),
+      );
+      const max = V3(
+        pos.reduce((a, c) => Math.max(a, c.x), -1e9) + 0.01,
+        pos.reduce((a, c) => Math.max(a, c.y), -1e9) + 0.01,
+        pos.reduce((a, c) => Math.max(a, c.z), -1e9) + 0.01,
+      );
       return p => {
-        const x = Math.floor((p.x - min.x) / (max.x - min.x) * power(2, N));
-        const y = Math.floor((p.y - min.y) / (max.y - min.y) * power(2, N));
-        const z = Math.floor((p.z - min.z) / (max.z - min.z) * power(2, N));
+        const x = Math.floor(p.sub(min).x / max.sub(min).x * power(2, N));
+        const y = Math.floor(p.sub(min).y / max.sub(min).y * power(2, N));
+        const z = Math.floor(p.sub(min).z / max.sub(min).z * power(2, N));
         return x * power(4, N) + y * power(2, N) + z;
       };
     })();
@@ -220,30 +219,30 @@ export class Polygon {
       index.push(t_index[i]);
       tridata.push(this.tridata[i]);
     }
-    return new Polygon(data, index, tridata);
+    return new Triangles(data, index, tridata);
   }
 }
 
 class Model {
   constructor({
-    object     = null,
+    primitives = null,
     model      = null,
     gl         = null,
-    mode       = null,
+    type       = null,
     mvp_matrix = M4(),
     m_matrix   = M4(),
   }) {
-    if (mode == null) {
-      throw new Error("must exist mode");
+    if (type == null) {
+      throw new Error("must exist type");
     }
-    if ((object == null || gl == null) && model == null) {
-      throw new Error("must exist object or model");
+    if ((primitives == null || gl == null) && model == null) {
+      throw new Error("must exist primitives or model");
     }
-    if ((object != null && gl != null) && model != null) {
-      throw new Error("must not be both object and model");
+    if ((primitives != null && gl != null) && model != null) {
+      throw new Error("must not be both primitives and model");
     }
-    if (object != null && gl != null) {
-      const { position, color, index, normal } = object.primitive();
+    if (primitives != null && gl != null) {
+      const { position, color, index, normal } = primitives.primitive();
 
       this.position = buffer(gl, gl.ARRAY_BUFFER, new Float32Array(position));
       if (color  != null) this.color  = buffer(gl, gl.ARRAY_BUFFER, new Float32Array(color));
@@ -259,7 +258,7 @@ class Model {
       this.index    = model.index;
       this.length   = model.length;
     }
-    this.mode       = mode;
+    this.type       = type;
     this.mvp_matrix = mvp_matrix;
     this.m_matrix   = m_matrix;
   }
@@ -287,7 +286,7 @@ class Model {
     inv_mat_name && uniform(gl, prg, "mat4", inv_mat_name, this.m_matrix.invert().transpose().primitive());
     light_name && uniform(gl, prg, "vec3", light_name, light.normalize().primitive());
 
-    gl.drawElements(this.mode, this.length, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(this.type, this.length, gl.UNSIGNED_SHORT, 0);
   }
   scale(...args) {
     return this.merge(this.mvp_matrix.scale(...args), this.m_matrix.scale(...args));
@@ -308,6 +307,6 @@ class Model {
     return this.merge(this.mvp_matrix.perspective(...args));
   }
   merge(mvp_matrix, m_matrix = this.m_matrix) {
-    return new Model({ model: this, mvp_matrix, m_matrix, mode: this.mode });
+    return new Model({ model: this, type: this.type, mvp_matrix, m_matrix });
   }
 }

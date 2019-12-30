@@ -1,5 +1,5 @@
 import { program, uniform } from "/module/webgl.js";
-import { sphere } from "/module/polygon.js";
+import { sphere } from "/module/triangles.js";
 import { V3 } from "/module/geometry.js";
 
 const vertex_source = `

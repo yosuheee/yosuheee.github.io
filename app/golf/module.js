@@ -1,6 +1,6 @@
 import { QuadTree } from "/module/quad-tree.js";
 import { V3 } from "/module/geometry.js";
-import { Polygon } from "/module/polygon.js";
+import { Triangles } from "/module/triangles.js";
 import { Env } from "./game.js";
 import { intersection_of_plane_and_line, triangle_contains_point } from "/module/geometry.js";
 
@@ -105,7 +105,7 @@ export function make_random_stage(r = 50, e = 50) {
       tridata.push({ e: Math.random(), d: Math.random() * 0.5 + 0.25 });
     }
   }
-  return new Polygon(data, index, tridata).translate(-e * r / 2, 0, -e * r / 2);
+  return new Triangles(data, index, tridata).translate(-e * r / 2, 0, -e * r / 2);
 }
 
 export function display_distance(ctx, dist) {

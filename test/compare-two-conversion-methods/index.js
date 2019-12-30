@@ -1,5 +1,5 @@
 import { program } from "/module/webgl.js";
-import { Polygon } from "/module/polygon.js";
+import { Triangles } from "/module/triangles.js";
 import { V3, Mat4 } from "/module/geometry.js";
 
 const vertex_source = `
@@ -15,7 +15,7 @@ void main(void) {
 }
 `;
 
-const po = new Polygon(
+const po = new Triangles(
   [
     { position: V3(0, 0, 0), color: [1, 1, 1] },
     { position: V3(1, 0, 0), color: [1, 1, 1] },

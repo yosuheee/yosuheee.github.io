@@ -1,5 +1,5 @@
 import { V3 } from "/module/geometry.js";
-import { Polygon, one_eighth_sphere, quarter_cylinder_rect, rect } from "/module/polygon.js";
+import { Triangles, one_eighth_sphere, quarter_cylinder_rect, rect } from "/module/triangles.js";
 
 export function ana(radius, count = 32, c = [1, 1, 1]) {
   const data = [], index = [];
@@ -21,7 +21,7 @@ export function ana(radius, count = 32, c = [1, 1, 1]) {
     index.push([std, std + 1, std + 2]);
     index.push([std + 1, std + 3, std + 2]);
   }
-  return new Polygon(data, index);
+  return new Triangles(data, index);
 }
 
 export function reverse_half_sphere(r, c = [1, 1, 1], row = 16, col = 16) {

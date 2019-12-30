@@ -1,7 +1,7 @@
 import { V3, M4, triangle_contains_point,
          intersection_of_plane_and_line, 
          Mat4 } from "./geometry.js";
-import { Polygon, rect } from "./polygon.js";
+import { Triangles, rect } from "./triangles.js";
 
 expect.extend({
   toEqualVec3(received, expected) {
@@ -207,7 +207,7 @@ describe("mathematics", () => {
       expect(c.z).toBeCloseTo(a.z);
     }
     {
-      const p = new Polygon([
+      const p = new Triangles([
         { position: V3(0, 0, 0), color: [1, 1, 1] },
         { position: V3(0, 1, 0), color: [1, 1, 1] },
         { position: V3(1, 0, 0), color: [1, 1, 1] },

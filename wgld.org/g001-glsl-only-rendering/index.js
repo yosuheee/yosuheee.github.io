@@ -1,5 +1,5 @@
 import { program, uniform } from "/module/webgl.js";
-import { rect } from "/module/polygon.js";
+import { rect } from "/module/triangles.js";
 
 const vertex_source = `
 attribute vec3 position;

@@ -1,6 +1,6 @@
 import { V3 } from "/module/geometry.js";
 import { program } from "/module/webgl.js";
-import { sphere } from "/module/polygon.js";
+import { sphere } from "/module/triangles.js";
 import { sleep } from "/module/util.js";
 import { Game, Env, BAR_STATUS, DISTANCE_STATUS, WORLD_STATUS } from "./game.js";
 import { make_random_stage, make_qtree, xyz_from_xz } from "./module.js";

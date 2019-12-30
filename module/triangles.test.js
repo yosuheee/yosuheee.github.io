@@ -1,16 +1,16 @@
-import { Polygon } from "./polygon.js";
+import { Triangles } from "./triangles.js";
 import { V3 } from "./geometry.js";
 
-describe("Polygon", () => {
+describe("Triangles", () => {
   describe("add()", () => {
     test("the larger array is concatenated", () => {
-      const p_large = new Polygon([
+      const p_large = new Triangles([
         { position: V3(1, 1, 1), color: [1, 1, 1] },
         { position: V3(1, 2, 1), color: [1, 1, 1] },
         { position: V3(2, 1, 1), color: [1, 1, 1] },
         { position: V3(2, 2, 1), color: [1, 1, 1] },
       ], [[0, 1, 2], [1, 2, 3]]);
-      const p_small = new Polygon([
+      const p_small = new Triangles([
         { position: V3(0, 0, 0), color: [1, 1, 1] },
         { position: V3(0, 1, 0), color: [1, 1, 1] },
         { position: V3(1, 0, 0), color: [1, 1, 1] },
@@ -24,7 +24,7 @@ describe("Polygon", () => {
 
   describe("primitive()", () => {
     test("normal", () => {
-      const p = new Polygon([
+      const p = new Triangles([
         { position: V3(1, 1, 1), color: [1, 1, 1] },
         { position: V3(0, 1, 1), color: [1, 1, 1] },
         { position: V3(1, 1, 0), color: [1, 1, 1] },
@@ -40,7 +40,7 @@ describe("Polygon", () => {
 
   describe("flatten()", () => {
     test("standard", () => {
-      const p = new Polygon([
+      const p = new Triangles([
         { position: V3(0, 0, 1), color: [1, 1, 1] },
         { position: V3(1, 0, 1), color: [1, 1, 1] },
         { position: V3(0, 1, 1), color: [1, 1, 1] },

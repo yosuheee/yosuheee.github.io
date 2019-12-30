@@ -1,5 +1,5 @@
 import { program, VERTEX_SOURCE, FRAGMENT_SOURCE } from "/module/webgl.js";
-import { rect } from "/module/polygon.js";
+import { rect } from "/module/triangles.js";
 import { V3 } from "/module/geometry.js";
 import { range } from "/module/util.js";
 

@@ -1,5 +1,5 @@
 import { program, uniform } from "/module/webgl.js";
-import { sphere } from "/module/polygon.js";
+import { sphere } from "/module/triangles.js";
 import { V3 } from "/module/geometry.js";
 
 const po = sphere(0.8, [0.6, 0.6, 0.6], 32, 32);

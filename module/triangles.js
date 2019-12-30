@@ -1,7 +1,7 @@
 import { V3, x_axis, y_axis, z_axis } from "./geometry.js";
-import { Polygon } from "./polygon/index.js";
+import { Triangles } from "./primitives/index.js";
 
-export { Polygon };
+export { Triangles };
 
 export function rect(x, y, color = [1, 1, 1]) {
   const data = [
@@ -10,7 +10,7 @@ export function rect(x, y, color = [1, 1, 1]) {
     { position: V3(0, y, 0), color },
     { position: V3(x, y, 0), color },
   ];
-  return new Polygon(data, [[0, 1, 2], [2, 1, 3]]);
+  return new Triangles(data, [[0, 1, 2], [2, 1, 3]]);
 }
 
 export function quarter_cylinder_rect(h, r, color = [1, 1, 1], c = 32) {
@@ -25,7 +25,7 @@ export function quarter_cylinder_rect(h, r, color = [1, 1, 1], c = 32) {
     index.push([j, j + 2, j + 1]);
     index.push([j + 2, j + 3, j + 1]);
   }
-  return new Polygon(data, index);
+  return new Triangles(data, index);
 }
 
 export function one_eighth_sphere(r, color = [1, 1, 1], c = 16) {
@@ -44,7 +44,7 @@ export function one_eighth_sphere(r, color = [1, 1, 1], c = 16) {
     index.push([s, t, s + 1]);
     index.push([s + 1, t, t + 1]);
   }
-  return new Polygon(data, index);
+  return new Triangles(data, index);
 }
 
 export function torus(lr = 0.55, sr = 0.25, color = [1, 1, 1], lc = 64, sc = 64) {
@@ -65,7 +65,7 @@ export function torus(lr = 0.55, sr = 0.25, color = [1, 1, 1], lc = 64, sc = 64)
     index.push([s, t, s + 1]);
     index.push([s + 1, t, t + 1]);
   }
-  return new Polygon(data, index).flatten();
+  return new Triangles(data, index).flatten();
 }
 
 export function sphere(r, color = [1, 1, 1], c = 16) {
