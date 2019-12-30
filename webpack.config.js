@@ -4,13 +4,14 @@ const path = require("path");
 module.exports = {
   mode: "production",
   entry: {
-    dice: "./src/app/dice/index.ts",
+    dice: "./src/app/dice/index.tsx",
   },
   plugins: [
     new HtmlWebpackPlugin({
+      title: "dice",
       filename: "app/dice/index.html",
       chunks: ["dice"],
-      template: "./src/assets/dice.html",
+      template: "./src/assets/index.html",
     }),
   ],
   output: {
@@ -25,6 +26,10 @@ module.exports = {
         exclude: /node_modules/,
       },
     ],
+  },
+  externals: {
+    react: "React",
+    "react-dom": "ReactDOM",
   },
   resolve: {
     extensions: [ ".tsx", ".ts", ".jsx", ".js" ],
