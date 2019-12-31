@@ -4,8 +4,8 @@ import { power } from "./math/index.js";
 import { uniform, buffer, attribute } from "./webgl.js";
 import { UnionFind } from "./union-find.js";
 
-export class Points {
-  constructor(data = [], index = []) {
+class Primitives {
+  constructor(data, index) {
     this.data = data;
     this.index = index;
   }
@@ -17,57 +17,46 @@ export class Points {
   }
   translate(...args) {
     return this.transform(Mat4.translate(...args));
+  }
+  primitive() {
+    const index = this.index.flat();
+    const position = this.data.map(d => d.position.primitive()).flat();
+    const color = this.data.map(d => d.color.length === 3 ? d.color.concat([1.0]) : d.color).flat();
+    return { index, position, color };
+  }
+}
+
+export class Points extends Primitives {
+  constructor(data, index) {
+    super(data, index);
   }
   transform(m) {
     return new Points(this.data.map(d => {
       return { ...d, position: d.position.transform(m)};
     }), this.index);
   }
-  primitive() {
-    const index = this.index.flat();
-    const position = this.data.map(d => d.position.primitive()).flat();
-    const color = this.data.map(d => d.color.length === 3 ? d.color.concat([1.0]) : d.color).flat();
-    return { index, position, color };
-  }
   model(gl) {
     return new Model({ gl, primitives: this, type: gl.POINTS });
   }
 }
 
-export class Lines {
-  constructor(data = [], index = []) {
-    this.data = data;
-    this.index = index;
-  }
-  scale(...args) {
-    return this.transform(Mat4.scale(...args));
-  }
-  rotate(...args) {
-    return this.transform(Mat4.rotate(...args));
-  }
-  translate(...args) {
-    return this.transform(Mat4.translate(...args));
+export class Lines extends Primitives {
+  constructor(data, index) {
+    super(data, index);
   }
   transform(m) {
     return new Lines(this.data.map(d => {
       return { ...d, position: d.position.transform(m)};
     }), this.index);
   }
-  primitive() {
-    const index = this.index.flat();
-    const position = this.data.map(d => d.position.primitive()).flat();
-    const color = this.data.map(d => d.color.length === 3 ? d.color.concat([1.0]) : d.color).flat();
-    return { index, position, color };
-  }
   model(gl) {
     return new Model({ gl, primitives: this, type: gl.LINES });
   }
 }
 
-export class Triangles {
-  constructor(data = [], index = [], tridata = []) {
-    this.data = data;
-    this.index = index;
+export class Triangles extends Primitives {
+  constructor(data, index, tridata = []) {
+    super(data, index);
     this.tridata = tridata.length === 0 ?
       range(index.length).map(_ => {}) : tridata;
   }
@@ -81,15 +70,6 @@ export class Triangles {
     const tridata = thi.tridata.concat(tha.tridata);
     return new Triangles(data, index, tridata);
   }
-  scale(...args) {
-    return this.transform(Mat4.scale(...args));
-  }
-  rotate(...args) {
-    return this.transform(Mat4.rotate(...args));
-  }
-  translate(...args) {
-    return this.transform(Mat4.translate(...args));
-  }
   transform(m) {
     return new Triangles(this.data.map(d => {
       return { ...d, position: d.position.transform(m)};
@@ -99,9 +79,7 @@ export class Triangles {
     return new Triangles(this.data, this.index.map(i => [i[0], i[2], i[1]]), this.tridata);
   }
   primitive() {
-    const index = this.index.flat();
-    const position = this.data.map(d => d.position.primitive()).flat();
-    const color = this.data.map(d => d.color.length === 3 ? d.color.concat([1.0]) : d.color).flat();
+    const { index, position, color } = super.primitive();
     const nlist = this.data.map(_ => []);
     for (const s of this.index) {
       const [A, B, C] = s.map(i => this.data[i].position);
