@@ -1,7 +1,7 @@
 import { mat4 } from "gl-matrix";
 import { Vec3 } from "./vec3";
 
-export function M4(data = mat4.create()) {
+export function M4(data: any = mat4.create()) {
   return new Mat4(data);
 }
 
@@ -27,6 +27,9 @@ export class Mat4 {
   }
   primitive() {
     return this.data;
+  }
+  determinant() {
+    return mat4.determinant(this.primitive());
   }
   scale(x: number, y: number, z: number) {
     return Mat4.scale(x, y, z).mul(this);

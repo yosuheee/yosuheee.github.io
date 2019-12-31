@@ -1,5 +1,6 @@
 import { V3, z_axis } from "../../math/geometry/index";
 import { Triangles, one_eighth_sphere, quarter_cylinder_rect, rect } from "../../triangles";
+import { range } from "../../util";
 
 export function ana(r: number, color = [1, 1, 1], c = 32) {
   const data = [], index = [];
@@ -187,19 +188,19 @@ function face(points: { x: number, y: number }[], edge = 10, size = 1, color = [
     ys.sort(compare);
   }
 
-  const objects: Triangles[] = [];
-  for (let i = 0; i < xs.length - 1; i++)
-  for (let j = 0; j < ys.length - 1; j++) {
-    const x = xs[i];
-    const y = ys[j];
-    const w = xs[i + 1] - xs[i];
-    const h = ys[j + 1] - ys[j];
-    if (points.some(p => p.x === x && p.y === y)) {
-      objects.push(ana(w / 2).add(reverse_half_sphere(w / 2, C)).translate(x, y, 0));
-    } else {
-      objects.push(rect(w, h).translate(x, y, 0));
-    }
-  }
-  
-  return objects.reduce((a, c) => a.add(c));
+  return (
+    range(xs.length - 1).map(i =>
+      range(ys.length - 1).map(j => {
+        const x = xs[i];
+        const y = ys[j];
+        const w = xs[i + 1] - xs[i];
+        const h = ys[j + 1] - ys[j];
+        if (points.some(p => p.x === x && p.y === y)) {
+          return ana(w / 2).add(reverse_half_sphere(w / 2, C)).translate(x, y, 0);
+        } else {
+          return rect(w, h).translate(x, y, 0);
+        }
+      })
+    ).flat().reduce((a, c) => a.add(c))
+  );
 }
