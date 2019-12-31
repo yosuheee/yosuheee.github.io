@@ -1,5 +1,5 @@
 export async function sleep(msec) {
-  return new Promise(resolve => window.setTimeout(resolve, msec));
+  return new Promise(resolve => window.setTimeout(() => resolve(), msec));
 }
 
 export function range(start, length) {

@@ -1,5 +1,5 @@
-import { program, uniform } from "/module/webgl.js";
-import { rect } from "/module/triangles.js";
+import { context, program, uniform } from "../../module/webgl.js";
+import { rect } from "../../module/triangles.js";
 import { fetch_text } from "../../module/util.js";
 
 const vertex_source = `
@@ -10,11 +10,11 @@ void main(void) {
 `;
 
 window.addEventListener("DOMContentLoaded", async () => {
-  const cvs = document.getElementById("canvas");
-  const gl = cvs.getContext("webgl");
-  const prg = program(gl, vertex_source, await fetch_text("./source.frag"));
+  const fragment_source = await fetch_text("./source.frag");
+  const gl = context("canvas");
+  const prg = program(gl, vertex_source, fragment_source);
   const mo = rect(2.0, 2.0).translate(-1.0, -1.0, 0).model(gl);
-  
+
   const start = new Date().getTime();
 
   let is_down = false;
@@ -25,9 +25,9 @@ window.addEventListener("DOMContentLoaded", async () => {
     my = e.offsetY / gl.canvas.height;
   };
 
-  cvs.addEventListener("mousedown", e => { is_down = true; change(e); });
-  cvs.addEventListener("mouseup", () => is_down = false);
-  cvs.addEventListener("mousemove", e => { if (is_down) change(e); });
+  gl.canvas.addEventListener("mousedown", e => { is_down = true; change(e); });
+  gl.canvas.addEventListener("mouseup", () => is_down = false);
+  gl.canvas.addEventListener("mousemove", e => { if (is_down) change(e); });
 
   const render = () => {
     requestAnimationFrame(render);

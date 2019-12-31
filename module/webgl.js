@@ -1,3 +1,7 @@
+export function context(id) {
+  return document.getElementById(id).getContext("webgl");
+}
+
 export function program(gl, vss, fss) {
   const prg = gl.createProgram();
   const list = [
