@@ -4,7 +4,7 @@ export function V3(x, y, z) {
   return new Vec3(x, y, z);
 }
 
-class Vec3 {
+export class Vec3 {
   constructor(x, y, z) {
     [this.x, this.y, this.z] = x.length != null ? x : [x, y, z];
   }

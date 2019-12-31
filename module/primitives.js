@@ -179,7 +179,7 @@ export class Triangles {
         if (p.sub(q).length() <= eps) uf.unite(i, j);
       }
     }
-    
+
     const se = new Set();
     for (let i = 0; i < n; i++) se.add(uf.root(i));
     const m = se.size;
