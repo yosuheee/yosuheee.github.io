@@ -13,3 +13,8 @@ export function range(start, length) {
   }
   return arr;
 }
+
+export async function fetch_text(file) {
+  const response = await fetch(file);
+  return await response.text();
+}
