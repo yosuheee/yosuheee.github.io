@@ -1,0 +1,14 @@
+{
+  "files.exclude": {
+    ".babelrc": true,
+    "app": true,
+    "diary": true,
+    "module": true,
+    "node_modules": true,
+    "package.json": true,
+    "README.md": true,
+    "test": true,
+    "yarn-error.log": true,
+    "yarn.lock": true
+  }
+}
