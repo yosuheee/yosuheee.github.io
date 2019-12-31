@@ -1,31 +1,26 @@
-import { V3 } from "/module/math/geometry/index.js";
+import { V3, z_axis } from "/module/math/geometry/index.js";
 import { Triangles, one_eighth_sphere, quarter_cylinder_rect, rect } from "/module/triangles.js";
+import { range } from "/module/util.js";
 
-export function ana(radius, count = 32, c = [1, 1, 1]) {
+export function square_minus_circle(r, color = [1, 1, 1], c = 32) {
   const data = [], index = [];
-  for (let i = 0; i <= count; i++) {
-    const angle = Math.PI * 2 / count * i;
-    const rx = radius * Math.cos(angle);
-    const ry = radius * Math.sin(angle);
-    const j = Math.floor(i / (count / 8)) % 8;
-    let x, y;
-    if (j == 0 || j == 7) x = radius, y = ry / Math.cos(angle);
-    if (j == 1 || j == 2) x = rx / Math.sin(angle), y = radius;
-    if (j == 3 || j == 4) x = -radius, y = -ry / Math.cos(angle);
-    if (j == 5 || j == 6) x = -rx / Math.sin(angle), y = -radius;
-    data.push({ position: V3(rx + radius, ry + radius, 0), color: c });
-    data.push({ position: V3(x + radius, y + radius, 0), color: c });
+  for (let i = 0; i <= c; i++) {
+    const p = V3(r, 0, 0).rotate(z_axis, 360 / c * i);
+    const s = Math.min(Math.abs(r / p.x), Math.abs(r / p.y));
+    const q = p.scale(s);
+    data.push({ position: p.add(V3(r, r, 0)), color });
+    data.push({ position: q.add(V3(r, r, 0)), color });
   }
-  for (let i = 0; i < count; i++) {
-    const std = i * 2;
-    index.push([std, std + 1, std + 2]);
-    index.push([std + 1, std + 3, std + 2]);
+  for (let i = 0; i < c; i++) {
+    const j = i * 2;
+    index.push([j, j + 1, j + 2]);
+    index.push([j + 1, j + 3, j + 2]);
   }
   return new Triangles(data, index);
 }
 
-export function reverse_half_sphere(r, c = [1, 1, 1], row = 16, col = 16) {
-  const oes = one_eighth_sphere(r, c, row, col);
+export function reverse_half_sphere(r, color = [1, 1, 1], c = 16) {
+  const oes = one_eighth_sphere(r, color, c);
   const parts = [
     oes,
     oes.rotate(V3(0, 0, 1),  90),
@@ -148,7 +143,7 @@ export function dice(edge = 8, radius = 2) {
     kama.rotate(V3(0, 1, 0), -90).rotate(V3(1, 0, 0),  90).translate(R, R, -R),
     kama.rotate(V3(0, 1, 0), -90).rotate(V3(1, 0, 0), 180).translate(R, R, -E - R),
   ];
-  const kado = one_eighth_sphere(R, [1, 1, 1], 16, 16);
+  const kado = one_eighth_sphere(R, [1, 1, 1], 16);
   const kado4 = [
     kado.translate(E + R, E + R, -R),
     kado.rotate(V3(0, 1, 0), -90).translate(R, E + R, -R),
@@ -192,20 +187,19 @@ function face(points, edge = 10, size = 1, color = [0, 0, 0]) {
     ys.sort(compare);
   }
 
-  const objects = [];
-  for (let i = 0; i < xs.length - 1; i++) {
-    for (let j = 0; j < ys.length - 1; j++) {
-      const x = xs[i];
-      const y = ys[j];
-      const w = xs[i + 1] - xs[i];
-      const h = ys[j + 1] - ys[j];
-      if (points.some(p => p.x === x && p.y === y)) {
-        objects.push({ o: ana(w / 2).add(reverse_half_sphere(w / 2, C)), x, y });
-      } else {
-        objects.push({ o: rect(w, h), x, y });
-      }
-    }
-  }
-  
-  return objects.map(r => r.o.translate(r.x, r.y, 0)).reduce((a, c) => a.add(c));
+  return (
+    range(xs.length - 1).map(i =>
+      range(ys.length - 1).map(j => {
+        const x = xs[i];
+        const y = ys[j];
+        const w = xs[i + 1] - xs[i];
+        const h = ys[j + 1] - ys[j];
+        if (points.some(p => p.x === x && p.y === y)) {
+          return square_minus_circle(w / 2).add(reverse_half_sphere(w / 2, C)).translate(x, y, 0);
+        } else {
+          return rect(w, h).translate(x, y, 0);
+        }
+      })
+    ).flat().reduce((a, c) => a.add(c))
+  );
 }
