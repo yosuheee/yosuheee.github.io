@@ -22,7 +22,7 @@ p_include :: Parser String
 p_include = do
   p_sharp
   spaces
-  str <- p_include_string
+  p_include_string
   spaces
   p_lt
   spaces

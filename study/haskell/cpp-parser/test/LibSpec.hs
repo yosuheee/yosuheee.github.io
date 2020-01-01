@@ -31,8 +31,6 @@ spec = do
       exec p_not_gt_or_blank "a" `shouldBe` "'a'"
 
   describe "p_include" $ do
-    it "accept \"#include<iostream>\"" $
-      exec p_include "#include<iostream>" `shouldBe` "\"iostream\""
     it "accept \"# include < iostream >\"" $
       exec p_include "# include < iostream >" `shouldBe` "\"iostream\""
 
