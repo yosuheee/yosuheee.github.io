@@ -49,29 +49,31 @@ export function buffer(gl, type, value) {
 }
 
 export const VERTEX_SOURCE = `
-attribute vec3 position;
-attribute vec4 color;
-attribute vec3 normal;
-uniform mat4 mvp_matrix;
-uniform mat4 inv_matrix;
-varying vec4 v_color;
-varying vec3 v_normal;
+  attribute vec3 position;
+  attribute vec4 color;
+  attribute vec3 normal;
+  uniform mat4 mvp_matrix;
+  varying vec4 v_color;
+  varying vec3 v_normal;
 
-void main(void) {
-  v_color = color;
-  v_normal = vec3(inv_matrix * vec4(normal, 0.0));
-  gl_Position = mvp_matrix * vec4(position, 1.0);
-}
+  void main(void) {
+    v_color = color;
+    v_normal = normal;
+    gl_Position = mvp_matrix * vec4(position, 1.0);
+  }
 `;
 
 export const FRAGMENT_SOURCE = `
-precision mediump float;
-uniform vec3 light;
-varying vec4 v_color;
-varying vec3 v_normal;
+  precision mediump float;
 
-void main(void) {
-  gl_FragColor = v_color;
-  gl_FragColor.rgb *= clamp(dot(light, v_normal), 0.1, 1.0);
-}
+  uniform mat4 inv_matrix;
+  uniform vec3 light;
+  varying vec4 v_color;
+  varying vec3 v_normal;
+
+  void main(void) {
+    vec3 normal = vec3(inv_matrix * vec4(v_normal, 0.0));
+    gl_FragColor = v_color;
+    gl_FragColor.rgb *= clamp(dot(light, normal), 0.1, 1.0);
+  }
 `;
