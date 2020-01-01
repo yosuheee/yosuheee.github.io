@@ -1,0 +1,26 @@
+name:     vec3
+version:  0.1.0.0
+
+dependencies:
+- base >= 4.7 && < 5
+- parsec
+
+library:
+  source-dirs:    src
+
+executables:
+  vec3-exe:
+    main:         Main.hs
+    source-dirs:  app
+    dependencies:
+    - vec3
+
+tests:
+  vec3-test:
+    main:         Spec.hs
+    source-dirs:  test
+    dependencies:
+    - vec3
+    - HUnit
+    - test-framework
+    - test-framework-hunit
