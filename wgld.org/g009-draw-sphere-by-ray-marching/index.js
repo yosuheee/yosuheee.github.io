@@ -1,6 +1,6 @@
 import { context, program, uniform } from "../../module/webgl.js";
 import { rect } from "../../module/triangles.js";
-import { fetch_text } from "../../module/util.js";
+import { fetcht } from "../../module/util.js";
 
 const vertex_source = `
 attribute vec3 position;
@@ -10,7 +10,7 @@ void main(void) {
 `;
 
 window.addEventListener("DOMContentLoaded", async () => {
-  const fragment_source = await fetch_text("./source.frag");
+  const fragment_source = await fetcht("./source.frag");
   const gl = context("canvas");
   const prg = program(gl, vertex_source, fragment_source);
   const mo = rect(2.0, 2.0).translate(-1.0, -1.0, 0).model(gl);
