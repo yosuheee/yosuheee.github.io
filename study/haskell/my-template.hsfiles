@@ -1,0 +1,22 @@
+{-# START_FILE package.yaml #-}
+name:     {{name}}
+version:  0.1.0.0
+
+dependencies:
+- base >= 4.7 && < 5
+- parsec
+
+executables:
+  {{name}}-exe:
+    main:         Main.hs
+    source-dirs:  src
+
+{-# START_FILE src/Main.hs #-}
+module Main where
+
+main :: IO ()
+main = putStrLn "hello world"
+
+{-# START_FILE .gitignore #-}
+.stack-work/
+{{name}}.cabal
