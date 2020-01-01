@@ -1,24 +1,24 @@
-name:     vec3
+name:     cpp-parser
 version:  0.1.0.0
 
 dependencies:
 - base >= 4.7 && < 5
 - parsec
 
-library:
-  source-dirs:    src
-
 executables:
-  vec3-exe:
+  cpp-parser-exe:
     main:         Main.hs
     source-dirs:  app
     dependencies:
-    - vec3
+    - cpp-parser
+
+library:
+  source-dirs:    src
 
 tests:
-  vec3-test:
+  cpp-parser-test:
     main:         Spec.hs
     source-dirs:  test
     dependencies:
-    - vec3
     - hspec
+    - cpp-parser

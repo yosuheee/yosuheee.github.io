@@ -4,18 +4,44 @@ version:  0.1.0.0
 
 dependencies:
 - base >= 4.7 && < 5
-- parsec
 
 executables:
   {{name}}-exe:
     main:         Main.hs
-    source-dirs:  src
+    source-dirs:  app
+    dependencies:
+    - {{name}}
 
-{-# START_FILE src/Main.hs #-}
+library:
+  source-dirs:    src
+
+tests:
+  {{name}}-test:
+    main:         Spec.hs
+    source-dirs:  test
+    dependencies:
+    - hspec
+    - {{name}}
+
+{-# START_FILE app/Main.hs #-}
 module Main where
 
 main :: IO ()
 main = putStrLn "hello world"
+
+{-# START_FILE src/Lib.hs #-}
+module Lib where
+
+{-# START_FILE test/Spec.hs #-}
+{-# OPTIONS_GHC -F -pgmF hspec-discover #-}
+
+{-# START_FILE test/LibSpec.hs #-}
+module LibSpec (spec) where
+
+import Test.Hspec
+import Lib
+
+spec :: Spec
 
 {-# START_FILE .gitignore #-}
 .stack-work/
