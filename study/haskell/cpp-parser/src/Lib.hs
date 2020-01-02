@@ -3,6 +3,21 @@ module Lib where
 import Text.Parsec
 import Text.Parsec.String
 
+p_identity :: Parser String
+p_identity = do
+  fst <- p_identity_char
+  snd <- many p_identity_and_digit_char
+  return $ [fst] ++ snd
+
+p_underscore :: Parser Char
+p_underscore = char '_'
+
+p_identity_char :: Parser Char
+p_identity_char = p_underscore <|> letter
+
+p_identity_and_digit_char :: Parser Char
+p_identity_and_digit_char = p_identity_char <|> digit
+
 p_sharp :: Parser Char
 p_sharp = char '#'
 
@@ -59,9 +74,6 @@ p_return = do
   p_semicolon
   return num
 
-p_type :: Parser String
-p_type = string "int"
-
 p_function_name :: Parser String
 p_function_name = string "main"
 
@@ -88,7 +100,7 @@ p_bracket_end = char ')'
 
 p_function :: Parser Integer
 p_function = do
-  p_type
+  p_identity
   spaces
   p_function_name
   spaces
@@ -125,3 +137,57 @@ p_main = do
   p_namespace
   spaces
   p_function
+
+p_var_defined :: Parser (String, String, Expression)
+p_var_defined = do
+  typ <- p_identity
+  spaces
+  name <- p_identity
+  spaces
+  char '='
+  spaces
+  value <- p_expression
+  spaces
+  p_semicolon
+  return (typ, name, value)
+
+data Expression = ExTuple (Expression, Char, Expression)
+                | ExInteger Integer
+                | ExDouble Double
+                | ExIdentity String
+                  deriving (Show)
+
+p_expression :: Parser Expression
+p_expression = do
+  try p_expression_tuple
+  <|> try p_expression_primitive
+
+p_expression_tuple :: Parser Expression
+p_expression_tuple = do
+  lft <- p_expression_primitive
+  spaces
+  sign <- oneOf "+-*/"
+  spaces
+  rgt <- p_expression_primitive
+  return $ ExTuple (lft, sign, rgt)
+
+p_expression_primitive :: Parser Expression
+p_expression_primitive = do
+  try p_expression_double <|> try p_expression_identity <|> p_expression_integer
+
+p_expression_integer :: Parser Expression
+p_expression_integer = do
+  num <- p_number
+  return $ ExInteger num
+
+p_expression_identity :: Parser Expression
+p_expression_identity = do
+  ident <- p_identity
+  return $ ExIdentity ident
+
+p_expression_double :: Parser Expression
+p_expression_double = do
+  fst <- many1 digit
+  char '.'
+  snd <- many1 digit
+  return . ExDouble . read $ fst ++ "." ++ snd
