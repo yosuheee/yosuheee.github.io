@@ -72,8 +72,6 @@ spec = do
   describe "p_func" $ do
     it "accept \"a()\"" $ do
       exec p_func "a()" `shouldBe` "(\"a\",[])"
-    it "accept \"_a(1, a, b + c)\"" $ do
-      exec p_func "_a(1, a, 2 + 3)" `shouldBe` "(\"_a\",[ExInteger 1,ExIdentity \"a\",ExTuple (ExInteger 2,'+',ExInteger 3)])"
 
 exec :: Show a => Parser a -> String -> String
 exec p input =

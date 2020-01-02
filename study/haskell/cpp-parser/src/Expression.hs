@@ -1,5 +1,6 @@
 module Expression where
 
+import Data.Function ((&))
 import Text.Parsec
 import Text.Parsec.String
 
@@ -24,7 +25,6 @@ p_number = do
   return $ read str
 
 data Expression =
-  ExTuple (Expression, Char, Expression) |
   ExInteger Integer |
   ExDouble Double |
   ExIdentity String |
@@ -34,21 +34,10 @@ data Expression =
   deriving (Show)
 
 p_expression :: Parser Expression
-p_expression = do
-  try p_expression_tuple
-  <|> try p_expression_primitive
+p_expression = p_priority_16
 
-p_expression_tuple :: Parser Expression
-p_expression_tuple = do
-  lft <- p_expression_primitive
-  spaces
-  sign <- oneOf "+-*/"
-  spaces
-  rgt <- p_expression_primitive
-  return $ ExTuple (lft, sign, rgt)
-
-p_expression_primitive :: Parser Expression
-p_expression_primitive = do
+p_primitive :: Parser Expression
+p_primitive = do
   try p_expression_double <|> try p_expression_identity <|> try p_expression_integer
 
 p_expression_integer :: Parser Expression
@@ -68,17 +57,16 @@ p_expression_double = do
   snd <- many1 digit
   return . ExDouble . read $ fst ++ "." ++ snd
 
-p_priority_5 = p_binops ["*", "/", "%"] p_expression_primitive
-p_priority_6 = p_binops ["+", "-"] p_priority_5
-p_priority_7 = p_binops ["<<", ">>"] p_priority_6
-p_priority_8 = p_binops ["<=>"] p_priority_7
-p_priority_9 = p_binops ["<=", ">=", "<", ">"] p_priority_8
-p_priority_10 = p_binops ["==", "!="] p_priority_9
-p_priority_11 = p_binops ["&"] p_priority_10
-p_priority_12 = p_binops ["^"] p_priority_11
-p_priority_13 = p_binops ["|"] p_priority_12
-p_priority_14 = p_binops ["&&"] p_priority_13
-p_priority_15 = p_binops ["||"] p_priority_14
+p_priority_15 =
+  foldl (&) p_primitive $
+    map p_binops [
+      ["*", "/", "%"],
+      ["+", "-"],
+      ["<<", ">>"],
+      ["<=>"],
+      ["<=", ">=", "<", ">"],
+      ["==", "!="],
+      ["&"], ["^"], ["|"], ["&&"], ["||"]]
 
 p_priority_16 =
   p_ternary <|>
