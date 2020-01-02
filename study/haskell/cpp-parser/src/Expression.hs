@@ -1,6 +1,5 @@
 module Expression where
 
-import Data.Function ((&))
 import Text.Parsec
 import Text.Parsec.String
 
@@ -25,7 +24,7 @@ p_number = do
   return $ read str
 
 data Expression =
-  ExInteger Integer |
+  ExInt Integer |
   ExDouble Double |
   ExIdentity String |
   ExList (Expression, [(String, Expression)]) |
@@ -43,7 +42,7 @@ p_primitive = do
 p_expression_integer :: Parser Expression
 p_expression_integer = do
   num <- p_number
-  return $ ExInteger num
+  return $ ExInt num
 
 p_expression_identity :: Parser Expression
 p_expression_identity = do
@@ -58,7 +57,7 @@ p_expression_double = do
   return . ExDouble . read $ fst ++ "." ++ snd
 
 p_priority_15 =
-  foldl (&) p_primitive $
+  foldl (\a b -> b a) p_primitive $
     map p_binops [
       ["*", "/", "%"],
       ["+", "-"],

@@ -1,6 +1,6 @@
 module ExpressionSpec (spec) where
 
-import Data.List (foldl')
+import Control.Monad (forM_)
 import Test.Hspec
 import Text.Parsec
 import Text.Parsec.String
@@ -39,61 +39,39 @@ spec = do
       exec p_identity_and_digit_char "1" `shouldBe` (show '1')
 
   describe "binary operator" $ do
-    it "accept all binary operators" $ do
-      spec_binop "*"
-      spec_binop "/"
-      spec_binop "%"
-      spec_binop "+"
-      spec_binop "-"
-      spec_binop "<<"
-      spec_binop ">>"
-      spec_binop "<=>"
-      spec_binop "<="
-      spec_binop ">="
-      spec_binop "<"
-      spec_binop ">"
-      spec_binop "=="
-      spec_binop "!="
-      spec_binop "&"
-      spec_binop "^"
-      spec_binop "|"
-      spec_binop "&&"
-      spec_binop "||"
-      spec_binop "="
-      spec_binop "+="
-      spec_binop "-="
-      spec_binop "*="
-      spec_binop "/="
-      spec_binop "%="
-      spec_binop "<<="
-      spec_binop ">>="
-      spec_binop "&="
-      spec_binop "^="
-      spec_binop "|="
+    flip forM_ it_spec_binop $ concat [
+      ["*", "/", "%"],
+      ["+", "-"],
+      ["<<", ">>"],
+      ["<=>"],
+      ["<=", ">=", "<", ">"],
+      ["==", "!="],
+      ["&"], ["^"], ["|"], ["&&"], ["||"],
+      ["=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", "&=", "^=", "|="]]
 
   describe "p_expression" $ do
     it "accept '123'" $
-      exec p_expression "123" `shouldBe` (show $ ExInteger 123)
+      exec p_expression "123" `shouldBe` (show $ ExInt 123)
     it "accept 'ana'" $
       exec p_expression "ana" `shouldBe` (show $ ExIdentity "ana")
     it "accept '1.5'" $
       exec p_expression "1.5" `shouldBe` (show $ ExDouble 1.5)
     it "accept '1 ? 2 : 3'" $ do
       exec p_expression "1 ? 2 : 3" `shouldBe`
-        (show $ ExTernary (ExInteger 1, ExInteger 2, ExInteger 3))
+        (show $ ExTernary (ExInt 1, ExInt 2, ExInt 3))
     it "accept 'throw 123'" $ do
       exec p_expression "throw 123" `shouldBe`
-        (show $ ExThrow (ExInteger 123))
+        (show $ ExThrow (ExInt 123))
 
   describe "p_ternary" $ do
     it "accept '1 ? 2 : 3'" $ do
       exec p_ternary "1 ? 2 : 3" `shouldBe`
-        (show $ ExTernary (ExInteger 1, ExInteger 2, ExInteger 3))
+        (show $ ExTernary (ExInt 1, ExInt 2, ExInt 3))
 
   describe "p_throw" $ do
     it "accept 'throw 1'" $ do
       exec p_throw "throw 1" `shouldBe`
-        (show $ ExThrow (ExInteger 1))
+        (show $ ExThrow (ExInt 1))
 
   describe "some operator" $ do
     it "accept some operator" $ do
@@ -111,35 +89,35 @@ spec = do
         ExList (
         ExList (
         ExList (
-          ExInteger 1
-          , [("*"  , ExInteger  2)])
-          , [("+"  , ExInteger  3)])
-          , [("<<" , ExInteger  4)])
-          , [("<=>", ExInteger  5)])
-          , [("<=" , ExInteger  6)])
-          , [("==" , ExInteger  7)])
-          , [("&"  , ExInteger  8)])
-          , [("^"  , ExInteger  9)])
-          , [("|"  , ExInteger 10)])
-          , [("&&" , ExInteger 11)])
-          , [("||" , ExInteger 12)])
-          , [("="  , ExInteger 13)]))
+          ExInt 1
+          , [("*"  , ExInt  2)])
+          , [("+"  , ExInt  3)])
+          , [("<<" , ExInt  4)])
+          , [("<=>", ExInt  5)])
+          , [("<=" , ExInt  6)])
+          , [("==" , ExInt  7)])
+          , [("&"  , ExInt  8)])
+          , [("^"  , ExInt  9)])
+          , [("|"  , ExInt 10)])
+          , [("&&" , ExInt 11)])
+          , [("||" , ExInt 12)])
+          , [("="  , ExInt 13)]))
 
     it "accept some operator" $ do
       let input = "1 = 2 || 3 && 4 | 5 ^ 6 & 7 == 8 <= 9 <=> 10 << 11 + 12 * 13"
       exec p_priority_16 input `shouldBe` (show $
-        ExList (ExInteger  1, [("="  , 
-        ExList (ExInteger  2, [("||" , 
-        ExList (ExInteger  3, [("&&" , 
-        ExList (ExInteger  4, [("|"  , 
-        ExList (ExInteger  5, [("^"  , 
-        ExList (ExInteger  6, [("&"  , 
-        ExList (ExInteger  7, [("==" , 
-        ExList (ExInteger  8, [("<=" , 
-        ExList (ExInteger  9, [("<=>", 
-        ExList (ExInteger 10, [("<<" , 
-        ExList (ExInteger 11, [("+"  , 
-        ExList (ExInteger 12, [("*"  , ExInteger 13)])
+        ExList (ExInt  1, [("="  , 
+        ExList (ExInt  2, [("||" , 
+        ExList (ExInt  3, [("&&" , 
+        ExList (ExInt  4, [("|"  , 
+        ExList (ExInt  5, [("^"  , 
+        ExList (ExInt  6, [("&"  , 
+        ExList (ExInt  7, [("==" , 
+        ExList (ExInt  8, [("<=" , 
+        ExList (ExInt  9, [("<=>", 
+        ExList (ExInt 10, [("<<" , 
+        ExList (ExInt 11, [("+"  , 
+        ExList (ExInt 12, [("*"  , ExInt 13)])
         )])
         )])
         )])
@@ -159,7 +137,9 @@ exec p input =
     Left  err -> show err
     Right val -> show val
 
-spec_binop :: String -> Expectation
-spec_binop op =
-  exec p_expression ("1" ++ op ++ "2") `shouldBe`
-    (show $ ExList (ExInteger 1, [(op, ExInteger 2)]))
+it_spec_binop :: String -> SpecWith (Arg Expectation)
+it_spec_binop op =
+  it ("accept '1 " ++ op ++ " 2'") $
+    exec p_expression ("1" ++ op ++ "2") `shouldBe` expected
+  where
+    expected = show $ ExList (ExInt 1, [(op, ExInt 2)])

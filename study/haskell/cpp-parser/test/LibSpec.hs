@@ -67,7 +67,7 @@ spec = do
 
   describe "p_var_defined" $ do
     it "accept \"int abc = 123;\"" $ do
-      exec p_var_defined "int abc = 123;" `shouldBe` "(\"int\",\"abc\",ExInteger 123)"
+      exec p_var_defined "int abc = 123;" `shouldBe` "(\"int\",\"abc\",ExInt 123)"
 
   describe "p_func" $ do
     it "accept \"a()\"" $ do
