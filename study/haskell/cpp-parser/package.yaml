@@ -9,6 +9,8 @@ executables:
   cpp-parser-exe:
     main:         Main.hs
     source-dirs:  app
+    ghc-options:
+    - -fsimpl-tick-factor=10000
     dependencies:
     - cpp-parser
 
