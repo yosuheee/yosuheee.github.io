@@ -1,11 +1,12 @@
 module Main where
 
 import Text.Parsec
+import Text.Parsec.String
 import Lib
 
 main :: IO ()
 main = do
-  input <- readFile "test/main.cpp"
+  input <- readFile "../test/main.cpp"
   case parse p_main "Parser" input of
     Left  err -> print err
     Right val -> print val

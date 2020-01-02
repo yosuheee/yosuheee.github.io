@@ -9,6 +9,8 @@ executables:
   {{name}}-exe:
     main:         Main.hs
     source-dirs:  app
+    ghc-options:
+    - -O0
     dependencies:
     - {{name}}
 
@@ -19,6 +21,8 @@ tests:
   {{name}}-test:
     main:         Spec.hs
     source-dirs:  test
+    ghc-options:
+    - -O0
     dependencies:
     - hspec
     - {{name}}

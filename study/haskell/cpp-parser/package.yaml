@@ -10,7 +10,7 @@ executables:
     main:         Main.hs
     source-dirs:  app
     ghc-options:
-    - -fsimpl-tick-factor=10000
+    - -O0
     dependencies:
     - cpp-parser
 
@@ -21,6 +21,8 @@ tests:
   cpp-parser-test:
     main:         Spec.hs
     source-dirs:  test
+    ghc-options:
+    - -O0
     dependencies:
     - hspec
     - cpp-parser
