@@ -117,6 +117,14 @@ spec = do
       exec p_expression "1 / 2" `shouldBe` "ExTuple (ExInteger 1,'/',ExInteger 2)"
     it "accept \"1.5\"" $
       exec p_expression "1.5" `shouldBe` "ExDouble 1.5"
+    it "accept \"1 + 2 + 3\"" $
+      exec p_expression "1 + 2 + 3" `shouldBe` "ExTuple (ExInteger 1,'+',ExTuple (ExInteger 2,'+',ExInteger 3))"
+
+  describe "p_func" $ do
+    it "accept \"a()\"" $ do
+      exec p_func "a()" `shouldBe` "(\"a\",[])"
+    it "accept \"_a(1, a, b + c)\"" $ do
+      exec p_func "_a(1, a, 2 + 3)" `shouldBe` "(\"_a\",[ExInteger 1,ExIdentity \"a\",ExTuple (ExInteger 2,'+',ExInteger 3)])"
 
 exec :: Show a => Parser a -> String -> String
 exec p input =

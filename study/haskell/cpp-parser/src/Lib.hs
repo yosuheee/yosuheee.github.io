@@ -173,7 +173,7 @@ p_expression_tuple = do
 
 p_expression_primitive :: Parser Expression
 p_expression_primitive = do
-  try p_expression_double <|> try p_expression_identity <|> p_expression_integer
+  try p_expression_double <|> try p_expression_identity <|> try p_expression_integer
 
 p_expression_integer :: Parser Expression
 p_expression_integer = do
@@ -191,3 +191,17 @@ p_expression_double = do
   char '.'
   snd <- many1 digit
   return . ExDouble . read $ fst ++ "." ++ snd
+
+p_func :: Parser (String, [Expression])
+p_func = do
+  name <- p_identity
+  spaces
+  char '('
+  args <- sepEndBy p_expression p_argument_separate
+  return (name, args)
+
+p_argument_separate :: Parser ()
+p_argument_separate = do
+  char ','
+  spaces
+  return ()
