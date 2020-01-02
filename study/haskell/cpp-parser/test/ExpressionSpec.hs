@@ -57,33 +57,77 @@ spec = do
     it "accept \"1.5\"" $
       exec p_expression "1.5" `shouldBe` "ExDouble 1.5"
 
-  describe "p_mul_div" $ do
+  describe "p_priority_5" $ do
     it "accept \"1*2\"" $ do
-      exec p_mul_div "1*2" `shouldBe`
+      exec p_priority_5 "1*2" `shouldBe`
         (show $ ExList (ExInteger 1, [("*", ExInteger 2)]))
     it "accept \"1 * 2\"" $ do
-      exec p_mul_div "1 * 2" `shouldBe`
+      exec p_priority_5 "1 * 2" `shouldBe`
         (show $ ExList (ExInteger 1, [("*", ExInteger 2)]))
     it "accept \"1 * 2 * 3\"" $ do
-      exec p_mul_div "1 * 2 * 3" `shouldBe`
+      exec p_priority_5 "1 * 2 * 3" `shouldBe`
         (show $ ExList (ExInteger 1, [("*", ExInteger 2), ("*", ExInteger 3)]))
+    it "accept \"1 / 2\"" $ do
+      exec p_priority_5 "1 / 2" `shouldBe`
+        (show $ ExList (ExInteger 1, [("/", ExInteger 2)]))
+    it "accept \"1 % 2\"" $ do
+      exec p_priority_5 "1 % 2" `shouldBe`
+        (show $ ExList (ExInteger 1, [("%", ExInteger 2)]))
 
-  describe "p_add_sub" $ do
+  describe "p_priority_6" $ do
     it "accept \"1 + 2\"" $ do
-      exec p_add_sub "1 + 2" `shouldBe`
+      exec p_priority_6 "1 + 2" `shouldBe`
         (show $ ExList (ExInteger 1, [("+", ExInteger 2)]))
     it "accept \"1 + 2 + 3\"" $ do
-      exec p_add_sub "1 + 2 + 3" `shouldBe`
+      exec p_priority_6 "1 + 2 + 3" `shouldBe`
         (show $ ExList (ExInteger 1, [("+", ExInteger 2), ("+", ExInteger 3)]))
     it "accept \"1 + 2 * 3\"" $ do
-      exec p_add_sub "1 + 2 * 3" `shouldBe`
+      exec p_priority_6 "1 + 2 * 3" `shouldBe`
         (show $ ExList (ExInteger 1, [("+", ExList (ExInteger 2, [("*", ExInteger 3)]))]))
     it "accept \"1 * 2 + 3\"" $ do
-      exec p_add_sub "1 * 2 + 3" `shouldBe`
+      exec p_priority_6 "1 * 2 + 3" `shouldBe`
         (show $ ExList (ExList (ExInteger 1, [("*", ExInteger 2)]), [("+", ExInteger 3)]))
+
+  describe "p_priority_7" $ do
+    it "accept \"1 << 2\"" $ spec_binop p_priority_7 "<<"
+    it "accept \"1 >> 2\"" $ spec_binop p_priority_7 ">>"
+
+  describe "p_priority_8" $ do
+    it "accept \"1 <=> 2\"" $ spec_binop p_priority_8 "<=>"
+
+  describe "p_priority_9" $ do
+    it "accept \"1 <= 2\"" $ spec_binop p_priority_9 "<="
+    it "accept \"1 >= 2\"" $ spec_binop p_priority_9 ">="
+    it "accept \"1 < 2\""  $ spec_binop p_priority_9 "<"
+    it "accept \"1 > 2\""  $ spec_binop p_priority_9 ">"
+
+  describe "p_priority_10" $ do
+    it "accept \"1 == 2\"" $ spec_binop p_priority_10 "=="
+    it "accept \"1 != 2\"" $ spec_binop p_priority_10 "!="
+
+  describe "p_priority_11" $ do
+    it "accept \"1 & 2\""  $ spec_binop p_priority_11 "&"
+
+  describe "p_priority_12" $ do
+    it "accept \"1 ^ 2\""  $ spec_binop p_priority_12 "^"
+
+  describe "p_priority_13" $ do
+    it "accept \"1 | 2\""  $ spec_binop p_priority_13 "|"
+
+  describe "p_priority_14" $ do
+    it "accept \"1 && 2\"" $ spec_binop p_priority_14 "&&"
+
+  describe "p_priority_15" $ do
+    it "accept \"1 || 2\"" $ spec_binop p_priority_15 "||"
+
 
 exec :: Show a => Parser a -> String -> String
 exec p input =
   case parse p "" input of
     Left  err -> show err
     Right val -> show val
+
+spec_binop :: Parser Expression -> String -> Expectation
+spec_binop pa op = 
+  exec pa ("1" ++ op ++ "2") `shouldBe`
+    (show $ ExList (ExInteger 1, [(op, ExInteger 2)]))

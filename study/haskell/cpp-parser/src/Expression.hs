@@ -66,32 +66,29 @@ p_expression_double = do
   snd <- many1 digit
   return . ExDouble . read $ fst ++ "." ++ snd
 
-p_mul_div_rest :: Parser (String, Expression)
-p_mul_div_rest = do
-  op <- string "*" <|> string "/"
-  rgt <- try $ spaces *> p_expression_primitive
-  return (op, rgt)
+p_priority_5 = p_binops ["*", "/", "%"] p_expression_primitive
+p_priority_6 = p_binops ["+", "-"] p_priority_5
+p_priority_7 = p_binops ["<<", ">>"] p_priority_6
+p_priority_8 = p_binops ["<=>"] p_priority_7
+p_priority_9 = p_binops ["<=", ">=", "<", ">"] p_priority_8
+p_priority_10 = p_binops ["==", "!="] p_priority_9
+p_priority_11 = p_binops ["&"] p_priority_10
+p_priority_12 = p_binops ["^"] p_priority_11
+p_priority_13 = p_binops ["|"] p_priority_12
+p_priority_14 = p_binops ["&&"] p_priority_13
+p_priority_15 = p_binops ["||"] p_priority_14
 
-p_mul_div :: Parser Expression
-p_mul_div = do
-  lft <- p_expression_primitive
-  rgt <- many . try $ spaces *> p_mul_div_rest
+p_binops :: [String] -> Parser Expression -> Parser Expression
+p_binops ops p_high_priority = try $ do
+  lft <- p_high_priority
+  rgt <- many . try $ spaces *> rest
   return $
     case length rgt of
       0 -> lft
       _ -> ExList (lft, rgt)
-
-p_add_sub_rest :: Parser (String, Expression)
-p_add_sub_rest = do
-  op <- string "+" <|> string "-"
-  rgt <- try $ spaces *> p_mul_div
-  return (op, rgt)
-
-p_add_sub :: Parser Expression
-p_add_sub = do
-  lft <- p_mul_div
-  rgt <- many . try $ spaces *> p_add_sub_rest
-  return $
-    case length rgt of
-      0 -> lft
-      _ -> ExList (lft, rgt)
+  where
+    (x : xs) = map (try . string) ops
+    rest = do
+      o <- foldl (<|>) x xs
+      r <- try $ spaces *> p_high_priority
+      return (o, r)
