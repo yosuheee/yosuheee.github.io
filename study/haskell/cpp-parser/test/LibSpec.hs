@@ -31,8 +31,43 @@ spec = do
       exec p_not_gt_or_blank "a" `shouldBe` "'a'"
 
   describe "p_include" $ do
-    it "accept \"# include < iostream >\"" $
-      exec p_include "# include < iostream >" `shouldBe` "\"iostream\""
+    it "accept \"# include < iostream > \\n\"" $
+      exec p_include "# include < iostream > \n" `shouldBe` "\"iostream\""
+
+  describe "space" $ do
+    it "accept '\\n' and ' '" $ do
+      exec space "\n" `shouldBe` "'\\n'"
+      exec space " " `shouldBe` "' '"
+
+  describe "spaces" $ do
+    it "accept \"\"" $ do
+      exec spaces "" `shouldBe` "()"
+
+  describe "p_return_string" $ do
+    it "accept \"return\"" $
+      exec p_return_string "return" `shouldBe` "\"return\""
+
+  describe "p_number" $ do
+    it "accept \"12345\"" $
+      exec p_number "12345" `shouldBe` "12345"
+
+  describe "p_return" $ do
+    it "accept \"return 12345;\"" $
+      exec p_return "return 12345;" `shouldBe` "12345"
+
+  describe "p_function" $ do
+    let source = "int main() { return 123; }"
+    it "accept source" $
+      exec p_function source `shouldBe` "123"
+
+  describe "p_namespace" $ do
+    it "accept \"using namespace std;\"" $
+      exec p_namespace "using namespace std;" `shouldBe` "\"std\""
+
+  describe "p_main" $ do
+    let source = "#include <bits/stdc++.h>\n using namespace std; int main() { return 0; }"
+    it "accept main.cpp file" $
+      exec p_main source `shouldBe` "0"
 
 exec :: Show a => Parser a -> String -> String
 exec p input =
