@@ -151,11 +151,13 @@ p_var_defined = do
   p_semicolon
   return (typ, name, value)
 
-data Expression = ExTuple (Expression, Char, Expression)
-                | ExInteger Integer
-                | ExDouble Double
-                | ExIdentity String
-                  deriving (Show)
+data Expression =
+  ExTuple (Expression, Char, Expression) |
+  ExInteger Integer |
+  ExDouble Double |
+  ExIdentity String |
+  ExList (Expression, [(String, Expression)])
+  deriving (Show)
 
 p_expression :: Parser Expression
 p_expression = do
@@ -205,3 +207,33 @@ p_argument_separate = do
   char ','
   spaces
   return ()
+
+p_mul_div_rest :: Parser (String, Expression)
+p_mul_div_rest = do
+  op <- string "*" <|> string "/"
+  rgt <- try $ spaces *> p_expression_primitive
+  return (op, rgt)
+
+p_mul_div :: Parser Expression
+p_mul_div = do
+  lft <- p_expression_primitive
+  rgt <- many . try $ spaces *> p_mul_div_rest
+  return $
+    case length rgt of
+      0 -> lft
+      _ -> ExList $ (lft, rgt)
+
+p_add_sub_rest :: Parser (String, Expression)
+p_add_sub_rest = do
+  op <- string "+" <|> string "-"
+  rgt <- try $ spaces *> p_mul_div
+  return (op, rgt)
+
+p_add_sub :: Parser Expression
+p_add_sub = do
+  lft <- p_mul_div
+  rgt <- many . try $ spaces *> p_add_sub_rest
+  return $
+    case length rgt of
+      0 -> lft
+      _ -> ExList $ (lft, rgt)
