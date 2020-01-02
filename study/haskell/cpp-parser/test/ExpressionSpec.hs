@@ -120,6 +120,34 @@ spec = do
   describe "p_priority_15" $ do
     it "accept \"1 || 2\"" $ spec_binop p_priority_15 "||"
 
+  describe "p_priority_16" $ do
+    it "accept \"1 = 2\""  $ spec_binop p_priority_16 "="
+    it "accept \"1 += 2\"" $ spec_binop p_priority_16 "+="
+    it "accept \"1 -= 2\"" $ spec_binop p_priority_16 "-="
+    it "accept \"1 *= 2\"" $ spec_binop p_priority_16 "*="
+    it "accept \"1 /= 2\"" $ spec_binop p_priority_16 "/="
+    it "accept \"1 %= 2\"" $ spec_binop p_priority_16 "%="
+    it "accept \"1 <<= 2\"" $ spec_binop p_priority_16 "<<="
+    it "accept \"1 >>= 2\"" $ spec_binop p_priority_16 ">>="
+    it "accept \"1 &= 2\"" $ spec_binop p_priority_16 "&="
+    it "accept \"1 ^= 2\"" $ spec_binop p_priority_16 "^="
+    it "accept \"1 |= 2\"" $ spec_binop p_priority_16 "|="
+    it "accept \"1 ? 2 : 3\"" $ do
+      exec p_priority_16 "1 ? 2 : 3" `shouldBe`
+        (show $ ExTernary (ExInteger 1, ExInteger 2, ExInteger 3))
+    it "accept \"throw 1\"" $ do
+      exec p_priority_16 "throw 1" `shouldBe`
+        (show $ ExThrow (ExInteger 1))
+
+  describe "p_ternary" $ do
+    it "accept \"1 ? 2 : 3\"" $ do
+      exec p_ternary "1 ? 2 : 3" `shouldBe`
+        (show $ ExTernary (ExInteger 1, ExInteger 2, ExInteger 3))
+
+  describe "p_throw" $ do
+    it "accept \"throw 1\"" $ do
+      exec p_throw "throw 1" `shouldBe`
+        (show $ ExThrow (ExInteger 1))
 
 exec :: Show a => Parser a -> String -> String
 exec p input =

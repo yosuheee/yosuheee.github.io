@@ -28,7 +28,9 @@ data Expression =
   ExInteger Integer |
   ExDouble Double |
   ExIdentity String |
-  ExList (Expression, [(String, Expression)])
+  ExList (Expression, [(String, Expression)]) |
+  ExTernary (Expression, Expression, Expression) |
+  ExThrow Expression
   deriving (Show)
 
 p_expression :: Parser Expression
@@ -78,6 +80,11 @@ p_priority_13 = p_binops ["|"] p_priority_12
 p_priority_14 = p_binops ["&&"] p_priority_13
 p_priority_15 = p_binops ["||"] p_priority_14
 
+p_priority_16 =
+  p_ternary <|>
+  p_throw <|>
+  p_binops ["=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", "&=", "^=", "|="] p_priority_15
+
 p_binops :: [String] -> Parser Expression -> Parser Expression
 p_binops ops p_high_priority = try $ do
   lft <- p_high_priority
@@ -92,3 +99,19 @@ p_binops ops p_high_priority = try $ do
       o <- foldl (<|>) x xs
       r <- try $ spaces *> p_high_priority
       return (o, r)
+
+p_ternary :: Parser Expression
+p_ternary = try $ do
+  fst <- p_priority_15
+  spaces >> char '?' >> spaces
+  snd <- p_priority_15
+  spaces >> char ':' >> spaces
+  trd <- p_priority_15
+  return $ ExTernary (fst, snd, trd)
+
+p_throw :: Parser Expression
+p_throw = try $ do
+  string "throw"
+  skipMany1 space
+  fst <- p_priority_15
+  return $ ExThrow fst
