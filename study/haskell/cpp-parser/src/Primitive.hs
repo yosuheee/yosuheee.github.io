@@ -1,22 +1,24 @@
-module Primitive where
+module Primitive (
+  ChrLiteral,
+  DblLiteral,
+  IntLiteral,
+  StrLiteral,
+  p_chr_literal,
+  p_dbl_literal,
+  p_int_literal,
+  p_str_literal,
+  p_identity,
+  p_number
+) where
 
 import Text.Parsec
 import Text.Parsec.String
 
-p_identity :: Parser String
-p_identity = do
-  fst <- p_identity_char
-  snd <- many p_identity_and_digit_char
-  return $ [fst] ++ snd
-
-p_underscore :: Parser Char
-p_underscore = char '_'
-
-p_identity_char :: Parser Char
-p_identity_char = p_underscore <|> letter
-
-p_identity_and_digit_char :: Parser Char
-p_identity_and_digit_char = p_identity_char <|> digit
+import Primitive.Char
+import Primitive.Double
+import Primitive.Identity
+import Primitive.Integer
+import Primitive.String
 
 p_number :: Parser Integer
 p_number = do

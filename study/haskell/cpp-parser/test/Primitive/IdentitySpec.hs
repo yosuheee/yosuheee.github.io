@@ -1,17 +1,13 @@
-module PrimitiveSpec (spec) where
+module Primitive.IdentitySpec (spec) where
 
 import Test.Hspec
 import Text.Parsec
 import Text.Parsec.String
 
-import Primitive
+import Primitive.Identity
 
 spec :: Spec
 spec = do
-  describe "p_number" $ do
-    it "accept '12345'" $
-      exec p_number "12345" `shouldBe` (show 12345)
-
   describe "p_identity" $ do
     it "accept start underscore" $ do
       let input = "_anaconda eggplant"
