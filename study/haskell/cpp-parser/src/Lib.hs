@@ -3,6 +3,7 @@ module Lib where
 import Text.Parsec
 import Text.Parsec.String
 
+import Primitive
 import Expression
 
 p_sharp :: Parser Char

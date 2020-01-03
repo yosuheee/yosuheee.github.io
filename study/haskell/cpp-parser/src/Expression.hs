@@ -3,40 +3,22 @@ module Expression where
 import Text.Parsec
 import Text.Parsec.String
 
-p_identity :: Parser String
-p_identity = do
-  fst <- p_identity_char
-  snd <- many p_identity_and_digit_char
-  return $ [fst] ++ snd
-
-p_underscore :: Parser Char
-p_underscore = char '_'
-
-p_identity_char :: Parser Char
-p_identity_char = p_underscore <|> letter
-
-p_identity_and_digit_char :: Parser Char
-p_identity_and_digit_char = p_identity_char <|> digit
-
-p_number :: Parser Integer
-p_number = do
-  str <- many1 digit
-  return $ read str
+import Primitive
 
 data Expression =
   ExInt Integer |
   ExDouble Double |
   ExIdentity String |
-  ExList (Expression, [(String, Expression)]) |
-  ExTernary (Expression, Expression, Expression) |
-  ExThrow Expression
+  ExTernary Expression Expression Expression |
+  ExThrow Expression |
+  ExBinary String Expression Expression
   deriving (Show)
 
 p_expression :: Parser Expression
 p_expression = p_priority_16
 
-p_primitive :: Parser Expression
-p_primitive = do
+p_expression_primitive :: Parser Expression
+p_expression_primitive = do
   try p_expression_double <|> try p_expression_identity <|> try p_expression_integer
 
 p_expression_integer :: Parser Expression
@@ -56,30 +38,43 @@ p_expression_double = do
   snd <- many1 digit
   return . ExDouble . read $ fst ++ "." ++ snd
 
-p_priority_15 =
-  foldl (\a b -> b a) p_primitive $
-    map p_binops [
-      ["*", "/", "%"],
-      ["+", "-"],
-      ["<<", ">>"],
-      ["<=>"],
-      ["<=", ">=", "<", ">"],
-      ["==", "!="],
-      ["&"], ["^"], ["|"], ["&&"], ["||"]]
+data Infix = InfixL | InfixR
 
-p_priority_16 =
+p_priority_15 =
+  foldl (\a c -> p_binops c a) p_expression_primitive [
+    (InfixL, ["*", "/", "%"]),
+    (InfixL, ["+", "-"]),
+    (InfixL, ["<<", ">>"]),
+    (InfixL, ["<=>"]),
+    (InfixL, ["<=", ">=", "<", ">"]),
+    (InfixL, ["==", "!="]),
+    (InfixL, ["&"]),
+    (InfixL, ["^"]),
+    (InfixL, ["|"]),
+    (InfixL, ["&&"]),
+    (InfixL, ["||"])]
+
+p_priority_16 = 
   p_ternary <|>
   p_throw <|>
-  p_binops ["=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", "&=", "^=", "|="] p_priority_15
+  p_binops (InfixR, ["=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", "&=", "^=", "|="]) p_priority_15
 
-p_binops :: [String] -> Parser Expression -> Parser Expression
-p_binops ops p_high_priority = try $ do
+p_binops :: (Infix, [String]) -> Parser Expression -> Parser Expression
+p_binops (ifx, ops) p_high_priority = try $ do
   lft <- p_high_priority
   rgt <- many . try $ spaces *> rest
   return $
-    case length rgt of
-      0 -> lft
-      _ -> ExList (lft, rgt)
+    case ifx of
+      InfixL -> foldl (\a c -> ExBinary (fst c) a (snd c)) lft rgt
+      InfixR ->
+        case length rgt of
+          0 -> lft
+          _ ->
+            ExBinary (fst g) lft (snd g)
+              where
+                (x : xs) = reverse rgt
+                f a c = ((fst c), (ExBinary (fst a) (snd c) (snd a)))
+                g = foldl f x xs
   where
     (x : xs) = map (try . string) ops
     rest = do
@@ -94,7 +89,7 @@ p_ternary = try $ do
   snd <- p_priority_15
   spaces >> char ':' >> spaces
   trd <- p_priority_15
-  return $ ExTernary (fst, snd, trd)
+  return $ ExTernary fst snd trd
 
 p_throw :: Parser Expression
 p_throw = try $ do
