@@ -22,13 +22,13 @@ p_num_suffix = do
       (SuLL, [ "ll", "lL", "Ll", "LL" ]),
       (SuL, [ "l", "L" ]),
       (SuU, [ "u", "U" ]) ]
-    make :: NumSuffix -> [String] -> Parser NumSuffix
-    make typ lst = try $ do
+    make :: (NumSuffix, [String]) -> Parser NumSuffix
+    make (typ, lst) = try $ do
       let (x : xs) = map (try . string) lst
       foldl (<|>) x xs
       return typ
   foldr (<|>) (return SuNone) $ 
-    map (\(typ, lst) -> make typ lst) target
+    map make target
           
 
 p_num :: Parser Number
