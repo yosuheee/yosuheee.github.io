@@ -7,8 +7,7 @@ module Primitive (
   p_dbl_literal,
   p_int_literal,
   p_str_literal,
-  p_identity,
-  p_number
+  p_identity
 ) where
 
 import Text.Parsec
@@ -19,8 +18,3 @@ import Primitive.Double
 import Primitive.Identity
 import Primitive.Integer
 import Primitive.String
-
-p_number :: Parser Integer
-p_number = do
-  str <- many1 digit
-  return $ read str

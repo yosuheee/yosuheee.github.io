@@ -4,6 +4,8 @@ import Test.Hspec
 import Text.Parsec
 import Text.Parsec.String
 
+import Primitive
+import Primitive.Integer
 import Lib
 
 spec :: Spec
@@ -49,12 +51,12 @@ spec = do
 
   describe "p_return" $ do
     it "accept \"return 12345;\"" $
-      exec p_return "return 12345;" `shouldBe` "12345"
+      exec p_return "return 12345;" `shouldBe` (show $ IDec ISNone "12345")
 
   describe "p_function" $ do
     let source = "int main() { return 123; }"
     it "accept source" $
-      exec p_function source `shouldBe` "123"
+      exec p_function source `shouldBe` (show $ IDec ISNone "123")
 
   describe "p_namespace" $ do
     it "accept \"using namespace std;\"" $
@@ -63,7 +65,7 @@ spec = do
   describe "p_main" $ do
     it "accept main.cpp file" $ do
       input <- readFile "./test/main.cpp"
-      exec p_main input `shouldBe` "0"
+      exec p_main input `shouldBe` (show $ IDec ISNone "0")
 
   describe "p_func" $ do
     it "accept \"a()\"" $ do
