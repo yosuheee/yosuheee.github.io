@@ -8,9 +8,9 @@ import Text.Parsec.String
 import Primitive
 import Expression
 
-ex_int num = ExPrimitive $ PInteger (NuDec (show num) SuNone)
-ex_identity str = ExPrimitive $ PIdentity str
-ex_double num = ExPrimitive $ PDouble (DblLiteral DbNone (show num) "+1") 
+ex_int num = ExInteger (NuDec (show num) SuNone)
+ex_identity str = ExIdentity str
+ex_double num = ExDouble (DblLiteral DbNone (show num) "+1") 
 
 spec :: Spec
 spec = do

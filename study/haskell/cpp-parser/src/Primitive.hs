@@ -3,21 +3,6 @@ module Primitive where
 import Text.Parsec
 import Text.Parsec.String
 
-data Primitive =
-  PDouble DblLiteral |
-  PInteger Number |
-  PString StrLiteral |
-  PChar ChrLiteral |
-  PIdentity String deriving Show
-
-p_primitive :: Parser Primitive
-p_primitive =
-  (PDouble <$> p_double) <|>
-  (PInteger <$> p_num) <|>
-  (PString <$> p_string_literal) <|>
-  (PChar <$> p_chr_literal) <|>
-  (PIdentity <$> p_identity)
-
 data DblSuffix = DbNone | Dbf | DbF | Dbl | DbL deriving Show
 
 data DblLiteral = DblLiteral DblSuffix String String deriving Show

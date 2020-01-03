@@ -8,7 +8,11 @@ import Primitive
 data Infix = InfixL | InfixR deriving (Show)
 
 data Expression =
-  ExPrimitive Primitive |
+  ExDouble DblLiteral |
+  ExInteger Number |
+  ExString StrLiteral |
+  ExCharacter ChrLiteral |
+  ExIdentity String |
   ExPrefix String Expression |
   ExSuffix String Expression |
   ExBinary String Expression Expression |
@@ -20,12 +24,17 @@ type PE = Parser Expression
 p_expression :: PE
 p_expression = p_priority_16
 
-p_expression_primitive :: PE
-p_expression_primitive = ExPrimitive <$> p_primitive
+p_primitive :: PE
+p_primitive =
+  (ExDouble <$> p_double) <|>
+  (ExInteger <$> p_num) <|>
+  (ExString <$> p_string_literal) <|>
+  (ExCharacter <$> p_chr_literal) <|>
+  (ExIdentity <$> p_identity)
 
 p_priority_2 :: PE
 p_priority_2 = try $ do
-  value <- p_expression_primitive
+  value <- p_primitive
   prefs <- many p_prefs
   return $ foldl (\a c -> ExPrefix c a) value prefs
   where
