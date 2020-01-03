@@ -28,6 +28,12 @@ spec = do
     it "accept '+1 + ++a + a++'" $ do
       exec p_expression "+1 + ++a + a++" `shouldBe`
         (show $ ExBinary "+" (ExBinary "+" (ExSuffix "+" (ExInt 1)) (ExSuffix "++" (ExIdentity "a"))) (ExPrefix "++" (ExIdentity "a")))
+    it "accept '1 && 2'" $ do
+      exec p_expression "1 && 2" `shouldBe`
+        (show $ ExBinary "&&" (ExInt 1) (ExInt 2))
+    it "accept '!~1'" $ do
+      exec p_expression "!~1" `shouldBe`
+        (show $ ExSuffix "!" (ExSuffix "~" (ExInt 1)))
 
   describe "p_ternary" $ do
     it "accept '1 ? 2 : 3'" $ do
@@ -61,28 +67,6 @@ spec = do
       ["==", "!="],
       ["&"], ["^"], ["|"], ["&&"], ["||"],
       ["=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", "&=", "^=", "|="]]
-
-  it "priority 3 suffix" $ do
-    exec p_logical_negative "!1" `shouldBe` (
-      show $ ExSuffix "!" (ExInt 1))
-    exec p_bit_negative "~1" `shouldBe` (
-      show $ ExSuffix "~" (ExInt 1))
-    exec p_suffix_increment "++a" `shouldBe` (
-      show $ ExSuffix "++" (ExIdentity "a"))
-    exec p_suffix_decrement "--a" `shouldBe` (
-      show $ ExSuffix "--" (ExIdentity "a"))
-    exec p_positive_sign "+a" `shouldBe` (
-      show $ ExSuffix "+" (ExIdentity "a"))
-    exec p_negative_sign "-a" `shouldBe` (
-      show $ ExSuffix "-" (ExIdentity "a"))
-    exec p_indirect_reference "*a" `shouldBe` (
-      show $ ExSuffix "*" (ExIdentity "a"))
-    exec p_get_address "&a" `shouldBe` (
-      show $ ExSuffix "&" (ExIdentity "a"))
-    exec p_sizeof "sizeof a" `shouldBe` (
-      show $ ExSuffix "sizeof" (ExIdentity "a"))
-    exec p_sizeof "sizeofa" `shouldNotBe` (
-      show $ ExSuffix "sizeof" (ExIdentity "a"))
 
   it "priority 2 unary" $ do
     exec p_prefix_increment "a++" `shouldBe` (

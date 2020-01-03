@@ -11,7 +11,6 @@ data Expression =
   ExInt Integer |
   ExDouble Double |
   ExIdentity String |
-  ExUnary String Expression |
   ExBinary String Expression Expression |
   ExTernary Expression Expression Expression |
   ExSuffix String Expression |
@@ -69,54 +68,47 @@ p_prefix_decrement :: PE
 p_prefix_decrement = p_prefix "--" (ExIdentity <$> p_identity) (spaces >> string "--")
 
 p_priority_3 :: PE
-p_priority_3 = 
-  p_logical_negative <|>
-  p_bit_negative <|>
-  p_positive_sign <|>
-  p_negative_sign <|>
-  p_suffix_increment <|>
-  p_suffix_decrement <|>
-  p_indirect_reference <|>
-  p_get_address <|>
-  p_sizeof <|>
-  p_priority_2
+p_priority_3 = try $ do
+  prefs <- many p_priority_3_pref
+  value <- p_priority_2
+  return $ foldr (\a c -> ExSuffix a c) value prefs
 
-p_logical_negative :: PE
-p_logical_negative = p_suffix "!" (char '!' >> spaces) p_priority_2
+p_priority_3_pref :: Parser String
+p_priority_3_pref = choice 
+  [ try (string "++")
+  , try (string "--")
+  , string "+"
+  , string "-"
+  , string "!"
+  , string "~"
+  , string "*"
+  , string "&" ]
 
-p_bit_negative :: PE
-p_bit_negative = p_suffix "~" (char '~' >> spaces) p_priority_2
+p_priority_5_15 = p_priority_12_15
 
-p_positive_sign :: PE
-p_positive_sign = p_suffix "+" (char '+' >> spaces) p_priority_2
-
-p_negative_sign :: PE
-p_negative_sign = p_suffix "-" (char '-' >> spaces) p_priority_2
-
-p_suffix_increment :: PE
-p_suffix_increment = p_suffix "++" (string "++" >> spaces) (ExIdentity <$> p_identity)
-
-p_suffix_decrement :: PE
-p_suffix_decrement = p_suffix "--" (string "--" >> spaces) (ExIdentity <$> p_identity)
-
-p_indirect_reference :: PE
-p_indirect_reference = p_suffix "*" (char '*' >> spaces) (ExIdentity <$> p_identity)
-
-p_get_address :: PE
-p_get_address = p_suffix "&" (char '&' >> spaces) (ExIdentity <$> p_identity)
-
-p_sizeof :: PE
-p_sizeof = p_suffix "sizeof" (string "sizeof" >> skipMany1 space) p_priority_2
-
-p_priority_5_15 =
+p_priority_5_10 =
   foldl (\a c -> p_binops c a) p_priority_3 [
     (InfixL, ["*", "/", "%"]),
     (InfixL, ["+", "-"]),
     (InfixL, ["<<", ">>"]),
     (InfixL, ["<=>"]),
     (InfixL, ["<=", ">=", "<", ">"]),
-    (InfixL, ["==", "!="]),
-    (InfixL, ["&"]),
+    (InfixL, ["==", "!="])]
+
+p_priority_11 = try $ do
+  lft <- p_priority_5_10
+  rgt <- many . try $ spaces *> rest
+  return $
+    foldl (\a c -> ExBinary (fst c) a (snd c)) lft rgt
+  where
+    rest = do
+      o <- string "&"
+      notFollowedBy $ char '&'
+      r <- try $ spaces *> p_priority_5_10
+      return (o, r)
+
+p_priority_12_15 =
+  foldl (\a c -> p_binops c a) p_priority_11 [
     (InfixL, ["^"]),
     (InfixL, ["|"]),
     (InfixL, ["&&"]),
