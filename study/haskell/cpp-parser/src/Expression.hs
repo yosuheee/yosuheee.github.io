@@ -8,8 +8,8 @@ import Primitive
 data Infix = InfixL | InfixR deriving (Show)
 
 data Expression =
-  ExDbl DblLiteral |
   ExChar Char |
+  ExDouble Double |
   ExInteger Integer |
   ExString String |
   ExIdentity String |
@@ -26,7 +26,7 @@ p_expression = p_priority_16
 
 p_primitive :: PE
 p_primitive =
-  (ExDbl <$> p_dbl_literal) <|>
+  (ExDouble <$> p_double) <|>
   (ExInteger <$> p_integer) <|>
   (ExString <$> p_string) <|>
   (ExChar <$> p_char) <|>

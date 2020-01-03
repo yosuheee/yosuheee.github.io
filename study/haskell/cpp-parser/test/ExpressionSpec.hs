@@ -11,8 +11,6 @@ import Primitive.Integer
 import Primitive.String
 import Expression
 
-ex_double num = ExDbl (DblLiteral DSNone (show num) "+1") 
-
 spec :: Spec
 spec = do
   describe "p_expression" $ do
@@ -21,7 +19,7 @@ spec = do
     it "accept 'ana'" $
       exec p_expression "ana" `shouldBe` (show $ ExIdentity "ana")
     it "accept '1.5'" $
-      exec p_expression "1.5" `shouldBe` (show $ ex_double 1.5)
+      exec p_expression "1.5" `shouldBe` (show $ ExDouble 1.5)
     it "accept '1 ? 2 : 3'" $ do
       exec p_expression "1 ? 2 : 3" `shouldBe`
         (show $ ExTernary (ExInteger 1) (ExInteger 2) (ExInteger 3))
