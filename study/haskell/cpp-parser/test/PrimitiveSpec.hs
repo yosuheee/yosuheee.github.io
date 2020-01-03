@@ -105,32 +105,43 @@ spec = do
     it "\"test\"s" $ do
       exec p_string_literal "\"test\"s" `shouldBe` (show $ StrLiteral StNone Sts "test")
 
-  describe "escape sequence" $ do
+  it "escaped str" $ do
     let expected str = show $ StrLiteral StNone StNon str
-    it "\"test\\\\\"" $ do
-      exec p_string_literal "\"test\\\\\"" `shouldBe` expected "test\\"
-    it "\"test\\'\"" $ do
-      exec p_string_literal "\"test\\'\"" `shouldBe` expected "test'"
-    it "\"test\\\"\"" $ do
-      exec p_string_literal "\"test\\\"\"" `shouldBe` expected "test\""
-    it "\"test\\a\"" $ do
-      exec p_string_literal "\"test\\a\"" `shouldBe` expected "test\a"
-    it "\"test\\b\"" $ do
-      exec p_string_literal "\"test\\b\"" `shouldBe` expected "test\b"
-    it "\"test\\f\"" $ do
-      exec p_string_literal "\"test\\f\"" `shouldBe` expected "test\f"
-    it "\"test\\n\"" $ do
-      exec p_string_literal "\"test\\n\"" `shouldBe` expected "test\n"
-    it "\"test\\r\"" $ do
-      exec p_string_literal "\"test\\r\"" `shouldBe` expected "test\r"
-    it "\"test\\t\"" $ do
-      exec p_string_literal "\"test\\t\"" `shouldBe` expected "test\t"
-    it "\"test\\0\"" $ do
-      exec p_string_literal "\"test\\0\"" `shouldBe` expected "test\0"
-    it "\"test\\xff\"" $ do
-      exec p_string_literal "\"test\\xff\"" `shouldBe` expected "test\\xff"
-    it "\"test\\o77\"" $ do
-      exec p_string_literal "\"test\\o77\"" `shouldBe` expected "test\\o77"
+    exec p_string_literal "\"test\\\\\"" `shouldBe` expected "test\\"
+    exec p_string_literal "\"test\\'\"" `shouldBe` expected "test'"
+    exec p_string_literal "\"test\\\"\"" `shouldBe` expected "test\""
+    exec p_string_literal "\"test\\a\"" `shouldBe` expected "test\a"
+    exec p_string_literal "\"test\\b\"" `shouldBe` expected "test\b"
+    exec p_string_literal "\"test\\f\"" `shouldBe` expected "test\f"
+    exec p_string_literal "\"test\\n\"" `shouldBe` expected "test\n"
+    exec p_string_literal "\"test\\r\"" `shouldBe` expected "test\r"
+    exec p_string_literal "\"test\\t\"" `shouldBe` expected "test\t"
+    exec p_string_literal "\"test\\0\"" `shouldBe` expected "test\0"
+    exec p_string_literal "\"test\\xff\"" `shouldBe` expected "test\\xff"
+    exec p_string_literal "\"test\\o77\"" `shouldBe` expected "test\\o77"
+
+  describe "p_chr prefix" $ do
+    it "u8't'" $ do
+      exec p_chr_literal "u8't'" `shouldBe` (show $ ChrLiteral Chu8 't')
+    it "u't'" $ do
+      exec p_chr_literal "u't'" `shouldBe` (show $ ChrLiteral Chu 't')
+    it "U't'" $ do
+      exec p_chr_literal "U't'" `shouldBe` (show $ ChrLiteral ChU 't')
+    it "L't'" $ do
+      exec p_chr_literal "L't'" `shouldBe` (show $ ChrLiteral ChL 't')
+
+  it "escaped chr" $ do
+    exec p_chr_literal "'\\\\'" `shouldBe` (show $ ChrLiteral ChNone '\\')
+    exec p_chr_literal "'\\\''" `shouldBe` (show $ ChrLiteral ChNone '\'')
+    exec p_chr_literal "'\\\"'" `shouldBe` (show $ ChrLiteral ChNone '"')
+    exec p_chr_literal "'\\a'" `shouldBe` (show $ ChrLiteral ChNone '\a')
+    exec p_chr_literal "'\\b'" `shouldBe` (show $ ChrLiteral ChNone '\b')
+    exec p_chr_literal "'\\f'" `shouldBe` (show $ ChrLiteral ChNone '\f')
+    exec p_chr_literal "'\\n'" `shouldBe` (show $ ChrLiteral ChNone '\n')
+    exec p_chr_literal "'\\r'" `shouldBe` (show $ ChrLiteral ChNone '\r')
+    exec p_chr_literal "'\\t'" `shouldBe` (show $ ChrLiteral ChNone '\t')
+    exec p_chr_literal "'\\0'" `shouldBe` (show $ ChrLiteral ChNone '\0')
+      
 
 exec :: Show a => Parser a -> String -> String
 exec p input =

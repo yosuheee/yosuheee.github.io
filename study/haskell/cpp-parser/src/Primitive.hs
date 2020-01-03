@@ -66,6 +66,49 @@ p_dec = try $ do
   suff <- p_num_suffix
   return $ NuDec ([head] ++ rest) suff
 
+data ChrPrefix =
+  Chu8 | Chu | ChU | ChL | ChNone deriving Show
+
+data ChrLiteral =
+  ChrLiteral ChrPrefix Char deriving Show
+
+p_chr_prefix :: Parser ChrPrefix
+p_chr_prefix = do
+  let
+    target = [
+      (Chu8, ["u8"]), (ChL, ["L"]), (Chu, ["u"]), (ChU, ["U"]) ]
+    make :: (ChrPrefix, [String]) -> Parser ChrPrefix
+    make (typ, lst) = try $ do
+      let (x : xs) = map (try . string) lst
+      foldl (<|>) x xs
+      return typ
+  foldr (<|>) (return ChNone) $ 
+    map make target
+
+p_chr_literal :: Parser ChrLiteral
+p_chr_literal = try $ do
+  pref <- p_chr_prefix
+  char '\''
+  chr <- p_escaped_char '\''
+  char '\''
+  return $ ChrLiteral pref chr
+
+p_escaped_char :: Char -> Parser Char
+p_escaped_char c = 
+  escaped_char <|> noneOf [c]
+  where
+    escaped_char = char '\\' >> (
+      (char '\\' >> return '\\') <|> 
+      (char '\'' >> return '\'') <|> 
+      (char '\"' >> return '\"') <|>
+      (char 'a'  >> return '\a') <|>
+      (char 'b'  >> return '\b') <|> 
+      (char 'f'  >> return '\f') <|> 
+      (char 'n'  >> return '\n') <|> 
+      (char 'r'  >> return '\r') <|> 
+      (char 't'  >> return '\t') <|> 
+      (char '0'  >> return '\0'))
+
 data StrPrefix =
   Stu8 | StL | Stu | StU | 
   StR | Stu8R | StLR | StuR | StUR | 
@@ -101,20 +144,8 @@ p_string_literal = try $ do
 
 p_escaped_string :: Parser String
 p_escaped_string = do
-  many (escaped_char <|> noneOf "\"")
-  where
-    escaped_char = char '\\' >> (
-      (char '\\' >> return '\\') <|> 
-      (char '\'' >> return '\'') <|> 
-      (char '\"' >> return '\"') <|>
-      (char 'a'  >> return '\a') <|>
-      (char 'b'  >> return '\b') <|> 
-      (char 'f'  >> return '\f') <|> 
-      (char 'n'  >> return '\n') <|> 
-      (char 'r'  >> return '\r') <|> 
-      (char 't'  >> return '\t') <|> 
-      (char '0'  >> return '\0') <|>
-      return '\\')
+  str <- many (try (p_escaped_char '"') <|> noneOf "\"")
+  return str
 
 p_identity :: Parser String
 p_identity = do
