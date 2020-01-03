@@ -29,7 +29,6 @@ p_num_suffix = do
       return typ
   foldr (<|>) (return SuNone) $ 
     map make target
-          
 
 p_num :: Parser Number
 p_num = p_bin <|> p_hex <|> p_oct <|> p_dec
