@@ -4,6 +4,10 @@ import Text.Parsec
 import Text.Parsec.String
 
 import Primitive
+import Primitive.Char
+import Primitive.Double
+import Primitive.Integer
+import Primitive.String
 
 data Infix = InfixL | InfixR deriving (Show)
 

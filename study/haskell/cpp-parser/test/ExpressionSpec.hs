@@ -5,7 +5,10 @@ import Test.Hspec
 import Text.Parsec
 import Text.Parsec.String
 
-import Primitive
+import Primitive.Char
+import Primitive.Double
+import Primitive.Integer
+import Primitive.String
 import Expression
 
 ex_int num = ExInt (IDec ISNone (show num))
