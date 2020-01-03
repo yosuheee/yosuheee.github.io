@@ -37,6 +37,9 @@ spec = do
     it "accept '++a++'" $ do
       exec p_expression "++a--" `shouldBe`
         (show $ ExSuffix "++" (ExPrefix "--" (ExIdentity "a")))
+    it "accept 'a++--'" $ do
+      exec p_expression "a++--" `shouldBe`
+        (show $ ExPrefix "--" (ExPrefix "++" (ExIdentity "a")))
 
   describe "p_ternary" $ do
     it "accept '1 ? 2 : 3'" $ do

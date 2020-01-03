@@ -46,20 +46,20 @@ p_expression_double = do
 p_priority_2 :: PE
 p_priority_2 = try $ do
   value <- p_expression_primitive
-  prefs <- many p_suffs
-  return $ foldr (\a c -> ExPrefix a c) value prefs
+  prefs <- many p_prefs
+  return $ foldl (\a c -> ExPrefix c a) value prefs
   where
-    p_suffs = choice
+    p_prefs = choice
       [ try (string "++")
       , try (string "--") ]
 
 p_priority_3 :: PE
 p_priority_3 = try $ do
-  prefs <- many p_prefs
+  suffs <- many p_suffs
   value <- p_priority_2
-  return $ foldr (\a c -> ExSuffix a c) value prefs
+  return $ foldr (\a c -> ExSuffix a c) value suffs
   where
-    p_prefs = choice
+    p_suffs = choice
       [ try (string "++")
       , try (string "--")
       , string "+", string "-", string "!"
