@@ -9,9 +9,10 @@ data Expression =
   ExInt Integer |
   ExDouble Double |
   ExIdentity String |
+  ExUnary String Expression |
+  ExBinary String Expression Expression |
   ExTernary Expression Expression Expression |
-  ExThrow Expression |
-  ExBinary String Expression Expression
+  ExThrow Expression
   deriving (Show)
 
 p_expression :: Parser Expression
@@ -40,8 +41,88 @@ p_expression_double = do
 
 data Infix = InfixL | InfixR
 
-p_priority_15 =
-  foldl (\a c -> p_binops c a) p_expression_primitive [
+p_priority_2 :: Parser Expression
+p_priority_2 = 
+  p_prefix_increment <|>
+  p_prefix_decrement <|>
+  p_expression_primitive
+
+p_prefix_increment :: Parser Expression
+p_prefix_increment = try $ do
+  val <- p_identity
+  spaces
+  string "++"
+  return $ ExUnary " ++" (ExIdentity val)
+
+p_prefix_decrement :: Parser Expression
+p_prefix_decrement = try $ do
+  val <- p_identity
+  spaces
+  string "--"
+  return $ ExUnary " --" (ExIdentity val)
+
+p_priority_3 :: Parser Expression
+p_priority_3 = 
+  p_logical_negative <|>
+  p_bit_negative <|>
+  p_suffix_increment <|>
+  p_suffix_decrement <|>
+  p_indirect_reference <|>
+  p_get_address <|>
+  p_sizeof <|>
+  p_priority_2
+
+p_logical_negative :: Parser Expression
+p_logical_negative = try $ do
+  char '!'
+  spaces
+  val <- p_expression
+  return $ ExUnary "!" val
+
+p_bit_negative :: Parser Expression
+p_bit_negative = try $ do
+  char '~'
+  spaces
+  val <- p_expression
+  return $ ExUnary "~" val
+
+p_suffix_increment :: Parser Expression
+p_suffix_increment = try $ do
+  string "++"
+  spaces
+  val <- p_identity
+  return $ ExUnary "++ " (ExIdentity val)
+
+p_suffix_decrement :: Parser Expression
+p_suffix_decrement = try $ do
+  string "--"
+  spaces
+  val <- p_identity
+  return $ ExUnary "-- " (ExIdentity val)
+
+p_indirect_reference :: Parser Expression
+p_indirect_reference = try $ do
+  string "*"
+  spaces
+  val <- p_identity
+  return $ ExUnary "*" (ExIdentity val)
+
+p_get_address :: Parser Expression
+p_get_address = try $ do
+  string "&"
+  spaces
+  val <- p_identity
+  return $ ExUnary "&" (ExIdentity val)
+
+p_sizeof :: Parser Expression
+p_sizeof = try $ do
+  string "sizeof"
+  skipMany1 space
+  val <- p_expression
+  return $ ExUnary "sizeof" val
+
+p_priority_5_15 =
+  foldl (\a c -> p_binops c a) p_priority_3 [
     (InfixL, ["*", "/", "%"]),
     (InfixL, ["+", "-"]),
     (InfixL, ["<<", ">>"]),
@@ -57,7 +138,7 @@ p_priority_15 =
 p_priority_16 = 
   p_ternary <|>
   p_throw <|>
-  p_binops (InfixR, ["=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", "&=", "^=", "|="]) p_priority_15
+  p_binops (InfixR, ["=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", "&=", "^=", "|="]) p_priority_5_15
 
 p_binops :: (Infix, [String]) -> Parser Expression -> Parser Expression
 p_binops (ifx, ops) p_high_priority = try $ do
@@ -84,16 +165,16 @@ p_binops (ifx, ops) p_high_priority = try $ do
 
 p_ternary :: Parser Expression
 p_ternary = try $ do
-  fst <- p_priority_15
+  fst <- p_priority_5_15
   spaces >> char '?' >> spaces
-  snd <- p_priority_15
+  snd <- p_priority_5_15
   spaces >> char ':' >> spaces
-  trd <- p_priority_15
+  trd <- p_priority_5_15
   return $ ExTernary fst snd trd
 
 p_throw :: Parser Expression
 p_throw = try $ do
   string "throw"
   skipMany1 space
-  fst <- p_priority_15
-  return $ ExThrow fst
+  fst <- p_priority_5_15
+  return $ ExUnary "throw" fst
