@@ -34,6 +34,9 @@ spec = do
     it "accept '!~1'" $ do
       exec p_expression "!~1" `shouldBe`
         (show $ ExSuffix "!" (ExSuffix "~" (ExInt 1)))
+    it "accept '++a++'" $ do
+      exec p_expression "++a--" `shouldBe`
+        (show $ ExSuffix "++" (ExPrefix "--" (ExIdentity "a")))
 
   describe "p_ternary" $ do
     it "accept '1 ? 2 : 3'" $ do
@@ -57,22 +60,40 @@ spec = do
     exec p_priority_5_15 "1 - 2 / 3 + 4 == 5" `shouldBe` (show $
       ExBinary "==" (ExBinary "+" (ExBinary "-" (ExInt 1) (ExBinary "/" (ExInt 2) (ExInt 3))) (ExInt 4)) (ExInt 5))
 
+  it "p_priority_2" $ do
+    exec p_priority_2 "a++" `shouldBe` (
+      show $ ExPrefix "++" (ExIdentity "a"))
+    exec p_priority_2 "a--" `shouldBe` (
+      show $ ExPrefix "--" (ExIdentity "a"))
+
+  it "p_priority_3" $ do
+    exec p_priority_3 "++a" `shouldBe` (
+      show $ ExSuffix "++" (ExIdentity "a"))
+    exec p_priority_3 "--a" `shouldBe` (
+      show $ ExSuffix "--" (ExIdentity "a"))
+    exec p_priority_3 "+a" `shouldBe` (
+      show $ ExSuffix "+" (ExIdentity "a"))
+    exec p_priority_3 "-a" `shouldBe` (
+      show $ ExSuffix "-" (ExIdentity "a"))
+    exec p_priority_3 "!1" `shouldBe` (
+      show $ ExSuffix "!" (ExInt 1))
+    exec p_priority_3 "~1" `shouldBe` (
+      show $ ExSuffix "~" (ExInt 1))
+    exec p_priority_3 "*a" `shouldBe` (
+      show $ ExSuffix "*" (ExIdentity "a"))
+    exec p_priority_3 "&a" `shouldBe` (
+      show $ ExSuffix "&" (ExIdentity "a"))
+
   describe "binary operator" $ do
     flip forM_ it_spec_binop $ concat [
       ["*", "/", "%"],
       ["+", "-"],
       ["<<", ">>"],
       ["<=>"],
-      ["<=", ">=", "<", ">"],
+      ["<", ">", "<=", ">="],
       ["==", "!="],
       ["&"], ["^"], ["|"], ["&&"], ["||"],
       ["=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", "&=", "^=", "|="]]
-
-  it "priority 2 unary" $ do
-    exec p_prefix_increment "a++" `shouldBe` (
-      show $ ExPrefix "++" (ExIdentity "a"))
-    exec p_prefix_decrement "a--" `shouldBe` (
-      show $ ExPrefix "--" (ExIdentity "a"))
 
 exec :: Show a => Parser a -> String -> String
 exec p input =
