@@ -3,12 +3,12 @@ module Primitive where
 import Text.Parsec
 import Text.Parsec.String
 
-data DblSuffix = DbNone | Dbf | DbF | Dbl | DbL deriving Show
+data DblSuffix = DSNone | DSf | DSF | DSl | DSL deriving Show
 
 data DblLiteral = DblLiteral DblSuffix String String deriving Show
 
-p_dbl :: Parser DblLiteral
-p_dbl =
+p_dbl_literal :: Parser DblLiteral
+p_dbl_literal =
   p_all_double <|> p_front_double <|> p_simple_double
 
 p_double_suffix :: Parser DblSuffix
@@ -18,8 +18,8 @@ p_double_suffix = try $ do
     make (typ, str) = try $ do
       string str
       return typ
-  foldr (<|>) (return DbNone) $ 
-    map make [ (Dbf, "f"), (DbF, "F"), (Dbl, "l"), (DbL, "L") ]
+  foldr (<|>) (return DSNone) $ 
+    map make [ (DSf, "f"), (DSF, "F"), (DSl, "l"), (DSL, "L") ]
 
 p_simple_double :: Parser DblLiteral
 p_simple_double = try $ do
@@ -52,60 +52,68 @@ p_exponent = try $ do
   rest <- many1 digit
   return $ [sign] ++ rest
 
-data IntSuffix = SuNone | SuU | SuL | SuLU | SuLL | SuLLU deriving Show
+data IntSuffix = ISNone | ISU | ISL | ISLU | ISLL | ISLLU deriving Show
 
 data IntLiteral =
-  NuBin IntSuffix String |
-  NuOct IntSuffix String |
-  NuDec IntSuffix String |
-  NuHex IntSuffix String
+  IBin IntSuffix String |
+  IOct IntSuffix String |
+  IDec IntSuffix String |
+  IHex IntSuffix String
   deriving Show
 
-p_num_suffix :: Parser IntSuffix
-p_num_suffix = do
+p_int_literal :: Parser IntLiteral
+p_int_literal = p_bin <|> p_hex <|> p_oct <|> p_dec
+
+p_int_suffix :: Parser IntSuffix
+p_int_suffix = do
   let
     target = [
-      (SuLLU, [ "llu", "ull", "llU", "ulL", "lLu", "uLl", "lLU", "uLL",
+      (ISLLU, [ "llu", "ull", "llU", "ulL", "lLu", "uLl", "lLU", "uLL",
                 "Llu", "Ull", "LlU", "UlL", "LLu", "ULl", "LLU", "ULL" ]),
-      (SuLU, [ "lu", "ul", "lU", "uL", "Lu", "Ul", "LU", "UL" ]),
-      (SuLL, [ "ll", "lL", "Ll", "LL" ]),
-      (SuL, [ "l", "L" ]),
-      (SuU, [ "u", "U" ]) ]
+      (ISLU, [ "lu", "ul", "lU", "uL", "Lu", "Ul", "LU", "UL" ]),
+      (ISLL, [ "ll", "lL", "Ll", "LL" ]),
+      (ISL, [ "l", "L" ]),
+      (ISU, [ "u", "U" ]) ]
     make :: (IntSuffix, [String]) -> Parser IntSuffix
     make (typ, lst) = try $ do
       let (x : xs) = map (try . string) lst
       foldl (<|>) x xs
       return typ
-  foldr (<|>) (return SuNone) $ 
+  foldr (<|>) (return ISNone) $ 
     map make target
 
-p_int :: Parser IntLiteral
-p_int = p_bin <|> p_hex <|> p_oct <|> p_dec
-
-p_num_make :: (IntSuffix -> String -> IntLiteral) -> String -> Parser Char -> Parser IntLiteral
-p_num_make typ pre chr = try $ do
+p_int_make :: (IntSuffix -> String -> IntLiteral) -> String -> Parser Char -> Parser IntLiteral
+p_int_make typ pre chr = try $ do
   string pre
   rest <- many1 chr
-  suff <- p_num_suffix
+  suff <- p_int_suffix
   return $ typ suff rest
 
 p_bin :: Parser IntLiteral
-p_bin = p_num_make NuBin "0b" (oneOf "01")
+p_bin = p_int_make IBin "0b" (oneOf "01")
 
 p_hex :: Parser IntLiteral
-p_hex = p_num_make NuHex "0x" hexDigit
+p_hex = p_int_make IHex "0x" hexDigit
 
 p_oct :: Parser IntLiteral
-p_oct = p_num_make NuOct "0" octDigit
+p_oct = p_int_make IOct "0" octDigit
 
 p_dec :: Parser IntLiteral
-p_dec = p_num_make NuDec "" digit
+p_dec = p_int_make IDec "" digit
 
 data ChrPrefix =
-  Chu8 | Chu | ChU | ChL | ChNone deriving Show
+  CSu8 | CSu | CSU | CSL | CSNone deriving Show
 
 data ChrLiteral =
   ChrLiteral ChrPrefix Char deriving Show
+
+p_chr_literal :: Parser ChrLiteral
+p_chr_literal = try $ do
+  pref <- p_chr_prefix
+  char '\''
+  chr <- p_escaped_char '\''
+  char '\''
+  return $ ChrLiteral pref chr
 
 p_chr_prefix :: Parser ChrPrefix
 p_chr_prefix = do
@@ -114,16 +122,8 @@ p_chr_prefix = do
     make (typ, str) = try $ do
       try . string $ str
       return typ
-  foldr (<|>) (return ChNone) $ 
-    map make [ (Chu8, "u8"), (ChL, "L"), (Chu, "u"), (ChU, "U") ]
-
-p_chr :: Parser ChrLiteral
-p_chr = try $ do
-  pref <- p_chr_prefix
-  char '\''
-  chr <- p_escaped_char '\''
-  char '\''
-  return $ ChrLiteral pref chr
+  foldr (<|>) (return CSNone) $ 
+    map make [ (CSu8, "u8"), (CSL, "L"), (CSu, "u"), (CSU, "U") ]
 
 p_escaped_char :: Char -> Parser Char
 p_escaped_char c = 
@@ -142,21 +142,30 @@ p_escaped_char c =
       (char '0'  >> return '\0'))
 
 data StrPrefix =
-  Stu8 | StL | Stu | StU | 
-  StR | Stu8R | StLR | StuR | StUR | 
+  SPu8 | SPL | SPu | SPU | 
+  SPR | SPu8R | SPLR | SPuR | SPUR | 
   StNone deriving Show
 
 data StrSuffix =
-  Sts | StNon deriving Show
+  SSs | SSNone deriving Show
 
 data StrLiteral = StrLiteral StrPrefix StrSuffix String deriving Show
+
+p_str_literal :: Parser StrLiteral
+p_str_literal = try $ do
+  pref <- p_str_prefix
+  char '"'
+  str <- p_escaped_string
+  char '"'
+  suff <- p_str_suffix
+  return $ StrLiteral pref suff str
 
 p_str_prefix :: Parser StrPrefix
 p_str_prefix = do
   let
     target = [
-      (Stu8R, ["u8R"]), (StLR, ["LR"]), (StuR, ["uR"]), (StUR, ["UR"]),
-      (Stu8, ["u8"]), (StL, ["L"]), (Stu, ["u"]), (StU, ["U"]), (StR, ["R"]) ]
+      (SPu8R, ["u8R"]), (SPLR, ["LR"]), (SPuR, ["uR"]), (SPUR, ["UR"]),
+      (SPu8, ["u8"]), (SPL, ["L"]), (SPu, ["u"]), (SPU, ["U"]), (SPR, ["R"]) ]
     make :: (StrPrefix, [String]) -> Parser StrPrefix
     make (typ, lst) = try $ do
       let (x : xs) = map (try . string) lst
@@ -165,19 +174,11 @@ p_str_prefix = do
   foldr (<|>) (return StNone) $ 
     map make target
 
-p_str :: Parser StrLiteral
-p_str = try $ do
-  pref <- p_str_prefix
-  char '"'
-  str <- p_escaped_string
-  char '"'
-  suff <- (char 's' *> return Sts) <|> (return StNon)
-  return $ StrLiteral pref suff str
+p_str_suffix :: Parser StrSuffix
+p_str_suffix = (char 's' *> return SSs) <|> (return SSNone)
 
 p_escaped_string :: Parser String
-p_escaped_string = do
-  str <- many (try (p_escaped_char '"') <|> noneOf "\"")
-  return str
+p_escaped_string = many (try (p_escaped_char '"') <|> noneOf "\"")
 
 p_identity :: Parser String
 p_identity = do

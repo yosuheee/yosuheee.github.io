@@ -26,10 +26,10 @@ p_expression = p_priority_16
 
 p_primitive :: PE
 p_primitive =
-  (ExDbl <$> p_dbl) <|>
-  (ExInt <$> p_int) <|>
-  (ExStr <$> p_str) <|>
-  (ExChr <$> p_chr) <|>
+  (ExDbl <$> p_dbl_literal) <|>
+  (ExInt <$> p_int_literal) <|>
+  (ExStr <$> p_str_literal) <|>
+  (ExChr <$> p_chr_literal) <|>
   (ExIdentity <$> p_identity)
 
 p_priority_2 :: PE
