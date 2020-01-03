@@ -8,6 +8,22 @@ import Primitive.Char
 
 spec :: Spec
 spec = do
+  it "p_char" $ do
+    exec p_char "u8't'"  `shouldBe` (show $ 't')
+    exec p_char "u't'"   `shouldBe` (show $ 't')
+    exec p_char "U't'"   `shouldBe` (show $ 't')
+    exec p_char "L't'"   `shouldBe` (show $ 't')
+    exec p_char "'\\\\'" `shouldBe` (show $ '\\')
+    exec p_char "'\\\''" `shouldBe` (show $ '\'')
+    exec p_char "'\\\"'" `shouldBe` (show $ '"')
+    exec p_char "'\\a'"  `shouldBe` (show $ '\a')
+    exec p_char "'\\b'"  `shouldBe` (show $ '\b')
+    exec p_char "'\\f'"  `shouldBe` (show $ '\f')
+    exec p_char "'\\n'"  `shouldBe` (show $ '\n')
+    exec p_char "'\\r'"  `shouldBe` (show $ '\r')
+    exec p_char "'\\t'"  `shouldBe` (show $ '\t')
+    exec p_char "'\\0'"  `shouldBe` (show $ '\0')
+
   describe "p_chr_literal prefix" $ do
     it "u8't'" $ do
       exec p_chr_literal "u8't'" `shouldBe` (show $ ChrLiteral CSu8 't')

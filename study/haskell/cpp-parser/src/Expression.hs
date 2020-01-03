@@ -11,7 +11,7 @@ data Expression =
   ExDbl DblLiteral |
   ExInt IntLiteral |
   ExStr StrLiteral |
-  ExChr ChrLiteral |
+  ExChar Char |
   ExIdentity String |
   ExPrefix String Expression |
   ExSuffix String Expression |
@@ -29,7 +29,7 @@ p_primitive =
   (ExDbl <$> p_dbl_literal) <|>
   (ExInt <$> p_int_literal) <|>
   (ExStr <$> p_str_literal) <|>
-  (ExChr <$> p_chr_literal) <|>
+  (ExChar <$> p_char) <|>
   (ExIdentity <$> p_identity)
 
 p_priority_2 :: PE

@@ -1,9 +1,8 @@
 module Primitive (
-  ChrLiteral,
+  p_char,
   DblLiteral,
   IntLiteral,
   StrLiteral,
-  p_chr_literal,
   p_dbl_literal,
   p_int_literal,
   p_str_literal,

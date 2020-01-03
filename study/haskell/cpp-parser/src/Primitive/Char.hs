@@ -9,6 +9,12 @@ data ChrPrefix =
 data ChrLiteral =
   ChrLiteral ChrPrefix Char deriving Show
 
+p_char :: Parser Char
+p_char = do
+  chr <- p_chr_literal
+  let ChrLiteral _ c = chr
+  return c
+
 p_chr_literal :: Parser ChrLiteral
 p_chr_literal = try $ do
   pref <- p_chr_prefix
