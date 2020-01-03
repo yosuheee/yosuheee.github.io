@@ -7,8 +7,8 @@ data DblSuffix = DbNone | Dbf | DbF | Dbl | DbL deriving Show
 
 data DblLiteral = DblLiteral DblSuffix String String deriving Show
 
-p_double :: Parser DblLiteral
-p_double =
+p_dbl :: Parser DblLiteral
+p_dbl =
   p_all_double <|> p_front_double <|> p_simple_double
 
 p_double_suffix :: Parser DblSuffix
@@ -52,16 +52,16 @@ p_exponent = try $ do
   rest <- many1 digit
   return $ [sign] ++ rest
 
-data NumSuffix = SuNone | SuU | SuL | SuLU | SuLL | SuLLU deriving Show
+data IntSuffix = SuNone | SuU | SuL | SuLU | SuLL | SuLLU deriving Show
 
-data Number =
-  NuBin String NumSuffix |
-  NuOct String NumSuffix |
-  NuDec String NumSuffix |
-  NuHex String NumSuffix
+data IntLiteral =
+  NuBin IntSuffix String |
+  NuOct IntSuffix String |
+  NuDec IntSuffix String |
+  NuHex IntSuffix String
   deriving Show
 
-p_num_suffix :: Parser NumSuffix
+p_num_suffix :: Parser IntSuffix
 p_num_suffix = do
   let
     target = [
@@ -71,7 +71,7 @@ p_num_suffix = do
       (SuLL, [ "ll", "lL", "Ll", "LL" ]),
       (SuL, [ "l", "L" ]),
       (SuU, [ "u", "U" ]) ]
-    make :: (NumSuffix, [String]) -> Parser NumSuffix
+    make :: (IntSuffix, [String]) -> Parser IntSuffix
     make (typ, lst) = try $ do
       let (x : xs) = map (try . string) lst
       foldl (<|>) x xs
@@ -79,26 +79,26 @@ p_num_suffix = do
   foldr (<|>) (return SuNone) $ 
     map make target
 
-p_num :: Parser Number
-p_num = p_bin <|> p_hex <|> p_oct <|> p_dec
+p_int :: Parser IntLiteral
+p_int = p_bin <|> p_hex <|> p_oct <|> p_dec
 
-p_num_make :: (String -> NumSuffix -> Number) -> String -> Parser Char -> Parser Number
+p_num_make :: (IntSuffix -> String -> IntLiteral) -> String -> Parser Char -> Parser IntLiteral
 p_num_make typ pre chr = try $ do
   string pre
   rest <- many1 chr
   suff <- p_num_suffix
-  return $ typ rest suff
+  return $ typ suff rest
 
-p_bin :: Parser Number
+p_bin :: Parser IntLiteral
 p_bin = p_num_make NuBin "0b" (oneOf "01")
 
-p_hex :: Parser Number
+p_hex :: Parser IntLiteral
 p_hex = p_num_make NuHex "0x" hexDigit
 
-p_oct :: Parser Number
+p_oct :: Parser IntLiteral
 p_oct = p_num_make NuOct "0" octDigit
 
-p_dec :: Parser Number
+p_dec :: Parser IntLiteral
 p_dec = p_num_make NuDec "" digit
 
 data ChrPrefix =
@@ -117,8 +117,8 @@ p_chr_prefix = do
   foldr (<|>) (return ChNone) $ 
     map make [ (Chu8, "u8"), (ChL, "L"), (Chu, "u"), (ChU, "U") ]
 
-p_chr_literal :: Parser ChrLiteral
-p_chr_literal = try $ do
+p_chr :: Parser ChrLiteral
+p_chr = try $ do
   pref <- p_chr_prefix
   char '\''
   chr <- p_escaped_char '\''
@@ -165,8 +165,8 @@ p_str_prefix = do
   foldr (<|>) (return StNone) $ 
     map make target
 
-p_string_literal :: Parser StrLiteral
-p_string_literal = try $ do
+p_str :: Parser StrLiteral
+p_str = try $ do
   pref <- p_str_prefix
   char '"'
   str <- p_escaped_string

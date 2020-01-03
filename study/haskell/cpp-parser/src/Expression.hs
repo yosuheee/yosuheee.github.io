@@ -8,10 +8,10 @@ import Primitive
 data Infix = InfixL | InfixR deriving (Show)
 
 data Expression =
-  ExDouble DblLiteral |
-  ExInteger Number |
-  ExString StrLiteral |
-  ExCharacter ChrLiteral |
+  ExDbl DblLiteral |
+  ExInt IntLiteral |
+  ExStr StrLiteral |
+  ExChr ChrLiteral |
   ExIdentity String |
   ExPrefix String Expression |
   ExSuffix String Expression |
@@ -26,10 +26,10 @@ p_expression = p_priority_16
 
 p_primitive :: PE
 p_primitive =
-  (ExDouble <$> p_double) <|>
-  (ExInteger <$> p_num) <|>
-  (ExString <$> p_string_literal) <|>
-  (ExCharacter <$> p_chr_literal) <|>
+  (ExDbl <$> p_dbl) <|>
+  (ExInt <$> p_int) <|>
+  (ExStr <$> p_str) <|>
+  (ExChr <$> p_chr) <|>
   (ExIdentity <$> p_identity)
 
 p_priority_2 :: PE
