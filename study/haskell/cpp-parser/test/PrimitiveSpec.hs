@@ -76,6 +76,61 @@ spec = do
     it "u" $ do
       exec p_num "10u" `shouldBe` (show $ NuDec "10" SuU)
 
+  describe "p_string_literal" $ do
+    it "\"test\"" $ do
+      exec p_string_literal "\"test\"" `shouldBe` (show $ StrLiteral StNone StNon "test")
+
+  describe "p_string prefix" $ do
+    it "u8\"test\"" $ do
+      exec p_string_literal "u8\"test\"" `shouldBe` (show $ StrLiteral Stu8 StNon "test")
+    it "L\"test\"" $ do
+      exec p_string_literal "L\"test\"" `shouldBe` (show $ StrLiteral StL StNon "test")
+    it "u\"test\"" $ do
+      exec p_string_literal "u\"test\"" `shouldBe` (show $ StrLiteral Stu StNon "test")
+    it "U\"test\"" $ do
+      exec p_string_literal "U\"test\"" `shouldBe` (show $ StrLiteral StU StNon "test")
+    it "R\"test\"" $ do
+      exec p_string_literal "R\"test\"" `shouldBe` (show $ StrLiteral StR StNon "test")
+
+    it "u8R\"test\"" $ do
+      exec p_string_literal "u8R\"test\"" `shouldBe` (show $ StrLiteral Stu8R StNon "test")
+    it "LR\"test\"" $ do
+      exec p_string_literal "LR\"test\"" `shouldBe` (show $ StrLiteral StLR StNon "test")
+    it "uR\"test\"" $ do
+      exec p_string_literal "uR\"test\"" `shouldBe` (show $ StrLiteral StuR StNon "test")
+    it "UR\"test\"" $ do
+      exec p_string_literal "UR\"test\"" `shouldBe` (show $ StrLiteral StUR StNon "test")
+
+  describe "p_string suffix" $ do
+    it "\"test\"s" $ do
+      exec p_string_literal "\"test\"s" `shouldBe` (show $ StrLiteral StNone Sts "test")
+
+  describe "escape sequence" $ do
+    let expected str = show $ StrLiteral StNone StNon str
+    it "\"test\\\\\"" $ do
+      exec p_string_literal "\"test\\\\\"" `shouldBe` expected "test\\"
+    it "\"test\\'\"" $ do
+      exec p_string_literal "\"test\\'\"" `shouldBe` expected "test'"
+    it "\"test\\\"\"" $ do
+      exec p_string_literal "\"test\\\"\"" `shouldBe` expected "test\""
+    it "\"test\\a\"" $ do
+      exec p_string_literal "\"test\\a\"" `shouldBe` expected "test\a"
+    it "\"test\\b\"" $ do
+      exec p_string_literal "\"test\\b\"" `shouldBe` expected "test\b"
+    it "\"test\\f\"" $ do
+      exec p_string_literal "\"test\\f\"" `shouldBe` expected "test\f"
+    it "\"test\\n\"" $ do
+      exec p_string_literal "\"test\\n\"" `shouldBe` expected "test\n"
+    it "\"test\\r\"" $ do
+      exec p_string_literal "\"test\\r\"" `shouldBe` expected "test\r"
+    it "\"test\\t\"" $ do
+      exec p_string_literal "\"test\\t\"" `shouldBe` expected "test\t"
+    it "\"test\\0\"" $ do
+      exec p_string_literal "\"test\\0\"" `shouldBe` expected "test\0"
+    it "\"test\\xff\"" $ do
+      exec p_string_literal "\"test\\xff\"" `shouldBe` expected "test\\xff"
+    it "\"test\\o77\"" $ do
+      exec p_string_literal "\"test\\o77\"" `shouldBe` expected "test\\o77"
 
 exec :: Show a => Parser a -> String -> String
 exec p input =

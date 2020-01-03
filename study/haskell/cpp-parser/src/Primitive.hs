@@ -66,6 +66,56 @@ p_dec = try $ do
   suff <- p_num_suffix
   return $ NuDec ([head] ++ rest) suff
 
+data StrPrefix =
+  Stu8 | StL | Stu | StU | 
+  StR | Stu8R | StLR | StuR | StUR | 
+  StNone deriving Show
+
+data StrSuffix =
+  Sts | StNon deriving Show
+
+data StrLiteral = StrLiteral StrPrefix StrSuffix String deriving Show
+
+p_str_prefix :: Parser StrPrefix
+p_str_prefix = do
+  let
+    target = [
+      (Stu8R, ["u8R"]), (StLR, ["LR"]), (StuR, ["uR"]), (StUR, ["UR"]),
+      (Stu8, ["u8"]), (StL, ["L"]), (Stu, ["u"]), (StU, ["U"]), (StR, ["R"]) ]
+    make :: (StrPrefix, [String]) -> Parser StrPrefix
+    make (typ, lst) = try $ do
+      let (x : xs) = map (try . string) lst
+      foldl (<|>) x xs
+      return typ
+  foldr (<|>) (return StNone) $ 
+    map make target
+
+p_string_literal :: Parser StrLiteral
+p_string_literal = try $ do
+  pref <- p_str_prefix
+  char '"'
+  str <- p_escaped_string
+  char '"'
+  suff <- (char 's' *> return Sts) <|> (return StNon)
+  return $ StrLiteral pref suff str
+
+p_escaped_string :: Parser String
+p_escaped_string = do
+  many (escaped_char <|> noneOf "\"")
+  where
+    escaped_char = char '\\' >> (
+      (char '\\' >> return '\\') <|> 
+      (char '\'' >> return '\'') <|> 
+      (char '\"' >> return '\"') <|>
+      (char 'a'  >> return '\a') <|>
+      (char 'b'  >> return '\b') <|> 
+      (char 'f'  >> return '\f') <|> 
+      (char 'n'  >> return '\n') <|> 
+      (char 'r'  >> return '\r') <|> 
+      (char 't'  >> return '\t') <|> 
+      (char '0'  >> return '\0') <|>
+      return '\\')
+
 p_identity :: Parser String
 p_identity = do
   fst <- p_identity_char
