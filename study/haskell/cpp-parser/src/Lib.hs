@@ -48,11 +48,11 @@ p_return_string = string "return"
 p_semicolon :: Parser Char
 p_semicolon = char ';'
 
-p_return :: Parser IntLiteral
+p_return :: Parser Integer
 p_return = do
   p_return_string
   spaces
-  num <- p_int_literal
+  num <- p_integer
   spaces
   p_semicolon
   return num
@@ -66,7 +66,7 @@ p_block_start = char '{'
 p_block_end :: Parser Char
 p_block_end = char '}'
 
-p_block :: Parser IntLiteral
+p_block :: Parser Integer
 p_block = do
   p_block_start
   spaces
@@ -81,7 +81,7 @@ p_bracket_start = char '('
 p_bracket_end :: Parser Char
 p_bracket_end = char ')'
 
-p_function :: Parser IntLiteral
+p_function :: Parser Integer
 p_function = do
   p_identity
   spaces
@@ -113,7 +113,7 @@ p_namespace = do
   p_semicolon
   return name
 
-p_main :: Parser IntLiteral
+p_main :: Parser Integer
 p_main = do
   p_include
   spaces

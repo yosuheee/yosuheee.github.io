@@ -8,6 +8,18 @@ import Primitive.Integer
 
 spec :: Spec
 spec = do
+  it "p_integer" $ do
+    exec p_integer "0" `shouldBe` (show $ 0)
+    exec p_integer "1234" `shouldBe` (show $ 1234)
+    exec p_integer "03312" `shouldBe` (show $ 1738)
+    exec p_integer "0x6CA" `shouldBe` (show $ 1738)
+    exec p_integer "0x6ca" `shouldBe` (show $ 1738)
+    exec p_integer "0b11011001010" `shouldBe` (show $ 1738)
+    exec p_integer "0b011011001010" `shouldBe` (show $ 1738)
+    exec p_integer "10llu" `shouldBe` (show $ 10)
+    exec p_integer "010llu" `shouldBe` (show $ 8)
+    exec p_integer "10uLl" `shouldBe` (show $ 10)
+
   describe "number" $ do
     it "p_hex" $ do
       exec p_hex "0xaf" `shouldBe` (show $ IHex ISNone "af")

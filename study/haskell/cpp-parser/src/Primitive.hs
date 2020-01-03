@@ -1,10 +1,9 @@
 module Primitive (
   p_char,
+  p_integer,
   p_string,
   DblLiteral,
-  IntLiteral,
   p_dbl_literal,
-  p_int_literal,
   p_identity
 ) where
 
