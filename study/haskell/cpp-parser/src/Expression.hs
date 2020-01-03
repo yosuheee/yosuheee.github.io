@@ -10,8 +10,8 @@ data Infix = InfixL | InfixR deriving (Show)
 data Expression =
   ExDbl DblLiteral |
   ExInt IntLiteral |
-  ExStr StrLiteral |
   ExChar Char |
+  ExString String |
   ExIdentity String |
   ExPrefix String Expression |
   ExSuffix String Expression |
@@ -28,7 +28,7 @@ p_primitive :: PE
 p_primitive =
   (ExDbl <$> p_dbl_literal) <|>
   (ExInt <$> p_int_literal) <|>
-  (ExStr <$> p_str_literal) <|>
+  (ExString <$> p_string) <|>
   (ExChar <$> p_char) <|>
   (ExIdentity <$> p_identity)
 

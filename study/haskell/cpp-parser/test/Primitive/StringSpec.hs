@@ -8,6 +8,30 @@ import Primitive.String
 
 spec :: Spec
 spec = do
+  it "p_string" $ do
+    exec p_string "\"test\"" `shouldBe` (show $ "test")
+    exec p_string "u8\"test\"" `shouldBe` (show $ "test")
+    exec p_string "L\"test\"" `shouldBe` (show $ "test")
+    exec p_string "u\"test\"" `shouldBe` (show $ "test")
+    exec p_string "U\"test\"" `shouldBe` (show $ "test")
+    exec p_string "R\"test\"" `shouldBe` (show $ "test")
+    exec p_string "u8R\"test\"" `shouldBe` (show $ "test")
+    exec p_string "LR\"test\"" `shouldBe` (show $ "test")
+    exec p_string "uR\"test\"" `shouldBe` (show $ "test")
+    exec p_string "UR\"test\"" `shouldBe` (show $ "test")
+    exec p_string "\"test\\\\\"" `shouldBe` (show $ "test\\")
+    exec p_string "\"test\\'\"" `shouldBe` (show $ "test'")
+    exec p_string "\"test\\\"\"" `shouldBe` (show $ "test\"")
+    exec p_string "\"test\\a\"" `shouldBe` (show $ "test\a")
+    exec p_string "\"test\\b\"" `shouldBe` (show $ "test\b")
+    exec p_string "\"test\\f\"" `shouldBe` (show $ "test\f")
+    exec p_string "\"test\\n\"" `shouldBe` (show $ "test\n")
+    exec p_string "\"test\\r\"" `shouldBe` (show $ "test\r")
+    exec p_string "\"test\\t\"" `shouldBe` (show $ "test\t")
+    exec p_string "\"test\\0\"" `shouldBe` (show $ "test\0")
+    exec p_string "\"test\\xff\"" `shouldBe` (show $ "test\\xff")
+    exec p_string "\"test\\o77\"" `shouldBe` (show $ "test\\o77")
+
   describe "p_str_literal" $ do
     it "\"test\"" $ do
       exec p_str_literal "\"test\"" `shouldBe` (show $ StrLiteral StNone SSNone "test")
