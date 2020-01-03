@@ -65,10 +65,6 @@ spec = do
       input <- readFile "./test/main.cpp"
       exec p_main input `shouldBe` "0"
 
-  describe "p_var_defined" $ do
-    it "accept \"int abc = 123;\"" $ do
-      exec p_var_defined "int abc = 123;" `shouldBe` "(\"int\",\"abc\",ExInt 123)"
-
   describe "p_func" $ do
     it "accept \"a()\"" $ do
       exec p_func "a()" `shouldBe` "(\"a\",[])"

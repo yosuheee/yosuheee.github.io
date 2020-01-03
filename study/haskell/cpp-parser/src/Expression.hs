@@ -8,9 +8,7 @@ import Primitive
 data Infix = InfixL | InfixR deriving (Show)
 
 data Expression =
-  ExInt Integer |
-  ExDouble Double |
-  ExIdentity String |
+  ExPrimitive Primitive |
   ExPrefix String Expression |
   ExSuffix String Expression |
   ExBinary String Expression Expression |
@@ -23,25 +21,7 @@ p_expression :: PE
 p_expression = p_priority_16
 
 p_expression_primitive :: PE
-p_expression_primitive = do
-  try p_expression_double <|> try p_expression_identity <|> try p_expression_integer
-
-p_expression_integer :: PE
-p_expression_integer = do
-  num <- p_number
-  return $ ExInt num
-
-p_expression_identity :: PE
-p_expression_identity = do
-  ident <- p_identity
-  return $ ExIdentity ident
-
-p_expression_double :: PE
-p_expression_double = do
-  fst <- many1 digit
-  char '.'
-  snd <- many1 digit
-  return . ExDouble . read $ fst ++ "." ++ snd
+p_expression_primitive = ExPrimitive <$> p_primitive
 
 p_priority_2 :: PE
 p_priority_2 = try $ do

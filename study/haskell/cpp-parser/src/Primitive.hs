@@ -3,6 +3,70 @@ module Primitive where
 import Text.Parsec
 import Text.Parsec.String
 
+data Primitive =
+  PDouble DblLiteral |
+  PInteger Number |
+  PString StrLiteral |
+  PChar ChrLiteral |
+  PIdentity String deriving Show
+
+p_primitive :: Parser Primitive
+p_primitive =
+  (PDouble <$> p_double) <|>
+  (PInteger <$> p_num) <|>
+  (PString <$> p_string_literal) <|>
+  (PChar <$> p_chr_literal) <|>
+  (PIdentity <$> p_identity)
+
+data DblSuffix = DbNone | Dbf | DbF | Dbl | DbL deriving Show
+
+data DblLiteral = DblLiteral DblSuffix String String deriving Show
+
+p_double :: Parser DblLiteral
+p_double =
+  p_all_double <|> p_front_double <|> p_simple_double
+
+p_double_suffix :: Parser DblSuffix
+p_double_suffix = try $ do
+  let
+    make :: (DblSuffix, String) -> Parser DblSuffix
+    make (typ, str) = try $ do
+      string str
+      return typ
+  foldr (<|>) (return DbNone) $ 
+    map make [ (Dbf, "f"), (DbF, "F"), (Dbl, "l"), (DbL, "L") ]
+
+p_simple_double :: Parser DblLiteral
+p_simple_double = try $ do
+  fst <- many1 digit
+  snd <- p_exponent
+  suf <- p_double_suffix
+  return $ DblLiteral suf fst snd
+
+p_front_double :: Parser DblLiteral
+p_front_double = try $ do
+  fst <- many1 digit
+  char '.'
+  snd <- option "+1" p_exponent
+  suf <- p_double_suffix
+  return $ DblLiteral suf fst snd
+
+p_all_double :: Parser DblLiteral
+p_all_double = try $ do
+  fst <- option "0" $ many1 digit
+  char '.'
+  snd <- many1 digit
+  thd <- option "+1" p_exponent
+  suf <- p_double_suffix
+  return $ DblLiteral suf (fst ++ "." ++ snd) thd
+
+p_exponent :: Parser String
+p_exponent = try $ do
+  oneOf "eE"
+  sign <- oneOf "+-" <|> return '+'
+  rest <- many1 digit
+  return $ [sign] ++ rest
+
 data NumSuffix = SuNone | SuU | SuL | SuLU | SuLL | SuLLU deriving Show
 
 data Number =
@@ -33,38 +97,24 @@ p_num_suffix = do
 p_num :: Parser Number
 p_num = p_bin <|> p_hex <|> p_oct <|> p_dec
 
-p_hex :: Parser Number
-p_hex = try $ do
-  string "0x"
-  head <- oneOf $ "123456789" ++ abc
-  rest <- many $ digit <|> oneOf abc
+p_num_make :: (String -> NumSuffix -> Number) -> String -> Parser Char -> Parser Number
+p_num_make typ pre chr = try $ do
+  string pre
+  rest <- many1 chr
   suff <- p_num_suffix
-  return $ NuHex ([head] ++ rest) suff
-  where
-    abc = "abcdefABCDEF"
+  return $ typ rest suff
 
 p_bin :: Parser Number
-p_bin = try $ do
-  string "0b"
-  head <- char '1'
-  rest <- many $ oneOf "01"
-  suff <- p_num_suffix
-  return $ NuBin ([head] ++ rest) suff
+p_bin = p_num_make NuBin "0b" (oneOf "01")
+
+p_hex :: Parser Number
+p_hex = p_num_make NuHex "0x" hexDigit
 
 p_oct :: Parser Number
-p_oct = try $ do
-  string "0"
-  head <- oneOf "1234567"
-  rest <- many $ oneOf "01234567"
-  suff <- p_num_suffix
-  return $ NuOct ([head] ++ rest) suff
+p_oct = p_num_make NuOct "0" octDigit
 
 p_dec :: Parser Number
-p_dec = try $ do
-  head <- oneOf "123456789"
-  rest <- many digit
-  suff <- p_num_suffix
-  return $ NuDec ([head] ++ rest) suff
+p_dec = p_num_make NuDec "" digit
 
 data ChrPrefix =
   Chu8 | Chu | ChU | ChL | ChNone deriving Show
@@ -75,15 +125,12 @@ data ChrLiteral =
 p_chr_prefix :: Parser ChrPrefix
 p_chr_prefix = do
   let
-    target = [
-      (Chu8, ["u8"]), (ChL, ["L"]), (Chu, ["u"]), (ChU, ["U"]) ]
-    make :: (ChrPrefix, [String]) -> Parser ChrPrefix
-    make (typ, lst) = try $ do
-      let (x : xs) = map (try . string) lst
-      foldl (<|>) x xs
+    make :: (ChrPrefix, String) -> Parser ChrPrefix
+    make (typ, str) = try $ do
+      try . string $ str
       return typ
   foldr (<|>) (return ChNone) $ 
-    map make target
+    map make [ (Chu8, "u8"), (ChL, "L"), (Chu, "u"), (ChU, "U") ]
 
 p_chr_literal :: Parser ChrLiteral
 p_chr_literal = try $ do

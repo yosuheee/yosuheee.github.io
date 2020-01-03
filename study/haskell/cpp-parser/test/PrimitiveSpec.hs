@@ -46,21 +46,19 @@ spec = do
     it "p_oct" $ do
       exec p_oct "010" `shouldBe` (show $ NuOct "10" SuNone)
       exec p_oct "023" `shouldBe` (show $ NuOct "23" SuNone)
-      exec p_oct "005" `shouldNotBe` (show $ NuOct "05" SuNone)
     it "p_bin" $ do
       exec p_bin "0b10" `shouldBe` (show $ NuBin "10" SuNone)
       exec p_bin "0b1100011010" `shouldBe` (show $ NuBin "1100011010" SuNone)
-      exec p_bin "0b01" `shouldNotBe` (show $ NuBin "01" SuNone)
       exec p_bin "0b" `shouldNotBe` (show $ NuBin "" SuNone)
     it "p_dec" $ do
       exec p_dec "1234" `shouldBe` (show $ NuDec "1234" SuNone)
       exec p_dec "1000" `shouldBe` (show $ NuDec "1000" SuNone)
-      exec p_dec "01" `shouldNotBe` (show $ NuDec "01" SuNone)
     it "p_num" $ do
       exec p_num "0xaf" `shouldBe` (show $ NuHex "af" SuNone)
       exec p_num "0100" `shouldBe` (show $ NuOct "100" SuNone)
       exec p_num "0b10" `shouldBe` (show $ NuBin "10" SuNone)
       exec p_num "1234" `shouldBe` (show $ NuDec "1234" SuNone)
+      exec p_num "0" `shouldBe` (show $ NuDec "0" SuNone)
 
   describe "p_num_suffix" $ do
     it "llu" $ do
@@ -141,7 +139,40 @@ spec = do
     exec p_chr_literal "'\\r'" `shouldBe` (show $ ChrLiteral ChNone '\r')
     exec p_chr_literal "'\\t'" `shouldBe` (show $ ChrLiteral ChNone '\t')
     exec p_chr_literal "'\\0'" `shouldBe` (show $ ChrLiteral ChNone '\0')
-      
+
+  it "simple" $ do
+    exec p_simple_double "5e10" `shouldBe` (show $ DblLiteral DbNone "5" "+10")
+    exec p_simple_double "5e5f" `shouldBe` (show $ DblLiteral Dbf "5" "+5")
+    exec p_simple_double "5e5F" `shouldBe` (show $ DblLiteral DbF "5" "+5")
+    exec p_simple_double "5e5l" `shouldBe` (show $ DblLiteral Dbl "5" "+5")
+    exec p_simple_double "5e5L" `shouldBe` (show $ DblLiteral DbL "5" "+5")
+  
+  it "front" $ do
+    exec p_front_double "5.e-10" `shouldBe` (show $ DblLiteral DbNone "5" "-10")
+    exec p_front_double "5." `shouldBe` (show $ DblLiteral DbNone "5" "+1")
+    exec p_front_double "5.l" `shouldBe` (show $ DblLiteral Dbl "5" "+1")
+    exec p_front_double "2.e+3F" `shouldBe` (show $ DblLiteral DbF "2" "+3")
+
+  it "all double" $ do
+    exec p_all_double "5.3e-13" `shouldBe` (show $ DblLiteral DbNone "5.3" "-13")
+    exec p_all_double ".3e+2L" `shouldBe` (show $ DblLiteral DbL "0.3" "+2")
+    exec p_all_double "0.158l" `shouldBe` (show $ DblLiteral Dbl "0.158" "+1")
+    exec p_all_double "1.23E-13f" `shouldBe` (show $ DblLiteral Dbf "1.23" "-13")
+
+  it "double" $ do
+    exec p_double "5e10" `shouldBe` (show $ DblLiteral DbNone "5" "+10")
+    exec p_double "5e5f" `shouldBe` (show $ DblLiteral Dbf "5" "+5")
+    exec p_double "5e5F" `shouldBe` (show $ DblLiteral DbF "5" "+5")
+    exec p_double "5e5l" `shouldBe` (show $ DblLiteral Dbl "5" "+5")
+    exec p_double "5e5L" `shouldBe` (show $ DblLiteral DbL "5" "+5")
+    exec p_double "5.e-10" `shouldBe` (show $ DblLiteral DbNone "5" "-10")
+    exec p_double "5." `shouldBe` (show $ DblLiteral DbNone "5" "+1")
+    exec p_double "5.l" `shouldBe` (show $ DblLiteral Dbl "5" "+1")
+    exec p_double "2.e+3F" `shouldBe` (show $ DblLiteral DbF "2" "+3")
+    exec p_double "5.3e-13" `shouldBe` (show $ DblLiteral DbNone "5.3" "-13")
+    exec p_double ".3e+2L" `shouldBe` (show $ DblLiteral DbL "0.3" "+2")
+    exec p_double "0.158l" `shouldBe` (show $ DblLiteral Dbl "0.158" "+1")
+    exec p_double "1.23E-13f" `shouldBe` (show $ DblLiteral Dbf "1.23" "-13")
 
 exec :: Show a => Parser a -> String -> String
 exec p input =

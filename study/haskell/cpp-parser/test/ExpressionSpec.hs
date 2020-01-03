@@ -5,87 +5,92 @@ import Test.Hspec
 import Text.Parsec
 import Text.Parsec.String
 
+import Primitive
 import Expression
+
+ex_int num = ExPrimitive $ PInteger (NuDec (show num) SuNone)
+ex_identity str = ExPrimitive $ PIdentity str
+ex_double num = ExPrimitive $ PDouble (DblLiteral DbNone (show num) "+1") 
 
 spec :: Spec
 spec = do
   describe "p_expression" $ do
     it "accept '123'" $
-      exec p_expression "123" `shouldBe` (show $ ExInt 123)
+      exec p_expression "123" `shouldBe` (show $ ex_int 123)
     it "accept 'ana'" $
-      exec p_expression "ana" `shouldBe` (show $ ExIdentity "ana")
+      exec p_expression "ana" `shouldBe` (show $ ex_identity "ana")
     it "accept '1.5'" $
-      exec p_expression "1.5" `shouldBe` (show $ ExDouble 1.5)
+      exec p_expression "1.5" `shouldBe` (show $ ex_double 1.5)
     it "accept '1 ? 2 : 3'" $ do
       exec p_expression "1 ? 2 : 3" `shouldBe`
-        (show $ ExTernary (ExInt 1) (ExInt 2) (ExInt 3))
+        (show $ ExTernary (ex_int 1) (ex_int 2) (ex_int 3))
     it "accept 'throw 123'" $ do
       exec p_expression "throw 123" `shouldBe`
-        (show $ ExSuffix "throw" (ExInt 123))
+        (show $ ExSuffix "throw" (ex_int 123))
     it "accept '1 + ++a + a++'" $ do
       exec p_expression "1 + ++a + a++" `shouldBe`
-        (show $ ExBinary "+" (ExBinary "+" (ExInt 1) (ExSuffix "++" (ExIdentity "a"))) (ExPrefix "++" (ExIdentity "a")))
+        (show $ ExBinary "+" (ExBinary "+" (ex_int 1) (ExSuffix "++" (ex_identity "a"))) (ExPrefix "++" (ex_identity "a")))
     it "accept '+1 + ++a + a++'" $ do
       exec p_expression "+1 + ++a + a++" `shouldBe`
-        (show $ ExBinary "+" (ExBinary "+" (ExSuffix "+" (ExInt 1)) (ExSuffix "++" (ExIdentity "a"))) (ExPrefix "++" (ExIdentity "a")))
+        (show $ ExBinary "+" (ExBinary "+" (ExSuffix "+" (ex_int 1)) (ExSuffix "++" (ex_identity "a"))) (ExPrefix "++" (ex_identity "a")))
     it "accept '1 && 2'" $ do
       exec p_expression "1 && 2" `shouldBe`
-        (show $ ExBinary "&&" (ExInt 1) (ExInt 2))
+        (show $ ExBinary "&&" (ex_int 1) (ex_int 2))
     it "accept '!~1'" $ do
       exec p_expression "!~1" `shouldBe`
-        (show $ ExSuffix "!" (ExSuffix "~" (ExInt 1)))
+        (show $ ExSuffix "!" (ExSuffix "~" (ex_int 1)))
     it "accept '++a++'" $ do
       exec p_expression "++a--" `shouldBe`
-        (show $ ExSuffix "++" (ExPrefix "--" (ExIdentity "a")))
+        (show $ ExSuffix "++" (ExPrefix "--" (ex_identity "a")))
     it "accept 'a++--'" $ do
       exec p_expression "a++--" `shouldBe`
-        (show $ ExPrefix "--" (ExPrefix "++" (ExIdentity "a")))
+        (show $ ExPrefix "--" (ExPrefix "++" (ex_identity "a")))
 
   describe "p_ternary" $ do
     it "accept '1 ? 2 : 3'" $ do
       exec p_ternary "1 ? 2 : 3" `shouldBe`
-        (show $ ExTernary (ExInt 1) (ExInt 2) (ExInt 3))
+        (show $ ExTernary (ex_int 1) (ex_int 2) (ex_int 3))
 
   describe "p_throw" $ do
     it "accept 'throw 1'" $ do
       exec p_throw "throw 1" `shouldBe`
-        (show $ ExSuffix "throw" (ExInt 1))
+        (show $ ExSuffix "throw" (ex_int 1))
 
   it "p_priority_5_15" $ do
     exec p_priority_5_15 "1 + 2" `shouldBe` (show $
-      ExBinary "+" (ExInt 1) (ExInt 2))
+      ExBinary "+" (ex_int 1) (ex_int 2))
     exec p_priority_5_15 "1 + 2 - 3" `shouldBe` (show $
-      ExBinary "-" (ExBinary "+" (ExInt 1) (ExInt 2)) (ExInt 3))
+      ExBinary "-" (ExBinary "+" (ex_int 1) (ex_int 2)) (ex_int 3))
     exec p_priority_5_15 "1 + 2 * 3" `shouldBe` (show $
-      ExBinary "+" (ExInt 1) (ExBinary "*" (ExInt 2) (ExInt 3)))
+      ExBinary "+" (ex_int 1) (ExBinary "*" (ex_int 2) (ex_int 3)))
     exec p_priority_5_15 "1 * 2 << 3 % 4" `shouldBe` (show $
-      ExBinary "<<" (ExBinary "*" (ExInt 1) (ExInt 2)) (ExBinary "%" (ExInt 3) (ExInt 4)))
+      ExBinary "<<" (ExBinary "*" (ex_int 1) (ex_int 2)) (ExBinary "%" (ex_int 3) (ex_int 4)))
     exec p_priority_5_15 "1 - 2 / 3 + 4 == 5" `shouldBe` (show $
-      ExBinary "==" (ExBinary "+" (ExBinary "-" (ExInt 1) (ExBinary "/" (ExInt 2) (ExInt 3))) (ExInt 4)) (ExInt 5))
+      ExBinary "==" (ExBinary "+" (ExBinary "-" (ex_int 1) (ExBinary "/" (ex_int 2) (ex_int 3))) (ex_int 4)) (ex_int 5))
 
   it "p_priority_2" $ do
     exec p_priority_2 "a++" `shouldBe` (
-      show $ ExPrefix "++" (ExIdentity "a"))
+      show $ ExPrefix "++" (ex_identity "a"))
     exec p_priority_2 "a--" `shouldBe` (
-      show $ ExPrefix "--" (ExIdentity "a"))
+      show $ ExPrefix "--" (ex_identity "a"))
 
   it "p_priority_3" $ do
     exec p_priority_3 "++a" `shouldBe` (
-      show $ ExSuffix "++" (ExIdentity "a"))
+      show $ ExSuffix "++" (ex_identity "a"))
     exec p_priority_3 "--a" `shouldBe` (
-      show $ ExSuffix "--" (ExIdentity "a"))
+      show $ ExSuffix "--" (ex_identity "a"))
     exec p_priority_3 "+a" `shouldBe` (
-      show $ ExSuffix "+" (ExIdentity "a"))
+      show $ ExSuffix "+" (ex_identity "a"))
     exec p_priority_3 "-a" `shouldBe` (
-      show $ ExSuffix "-" (ExIdentity "a"))
+      show $ ExSuffix "-" (ex_identity "a"))
     exec p_priority_3 "!1" `shouldBe` (
-      show $ ExSuffix "!" (ExInt 1))
+      show $ ExSuffix "!" (ex_int 1))
     exec p_priority_3 "~1" `shouldBe` (
-      show $ ExSuffix "~" (ExInt 1))
+      show $ ExSuffix "~" (ex_int 1))
     exec p_priority_3 "*a" `shouldBe` (
-      show $ ExSuffix "*" (ExIdentity "a"))
+      show $ ExSuffix "*" (ex_identity "a"))
     exec p_priority_3 "&a" `shouldBe` (
-      show $ ExSuffix "&" (ExIdentity "a"))
+      show $ ExSuffix "&" (ex_identity "a"))
 
   describe "binary operator" $ do
     flip forM_ it_spec_binop $ concat [
@@ -109,4 +114,4 @@ it_spec_binop op =
   it ("accept '1 " ++ op ++ " 2'") $
     exec p_expression ("1" ++ op ++ "2") `shouldBe` expected
   where
-    expected = show $ ExBinary op (ExInt 1) (ExInt 2)
+    expected = show $ ExBinary op (ex_int 1) (ex_int 2)
