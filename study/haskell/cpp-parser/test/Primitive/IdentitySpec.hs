@@ -30,7 +30,7 @@ spec = do
 
   describe "p_identity_and_digit_char" $ do
     it "accept '_' and 'a' and 'A' and '1'" $ do
-      exec p_identity_and_digit_char "_" `shouldBe` (show '_')
-      exec p_identity_and_digit_char "a" `shouldBe` (show 'a')
-      exec p_identity_and_digit_char "A" `shouldBe` (show 'A')
-      exec p_identity_and_digit_char "1" `shouldBe` (show '1')
+      exec p_identity_char_and_digit "_" `shouldBe` (show '_')
+      exec p_identity_char_and_digit "a" `shouldBe` (show 'a')
+      exec p_identity_char_and_digit "A" `shouldBe` (show 'A')
+      exec p_identity_char_and_digit "1" `shouldBe` (show '1')

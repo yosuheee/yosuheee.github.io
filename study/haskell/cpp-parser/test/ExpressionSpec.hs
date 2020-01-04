@@ -46,6 +46,10 @@ spec = do
     it "accept 'a++--'" $ do
       exec p_expression "a++--" `shouldBe`
         (show $ ExPrefix "--" (ExPrefix "++" (ExIdentity "a")))
+    it "accept 'true' or 'false" $ do
+      exec p_expression "true" `shouldBe` (show $ ExBoolean True)
+      exec p_expression "false" `shouldBe` (show $ ExBoolean False)
+      exec (p_expression <* eof) "trues" `shouldBe` (show $ ExIdentity "trues")
 
   describe "p_ternary" $ do
     it "accept '1 ? 2 : 3'" $ do

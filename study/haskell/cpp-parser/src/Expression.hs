@@ -8,6 +8,7 @@ import Primitive
 data Infix = InfixL | InfixR deriving (Show)
 
 data Expression =
+  ExBoolean Bool |
   ExChar Char |
   ExDouble Double |
   ExInteger Integer |
@@ -26,6 +27,7 @@ p_expression = p_priority_16
 
 p_primitive :: PE
 p_primitive =
+  (ExBoolean <$> p_boolean) <|>
   (ExDouble <$> p_double) <|>
   (ExInteger <$> p_integer) <|>
   (ExString <$> p_string) <|>
