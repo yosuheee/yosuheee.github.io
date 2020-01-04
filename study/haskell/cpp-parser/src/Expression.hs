@@ -61,8 +61,10 @@ p_priority_3 = try $ do
       , string "+", string "-", string "!"
       , string "~", string "*", string "&" ]
 
+p_priority_5_15 :: PE
 p_priority_5_15 = p_priority_12_15
 
+p_priority_5_10 :: PE
 p_priority_5_10 =
   foldl (\a c -> p_binops c a) p_priority_3 $
     map (\(f, s) -> (f, map string s)) [
@@ -73,9 +75,11 @@ p_priority_5_10 =
       (InfixL, ["<", ">", "<=", ">="]),
       (InfixL, ["==", "!="])]
 
+p_priority_11 :: PE
 p_priority_11 =
   p_binops (InfixL, [string "&" <* (notFollowedBy $ char '&')]) p_priority_5_10
 
+p_priority_12_15 :: PE
 p_priority_12_15 =
   foldl (\a c -> p_binops c a) p_priority_11 $
     map (\(f, s) -> (f, map string s)) [
@@ -84,6 +88,7 @@ p_priority_12_15 =
       (InfixL, ["&&"]),
       (InfixL, ["||"])]
 
+p_priority_16 :: PE
 p_priority_16 =
   p_ternary <|>
   p_throw <|>
