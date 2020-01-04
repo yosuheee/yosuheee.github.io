@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head><title></title></head>
+  <style>
+    body {
+      padding: 0;
+      margin: 0;
+    }
+    #container {
+      padding: 0;
+      margin: 0;
+      display: grid;
+      grid-template-columns: 50% 50%;
+      grid-template-rows: 100%;
+    }
+    textarea {
+      padding: 1em;
+      font-family: Roboto Mono for Powerline;
+      font-size: 20px;
+    }
+  </style>
+  <body>
+    <div id="container">
+      <textarea id="src" name="source"></textarea>
+      <textarea id="dest" name="destination" readonly></textarea>
+    </div>
+    <script>
+      const resize = () => {
+        document.getElementById("container").style.height = window.innerHeight + "px";
+      };
+      resize();
+      window.addEventListener("resize", resize);
+      const textarea = document.getElementById("src");
+      textarea.addEventListener("keydown", e => {
+        if (e.code === "Tab") {
+          e.preventDefault();
+          const sentence = textarea.value;
+          const len      = sentence.length;
+          const pos      = textarea.selectionStart;
+          const before   = sentence.substr(0, pos);
+          const word     = "  ";
+          const after    = sentence.substr(pos, len);
+          textarea.value = before + word + after;
+          textarea.selectionEnd = pos + word.length;
+        }
+      });
+      textarea.addEventListener("keyup", async e => {
+        const source = e.target.value;
+        const response = await fetch("/parse", {
+          method: "POST",
+          body: textarea.value,
+        });
+        const text = await response.text();
+        if (text === "") return;
+        document.getElementById("dest").value = text;
+      });
+    </script>
+  </body>
+</html>

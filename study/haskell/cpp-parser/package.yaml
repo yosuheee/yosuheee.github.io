@@ -4,6 +4,10 @@ version:  0.1.0.0
 dependencies:
 - base >= 4.7 && < 5
 - parsec
+- wai
+- warp
+- http-types
+- bytestring
 
 executables:
   cpp-parser-exe:
