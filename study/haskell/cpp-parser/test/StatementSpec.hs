@@ -65,6 +65,24 @@ spec = do
     exec p_statement "int a = 1, b;" `shouldBe`
       (show $ StDeclarator (Type "int") [SetVar "a" (ExInteger 1), UnsetVar "b"])
 
+  it "label case" $ do
+    exec p_statement_label_case "case 1: return 0;" `shouldBe`
+      (show $ StLabel (SLCase (ExInteger 1)) (StReturn (ExInteger 0)))
+    exec p_statement "case 1: return 0;" `shouldBe`
+      (show $ StLabel (SLCase (ExInteger 1)) (StReturn (ExInteger 0)))
+
+  it "label default" $ do
+    exec p_statement_label_default "default: return 0;" `shouldBe`
+      (show $ StLabel SLDefault (StReturn (ExInteger 0)))
+    exec p_statement "default: return 0;" `shouldBe`
+      (show $ StLabel SLDefault (StReturn (ExInteger 0)))
+
+  it "label identity" $ do
+    exec p_statement_label_identity "label : return 0;" `shouldBe`
+      (show $ StLabel (SLIdentity "label") (StReturn (ExInteger 0)))
+    exec p_statement "label : return 0;" `shouldBe`
+      (show $ StLabel (SLIdentity "label") (StReturn (ExInteger 0)))
+
   describe "if" $ do
     it "standard" $ do
       exec p_statement_if_else "if (true) { 1; } else { 2; }" `shouldBe`
@@ -84,3 +102,9 @@ spec = do
             (StCompound [StExpression (ExInteger 2)])
             (StIf (ExInteger 3)
               (StCompound [StExpression (ExInteger 3)]))))
+
+  describe "switch" $ do
+    it "standard" $ do
+      exec p_statement_switch "switch (a) { case 1: return 0; }" `shouldBe`
+        (show $ StSwitch (ExIdentity "a")
+          (StCompound [StLabel (SLCase (ExInteger 1)) (StReturn (ExInteger 0))]))

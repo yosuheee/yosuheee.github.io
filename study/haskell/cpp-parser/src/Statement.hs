@@ -6,16 +6,23 @@ import Text.Parsec.String
 import Primitive
 import Expression
 
+data LabelPrefix =
+  SLCase Expression |
+  SLDefault |
+  SLIdentity String deriving Show
+
 data Statement =
   StBreak |
   StContinue |
   StReturn Expression |
   StGoto String |
+  StLabel LabelPrefix Statement |
   StCompound [Statement] |
   StExpression Expression |
   StDeclarator Type [Variable] |
   StIf Expression Statement |
-  StIfElse Expression Statement Statement
+  StIfElse Expression Statement Statement |
+  StSwitch Expression Statement
   deriving Show
 
 type PS = Parser Statement
@@ -29,14 +36,54 @@ p_statement =
   p_statement_compound <|>
   p_statement_expression <|>
   p_statement_declarator <|>
+  p_statement_label <|>
   p_statement_if_else <|>
   p_statement_if
+
+p_statement_label :: PS
+p_statement_label =
+  p_statement_label_case <|>
+  p_statement_label_default <|>
+  p_statement_label_identity
+
+p_statement_label_case :: PS
+p_statement_label_case = try $ do
+  string "case"
+  skipMany1 space
+  expr <- p_expression
+  spaces
+  char ':'
+  spaces
+  stmt <- p_statement
+  spaces
+  return $ StLabel (SLCase expr) stmt
+
+p_statement_label_default :: PS
+p_statement_label_default = try $ do
+  string "default"
+  spaces
+  char ':'
+  spaces
+  stmt <- p_statement
+  spaces
+  return $ StLabel SLDefault stmt
+
+p_statement_label_identity :: PS
+p_statement_label_identity = try $ do
+  id <- p_identity
+  spaces
+  char ':'
+  spaces
+  stmt <- p_statement
+  spaces
+  return $ StLabel (SLIdentity id) stmt
 
 p_statement_break :: PS
 p_statement_break = try $ do
   string "break"
   spaces
   char ';'
+  spaces
   return StBreak
 
 p_statement_continue :: PS
@@ -44,6 +91,7 @@ p_statement_continue = try $ do
   string "continue"
   spaces
   char ';'
+  spaces
   return StContinue
 
 p_statement_return :: PS
@@ -53,6 +101,7 @@ p_statement_return = try $ do
   expr <- p_expression
   spaces
   char ';'
+  spaces
   return . StReturn $ expr
 
 p_statement_goto :: PS
@@ -62,6 +111,7 @@ p_statement_goto = try $ do
   id <- p_identity
   spaces
   char ';'
+  spaces
   return $ StGoto id 
 
 p_statement_expression :: PS
@@ -109,11 +159,13 @@ p_set_declarator = try $ do
   char '='
   spaces
   expr <- p_expression
+  spaces
   return $ SetVar name expr
 
 p_unset_declarator :: Parser Variable
 p_unset_declarator = try $ do
   name <- p_identity
+  spaces
   return $ UnsetVar name
 
 data Type = Type String deriving Show
@@ -166,3 +218,17 @@ p_statement_if_else = try $ do
   false_stat <- p_statement
   spaces
   return $ StIfElse cond true_stat false_stat
+
+p_statement_switch :: PS
+p_statement_switch = try $ do
+  string "switch"
+  spaces
+  char '('
+  spaces
+  cond <- p_expression
+  spaces
+  char ')'
+  spaces
+  stmt <- p_statement
+  spaces
+  return $ StSwitch cond stmt
