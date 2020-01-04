@@ -18,6 +18,8 @@ spec = do
       (show $ StCompound [StExpression (ExInteger 1)])
     exec p_statement_compound "{{1;}2;{}}" `shouldBe`
       (show $ StCompound [StCompound [StExpression (ExInteger 1)], StExpression (ExInteger 2), StCompound []])
+    exec p_statement_compound "{{1;} 2;{}}" `shouldBe`
+      (show $ StCompound [StCompound [StExpression (ExInteger 1)], StExpression (ExInteger 2), StCompound []])
 
 exec :: Show a => Parser a -> String -> String
 exec p input =

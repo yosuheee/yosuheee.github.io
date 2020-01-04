@@ -25,8 +25,7 @@ p_statement_expression = try $ do
 p_statement_compound :: Parser Statement
 p_statement_compound = try $ do
   char '{'
-  spaces
-  body <- many p_statement
+  body <- many $ spaces *> p_statement
   spaces
   char '}'
   return . StCompound $ body
