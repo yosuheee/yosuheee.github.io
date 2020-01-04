@@ -7,10 +7,6 @@ import Text.Parsec.String
 
 import Util
 
-import Primitive.Char
-import Primitive.Double
-import Primitive.Integer
-import Primitive.String
 import Expression
 
 spec :: Spec
@@ -49,6 +45,7 @@ spec = do
     it "accept 'true' or 'false" $ do
       exec p_expression "true" `shouldBe` (show $ ExBoolean True)
       exec p_expression "false" `shouldBe` (show $ ExBoolean False)
+    it "p_boolean denied 'trues', and p_identity accept it" $
       exec (p_expression <* eof) "trues" `shouldBe` (show $ ExIdentity "trues")
 
   describe "p_ternary" $ do
