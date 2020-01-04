@@ -12,6 +12,9 @@ import Expression
 spec :: Spec
 spec = do
   describe "p_expression" $ do
+    it "accept '1 * (2 + 3)'" $
+      exec p_expression "1 * (2 + 3)" `shouldBe` (show $
+        (ExBinary "*" (ExInteger 1) (ExBinary "+" (ExInteger 2) (ExInteger 3))))
     it "accept '123'" $
       exec p_expression "123" `shouldBe` (show $ ExInteger 123)
     it "accept 'ana'" $
@@ -79,12 +82,12 @@ spec = do
   it "p_priority_3" $ do
     exec p_priority_3 "++a" `shouldBe` (show $ ExPrefix "++" (ExIdentity "a"))
     exec p_priority_3 "--a" `shouldBe` (show $ ExPrefix "--" (ExIdentity "a"))
-    exec p_priority_3 "+a"  `shouldBe` (show $ ExPrefix "+" (ExIdentity "a"))
-    exec p_priority_3 "-a"  `shouldBe` (show $ ExPrefix "-" (ExIdentity "a"))
-    exec p_priority_3 "!1"  `shouldBe` (show $ ExPrefix "!" (ExInteger 1))
-    exec p_priority_3 "~1"  `shouldBe` (show $ ExPrefix "~" (ExInteger 1))
-    exec p_priority_3 "*a"  `shouldBe` (show $ ExPrefix "*" (ExIdentity "a"))
-    exec p_priority_3 "&a"  `shouldBe` (show $ ExPrefix "&" (ExIdentity "a"))
+    exec p_priority_3 "+a"  `shouldBe` (show $ ExPrefix "+"  (ExIdentity "a"))
+    exec p_priority_3 "-a"  `shouldBe` (show $ ExPrefix "-"  (ExIdentity "a"))
+    exec p_priority_3 "!1"  `shouldBe` (show $ ExPrefix "!"  (ExInteger 1))
+    exec p_priority_3 "~1"  `shouldBe` (show $ ExPrefix "~"  (ExInteger 1))
+    exec p_priority_3 "*a"  `shouldBe` (show $ ExPrefix "*"  (ExIdentity "a"))
+    exec p_priority_3 "&a"  `shouldBe` (show $ ExPrefix "&"  (ExIdentity "a"))
 
   describe "binary operator" $ do
     flip forM_ it_spec_binop $ concat [

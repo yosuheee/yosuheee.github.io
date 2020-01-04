@@ -27,12 +27,17 @@ p_expression = p_priority_16
 
 p_primitive :: PE
 p_primitive =
+  p_priority_1 <|>
   (ExBoolean <$> p_boolean) <|>
   (ExDouble <$> p_double) <|>
   (ExInteger <$> p_integer) <|>
   (ExString <$> p_string) <|>
   (ExChar <$> p_char) <|>
   (ExIdentity <$> p_identity)
+
+p_priority_1 :: PE
+p_priority_1 = try $ do
+  char '(' *> spaces *> p_expression <* spaces <* char ')'
 
 p_priority_2 :: PE
 p_priority_2 = try $ do
