@@ -48,7 +48,8 @@ p_statement =
   p_statement_switch <|>
   p_statement_while <|>
   p_statement_do_while <|>
-  p_statement_for
+  p_statement_for <?>
+  "statement"
 
 p_statement_label :: PS
 p_statement_label =
@@ -282,12 +283,12 @@ p_statement_for = try $ do
   char '('
   spaces
   fst <-
-    option Nothing $ do
+    optionMaybe $ do
       typ <- p_simple_type
       many1 space
       decls <- p_declarators
       spaces
-      return . Just $ InitStmt typ decls
+      return $ InitStmt typ decls
   spaces
   char ';'
   spaces

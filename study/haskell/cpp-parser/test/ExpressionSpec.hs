@@ -126,6 +126,10 @@ spec = do
       exec p_expression_function "func((1) ,(2))" `shouldBe`
         (show $ ExFunction "func" [ExInteger 1, ExInteger 2])
 
+  describe "error" $
+    it "unexpected" $ do
+      exec p_expression "" `shouldBe` (message 1 1 "expression")
+
 it_spec_binop :: String -> SpecWith (Arg Expectation)
 it_spec_binop op =
   it ("accept '1 " ++ op ++ " 2'") $

@@ -24,7 +24,7 @@ data Expression =
 type PE = Parser Expression
 
 p_expression :: PE
-p_expression = p_priority_16
+p_expression = p_priority_16 <?> "expression"
 
 p_primitive :: PE
 p_primitive =

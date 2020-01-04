@@ -145,3 +145,7 @@ spec = do
     it "nothing" $ do
       exec p_statement_for "for (;;) true;" `shouldBe`
         (show $ StFor Nothing Nothing Nothing (StExpression (ExBoolean True))) 
+
+  describe "error" $
+    it "unexpected" $ do
+      exec p_statement "" `shouldBe` (message 1 1 "statement")

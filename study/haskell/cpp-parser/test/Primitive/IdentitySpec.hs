@@ -34,3 +34,7 @@ spec = do
       exec p_identity_char_and_digit "a" `shouldBe` (show 'a')
       exec p_identity_char_and_digit "A" `shouldBe` (show 'A')
       exec p_identity_char_and_digit "1" `shouldBe` (show '1')
+
+  describe "keyword" $ do
+    it "for" $ do
+      exec (p_identity <* eof) "for" `shouldNotBe` (show "for")

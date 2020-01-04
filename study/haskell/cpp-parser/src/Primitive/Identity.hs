@@ -8,7 +8,12 @@ p_identity = do
   fst <- p_identity_char
   snd <- many p_identity_char_and_digit
   spaces
-  return $ [fst] ++ snd
+  let word = [fst] ++ snd
+  let lst = [ "for" ]
+  if elem word lst then
+    parserFail "identity"
+  else
+    return word
 
 p_underscore :: Parser Char
 p_underscore = char '_'

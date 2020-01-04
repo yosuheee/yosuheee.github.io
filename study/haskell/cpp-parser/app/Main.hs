@@ -13,6 +13,8 @@ import Data.ByteString.Internal (unpackChars)
 import Text.Parsec
 import Statement
 
+import Util
+
 main :: IO ()
 main = do
   port <- getPort
@@ -26,11 +28,10 @@ helloApp req respond = do
   value <-
     if requestMethod req == "POST" && pathInfo req == ["parse"] then do
       let input = unpackChars body
-      if input == "" then return " " else
-        return $
-          case parse p_statement "" input of
-            Left  err -> show err
-            Right val -> show val
+      if input == "" then
+        return " "
+      else
+        return $ exec (p_statement <* eof) input
     else
       readFile "app/index.html"
   respond $ responseLBS status200 [] $ packChars value
