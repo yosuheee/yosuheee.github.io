@@ -102,29 +102,53 @@ spec = do
 
   describe "function" $ do
     it "standard" $ do
-      exec p_expression_function "func(1, a)" `shouldBe`
-        (show $ ExFunction "func" [ExInteger 1, ExIdentity "a"])
+      exec p_priority_2 "func(1, a)" `shouldBe`
+        (show $ ExFunction (ExIdentity "func") [ExInteger 1, ExIdentity "a"])
   
+  describe "chain" $ do
+    it "dot" $ do
+      exec p_priority_2 "a.b.c" `shouldBe`
+        (show $ ExBinary "." (ExBinary "." (ExIdentity "a") (ExIdentity "b")) (ExIdentity "c"))
+    it "address" $ do
+      exec p_priority_2 "a->b->c" `shouldBe`
+        (show $ ExBinary "->" (ExBinary "->" (ExIdentity "a") (ExIdentity "b")) (ExIdentity "c"))
+    it "function" $ do
+      exec p_priority_2 "a(1)(2)" `shouldBe`
+        (show $ ExFunction (ExFunction (ExIdentity "a") [(ExInteger 1)]) [(ExInteger 2)])
+    it "array" $ do
+      exec p_priority_2 "a[1][2]" `shouldBe`
+        (show $ ExBinary "[]" (ExBinary "[]" (ExIdentity "a") (ExInteger 1)) (ExInteger 2))
+    it "combinate" $ do
+      exec p_priority_2 "a[1].b->c++--" `shouldBe`
+        (show $
+          ExSuffix "--"
+            (ExSuffix "++"
+              (ExBinary "->"
+                (ExBinary "."
+                  (ExBinary "[]" (ExIdentity "a") (ExInteger 1))
+                  (ExIdentity "b"))
+                (ExIdentity "c"))))
+
   describe "bug blank" $ do
     it "function" $ do
-      exec p_expression_function "func(1 )" `shouldBe`
-        (show $ ExFunction "func" [ExInteger 1])
-      exec p_expression_function "func(1 ,2)" `shouldBe`
-        (show $ ExFunction "func" [ExInteger 1, ExInteger 2])
-      exec p_expression_function "func(a ,b)" `shouldBe`
-        (show $ ExFunction "func" [ExIdentity "a", ExIdentity "b"])
-      exec p_expression_function "func(\"a\" ,\"b\")" `shouldBe`
-        (show $ ExFunction "func" [ExString "a", ExString "b"])
-      exec p_expression_function "func('a' ,'b')" `shouldBe`
-        (show $ ExFunction "func" [ExChar 'a', ExChar 'b'])
-      exec p_expression_function "func(1.2 ,1.3)" `shouldBe`
-        (show $ ExFunction "func" [ExDouble 1.2, ExDouble 1.3])
-      exec p_expression_function "func(true ,false)" `shouldBe`
-        (show $ ExFunction "func" [ExBoolean True, ExBoolean False])
-      exec p_expression_function "func(f() ,g())" `shouldBe`
-        (show $ ExFunction "func" [ExFunction "f" [], ExFunction "g" []])
-      exec p_expression_function "func((1) ,(2))" `shouldBe`
-        (show $ ExFunction "func" [ExInteger 1, ExInteger 2])
+      exec p_priority_2 "func(1 )" `shouldBe`
+        (show $ ExFunction (ExIdentity "func") [ExInteger 1])
+      exec p_priority_2 "func(1 ,2)" `shouldBe`
+        (show $ ExFunction (ExIdentity "func") [ExInteger 1, ExInteger 2])
+      exec p_priority_2 "func(a ,b)" `shouldBe`
+        (show $ ExFunction (ExIdentity "func") [ExIdentity "a", ExIdentity "b"])
+      exec p_priority_2 "func(\"a\" ,\"b\")" `shouldBe`
+        (show $ ExFunction (ExIdentity "func") [ExString "a", ExString "b"])
+      exec p_priority_2 "func('a' ,'b')" `shouldBe`
+        (show $ ExFunction (ExIdentity "func") [ExChar 'a', ExChar 'b'])
+      exec p_priority_2 "func(1.2 ,1.3)" `shouldBe`
+        (show $ ExFunction (ExIdentity "func") [ExDouble 1.2, ExDouble 1.3])
+      exec p_priority_2 "func(true ,false)" `shouldBe`
+        (show $ ExFunction (ExIdentity "func") [ExBoolean True, ExBoolean False])
+      exec p_priority_2 "func(f() ,g())" `shouldBe`
+        (show $ ExFunction (ExIdentity "func") [ExFunction (ExIdentity "f") [], ExFunction (ExIdentity "g") []])
+      exec p_priority_2 "func((1) ,(2))" `shouldBe`
+        (show $ ExFunction (ExIdentity "func") [ExInteger 1, ExInteger 2])
 
   describe "error" $
     it "unexpected" $ do

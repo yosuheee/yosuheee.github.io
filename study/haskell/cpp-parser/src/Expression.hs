@@ -18,7 +18,7 @@ data Expression =
   ExPrefix String Expression |
   ExBinary String Expression Expression |
   ExTernary Expression Expression Expression |
-  ExFunction String [Expression]
+  ExFunction Expression [Expression]
   deriving (Show)
 
 type PE = Parser Expression
@@ -28,17 +28,16 @@ p_expression = p_priority_16 <?> "expression"
 
 p_primitive :: PE
 p_primitive =
-  p_priority_1 <|>
+  p_priority_0 <|>
   (ExBoolean <$> p_boolean) <|>
   (ExDouble <$> p_double) <|>
   (ExInteger <$> p_integer) <|>
   (ExString <$> p_string) <|>
   (ExChar <$> p_char) <|>
-  p_expression_function <|>
   (ExIdentity <$> p_identity)
 
-p_priority_1 :: PE
-p_priority_1 = try $ do
+p_priority_0 :: PE
+p_priority_0 = try $ do
   char '('
   spaces
   expr <- p_expression
@@ -49,13 +48,83 @@ p_priority_1 = try $ do
 
 p_priority_2 :: PE
 p_priority_2 = try $ do
-  value <- p_primitive
-  suffs <- many p_suffs
-  return $ foldl (flip ExSuffix) value suffs
+  expr <- p_primitive
+  spaces
+  rest <- many $ parsers <* spaces
+  let result = foldl merge expr rest
+  spaces
+  return result
   where
-    p_suffs = choice
-      [ try (string "++")
-      , try (string "--") ]
+    parsers =
+      p_p2_dot <|>
+      p_p2_address <|>
+      p_p2_function <|>
+      p_p2_array <|>
+      p_p2_increment <|>
+      p_p2_decrement
+    merge a c =
+      case c of
+        E2Dot str -> (ExBinary "." a $ ExIdentity str)
+        E2Address str -> (ExBinary "->" a $ ExIdentity str)
+        E2Function args -> (ExFunction a args)
+        E2Array expr -> (ExBinary "[]" a expr)
+        E2Increment -> (ExSuffix "++" a)
+        E2Decrement -> (ExSuffix "--" a)
+
+data E2Data =
+  E2Dot String |
+  E2Address String |
+  E2Function [Expression] |
+  E2Array Expression |
+  E2Increment |
+  E2Decrement
+  deriving Show
+
+p_p2_increment :: Parser E2Data
+p_p2_increment = try $ do
+  string "++"
+  spaces
+  return E2Increment
+
+p_p2_decrement :: Parser E2Data
+p_p2_decrement = try $ do
+  string "--"
+  spaces
+  return E2Decrement
+
+p_p2_array :: Parser E2Data
+p_p2_array = try $ do
+  char '['
+  spaces
+  expr <- p_expression
+  char ']'
+  spaces
+  return $ E2Array expr
+
+p_p2_dot :: Parser E2Data
+p_p2_dot = try $ do
+  char '.'
+  spaces
+  id <- p_identity
+  spaces
+  return $ E2Dot id
+
+p_p2_address :: Parser E2Data
+p_p2_address = try $ do
+  string "->"
+  spaces
+  id <- p_identity
+  spaces
+  return $ E2Address id
+
+p_p2_function :: Parser E2Data
+p_p2_function = try $ do
+  char '('
+  spaces
+  args <- sepBy p_expression (char ',' >> spaces)
+  char ')'
+  spaces
+  return $ E2Function args
 
 p_priority_3 :: PE
 p_priority_3 = try $ do
@@ -146,15 +215,3 @@ p_throw = try $ do
   skipMany1 space
   val <- p_priority_5_15
   return $ ExPrefix "throw" val
-
-p_expression_function :: PE
-p_expression_function = try $ do
-  name <- p_identity
-  spaces
-  char '('
-  spaces
-  args <- sepBy p_expression (char ',' >> spaces)
-  spaces
-  char ')'
-  spaces
-  return $ ExFunction name args

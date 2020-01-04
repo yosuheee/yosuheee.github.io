@@ -57,10 +57,10 @@ spec = do
     it "accept \"return 12345;\"" $
       exec p_return "return 12345;" `shouldBe` (show $ 12345)
 
-  describe "p_function" $ do
+  describe "p_function_return_integer" $ do
     let source = "int main() { return 123; }"
     it "accept source" $
-      exec p_function source `shouldBe` (show $ 123)
+      exec p_function_return_integer source `shouldBe` (show $ 123)
 
   describe "p_namespace" $ do
     it "accept \"using namespace std;\"" $

@@ -81,8 +81,8 @@ p_bracket_start = char '('
 p_bracket_end :: Parser Char
 p_bracket_end = char ')'
 
-p_function :: Parser Integer
-p_function = do
+p_function_return_integer :: Parser Integer
+p_function_return_integer = do
   p_identity
   spaces
   p_function_name
@@ -119,7 +119,7 @@ p_main = do
   spaces
   p_namespace
   spaces
-  p_function
+  p_function_return_integer
 
 p_var_defined :: Parser (String, String, Expression)
 p_var_defined = do
