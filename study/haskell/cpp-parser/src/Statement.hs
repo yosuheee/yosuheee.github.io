@@ -278,7 +278,6 @@ p_statement_do_while = try $ do
 p_statement_for :: PS
 p_statement_for = try $ do
   string "for"
-  notFollowedBy p_identity_char_and_digit
   spaces
   char '('
   spaces
