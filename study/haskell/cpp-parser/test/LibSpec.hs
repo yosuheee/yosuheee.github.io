@@ -8,6 +8,8 @@ import Util
 
 import Primitive
 import Primitive.Integer
+import Expression
+import Statement
 import Lib
 
 spec :: Spec

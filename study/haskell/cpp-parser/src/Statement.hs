@@ -13,7 +13,9 @@ data Statement =
   StGoto String |
   StCompound [Statement] |
   StExpression Expression |
-  StDeclarator Type [Variable]
+  StDeclarator Type [Variable] |
+  StIf Expression Statement |
+  StIfElse Expression Statement Statement
   deriving Show
 
 type PS = Parser Statement
@@ -26,7 +28,9 @@ p_statement =
   p_statement_goto <|>
   p_statement_compound <|>
   p_statement_expression <|>
-  p_statement_declarator
+  p_statement_declarator <|>
+  p_statement_if_else <|>
+  p_statement_if
 
 p_statement_break :: PS
 p_statement_break = try $ do
@@ -130,3 +134,35 @@ p_simple_type = try $ do
     "int", "short", "long",
     "void" ]
   return . Type $ typ
+
+p_statement_if :: PS
+p_statement_if = try $ do
+  string "if"
+  spaces
+  char '('
+  spaces
+  cond <- p_expression
+  spaces
+  char ')'
+  spaces
+  true_stat <- p_statement
+  spaces
+  return $ StIf cond true_stat
+
+p_statement_if_else :: PS
+p_statement_if_else = try $ do
+  string "if"
+  spaces
+  char '('
+  spaces
+  cond <- p_expression
+  spaces
+  char ')'
+  spaces
+  true_stat <- p_statement
+  spaces
+  string "else"
+  spaces
+  false_stat <- p_statement
+  spaces
+  return $ StIfElse cond true_stat false_stat

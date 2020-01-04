@@ -64,3 +64,23 @@ spec = do
       (show $ StDeclarator (Type "int") [SetVar "a" (ExInteger 1), UnsetVar "b"])
     exec p_statement "int a = 1, b;" `shouldBe`
       (show $ StDeclarator (Type "int") [SetVar "a" (ExInteger 1), UnsetVar "b"])
+
+  describe "if" $ do
+    it "standard" $ do
+      exec p_statement_if_else "if (true) { 1; } else { 2; }" `shouldBe`
+        (show $ StIfElse (ExBoolean True)
+          (StCompound [StExpression (ExInteger 1)])
+          (StCompound [StExpression (ExInteger 2)]))
+    it "else if" $ do
+      exec p_statement_if_else "if (true) { 1; } else if (false) { 2; }" `shouldBe`
+        (show $ StIfElse (ExBoolean True)
+          (StCompound [StExpression (ExInteger 1)])
+          (StIf (ExBoolean False)
+            (StCompound [StExpression (ExInteger 2)])))
+      exec p_statement_if_else "if (1) { 1; } else if (2) { 2; } else if (3) { 3; }" `shouldBe`
+        (show $ StIfElse (ExInteger 1)
+          (StCompound [StExpression (ExInteger 1)])
+          (StIfElse (ExInteger 2)
+            (StCompound [StExpression (ExInteger 2)])
+            (StIf (ExInteger 3)
+              (StCompound [StExpression (ExInteger 3)]))))
