@@ -7,18 +7,60 @@ import Primitive
 import Expression
 
 data Statement =
+  StBreak |
+  StContinue |
+  StReturn Expression |
+  StGoto String |
   StCompound [Statement] |
   StExpression Expression |
   StDeclarator Type [Variable]
   deriving Show
 
-p_statement :: Parser Statement
+type PS = Parser Statement
+
+p_statement :: PS
 p_statement =
+  p_statement_break <|>
+  p_statement_continue <|>
+  p_statement_return <|>
+  p_statement_goto <|>
   p_statement_compound <|>
   p_statement_expression <|>
   p_statement_declarator
 
-p_statement_expression :: Parser Statement
+p_statement_break :: PS
+p_statement_break = try $ do
+  string "break"
+  spaces
+  char ';'
+  return StBreak
+
+p_statement_continue :: PS
+p_statement_continue = try $ do
+  string "continue"
+  spaces
+  char ';'
+  return StContinue
+
+p_statement_return :: PS
+p_statement_return = try $ do
+  string "return"
+  many1 space
+  expr <- p_expression
+  spaces
+  char ';'
+  return . StReturn $ expr
+
+p_statement_goto :: PS
+p_statement_goto = try $ do
+  string "goto"
+  many1 space
+  id <- p_identity
+  spaces
+  char ';'
+  return $ StGoto id 
+
+p_statement_expression :: PS
 p_statement_expression = try $ do
   exp <- p_expression
   spaces
@@ -26,7 +68,7 @@ p_statement_expression = try $ do
   spaces
   return . StExpression $ exp
 
-p_statement_compound :: Parser Statement
+p_statement_compound :: PS
 p_statement_compound = try $ do
   char '{'
   body <- many $ spaces *> p_statement
@@ -35,7 +77,7 @@ p_statement_compound = try $ do
   spaces
   return . StCompound $ body
 
-p_statement_declarator :: Parser Statement
+p_statement_declarator :: PS
 p_statement_declarator = try $ do
   typ <- p_simple_type
   many1 space
