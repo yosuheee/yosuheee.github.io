@@ -123,3 +123,23 @@ spec = do
         (show $ StDoWhile (StExpression (ExInteger 1)) (ExInteger 2))
       exec p_statement "do 1; while (2);" `shouldBe`
         (show $ StDoWhile (StExpression (ExInteger 1)) (ExInteger 2))
+
+  describe "for" $ do
+    it "standard" $ do
+      exec p_statement_for "for (int i = 0; i < 5; i++) sum += i;" `shouldBe`
+        (show $ StFor
+          (Just $ InitStmt (Type "int") [SetVar "i" (ExInteger 0)])
+          (Just $ ExBinary "<" (ExIdentity "i") (ExInteger 5))
+          (Just $ ExSuffix "++" (ExIdentity "i"))
+          (StExpression
+            (ExBinary "+=" (ExIdentity "sum") (ExIdentity "i"))))
+      exec p_statement "for (int i = 0; i < 5; i++) sum += i;" `shouldBe`
+        (show $ StFor
+          (Just $ InitStmt (Type "int") [SetVar "i" (ExInteger 0)])
+          (Just $ ExBinary "<" (ExIdentity "i") (ExInteger 5))
+          (Just $ ExSuffix "++" (ExIdentity "i"))
+          (StExpression
+            (ExBinary "+=" (ExIdentity "sum") (ExIdentity "i"))))
+    it "nothing" $ do
+      exec p_statement_for "for (;;) true;" `shouldBe`
+        (show $ StFor Nothing Nothing Nothing (StExpression (ExBoolean True))) 

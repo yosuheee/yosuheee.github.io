@@ -12,6 +12,8 @@ data LabelPrefix =
   SLDefault |
   SLIdentity String deriving Show
 
+data InitStmt = InitStmt Type [Variable] deriving Show
+
 data Statement =
   StBreak |
   StContinue |
@@ -25,7 +27,8 @@ data Statement =
   StIfElse Expression Statement Statement |
   StSwitch Expression Statement |
   StWhile Expression Statement |
-  StDoWhile Statement Expression
+  StDoWhile Statement Expression |
+  StFor (Maybe InitStmt) (Maybe Expression) (Maybe Expression) Statement
   deriving Show
 
 type PS = Parser Statement
@@ -44,7 +47,8 @@ p_statement =
   p_statement_if <|>
   p_statement_switch <|>
   p_statement_while <|>
-  p_statement_do_while
+  p_statement_do_while <|>
+  p_statement_for
 
 p_statement_label :: PS
 p_statement_label =
@@ -270,3 +274,32 @@ p_statement_do_while = try $ do
   char ';'
   spaces
   return $ StDoWhile stmt cond
+
+p_statement_for :: PS
+p_statement_for = try $ do
+  string "for"
+  notFollowedBy p_identity_char_and_digit
+  spaces
+  char '('
+  spaces
+  fst <-
+    option Nothing $ do
+      typ <- p_simple_type
+      many1 space
+      decls <- p_declarators
+      spaces
+      return . Just $ InitStmt typ decls
+  spaces
+  char ';'
+  spaces
+  snd <- option Nothing (Just <$> p_expression)
+  spaces
+  char ';'
+  spaces
+  thd <- option Nothing (Just <$> p_expression)
+  spaces
+  char ')'
+  spaces
+  stmt <- p_statement
+  spaces
+  return $ StFor fst snd thd stmt
