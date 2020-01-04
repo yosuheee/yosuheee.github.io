@@ -42,20 +42,20 @@ p_priority_1 = try $ do
 p_priority_2 :: PE
 p_priority_2 = try $ do
   value <- p_primitive
-  prefs <- many p_prefs
-  return $ foldl (\a c -> ExSuffix c a) value prefs
+  suffs <- many p_suffs
+  return $ foldl (flip ExSuffix) value suffs
   where
-    p_prefs = choice
+    p_suffs = choice
       [ try (string "++")
       , try (string "--") ]
 
 p_priority_3 :: PE
 p_priority_3 = try $ do
-  suffs <- many p_suffs
+  prefs <- many p_prefs
   value <- p_priority_2
-  return $ foldr (\a c -> ExPrefix a c) value suffs
+  return $ foldr ExPrefix value prefs
   where
-    p_suffs = choice
+    p_prefs = choice
       [ try (string "++")
       , try (string "--")
       , string "+", string "-", string "!"
@@ -66,7 +66,7 @@ p_priority_5_15 = p_priority_12_15
 
 p_priority_5_10 :: PE
 p_priority_5_10 =
-  foldl (\a c -> p_binops c a) p_priority_3 $
+  foldl (flip p_binops) p_priority_3 $
     map (\(f, s) -> (f, map string s)) [
       (InfixL, ["*", "/", "%"]),
       (InfixL, ["+", "-"]),
@@ -81,7 +81,7 @@ p_priority_11 =
 
 p_priority_12_15 :: PE
 p_priority_12_15 =
-  foldl (\a c -> p_binops c a) p_priority_11 $
+  foldl (flip p_binops) p_priority_11 $
     map (\(f, s) -> (f, map string s)) [
       (InfixL, ["^"]),
       (InfixL, ["|"]),
@@ -122,9 +122,13 @@ p_binops (ifx, ops) p_high_priority = try $ do
 p_ternary :: PE
 p_ternary = try $ do
   fst <- p_priority_5_15
-  spaces >> char '?' >> spaces
+  spaces
+  char '?'
+  spaces
   snd <- p_priority_5_15
-  spaces >> char ':' >> spaces
+  spaces
+  char ':'
+  spaces
   trd <- p_priority_5_15
   return $ ExTernary fst snd trd
 
