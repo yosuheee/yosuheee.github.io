@@ -21,17 +21,18 @@
   </style>
   <body>
     <div id="container">
-      <textarea id="src" name="source"></textarea>
+      <textarea id="src" name="source">a + b + c;</textarea>
       <textarea id="dest" name="destination"></textarea>
     </div>
     <script>
       const resize = () => {
         document.getElementById("container").style.height = window.innerHeight + "px";
       };
-      resize();
       window.addEventListener("resize", resize);
-      const textarea = document.getElementById("src");
-      textarea.addEventListener("keydown", e => {
+
+      const src = document.getElementById("src");
+      const dest = document.getElementById("dest");
+      src.addEventListener("keydown", e => {
         if (e.code === "Tab") {
           e.preventDefault();
           const sentence = textarea.value;
@@ -44,16 +45,26 @@
           textarea.selectionEnd = pos + word.length;
         }
       });
-      textarea.addEventListener("keyup", async e => {
-        const source = e.target.value;
+      const change = async source => {
         const response = await fetch("/parse", {
           method: "POST",
-          body: textarea.value,
+          body: source,
         });
         const text = await response.text();
-        if (text === "") return;
-        document.getElementById("dest").value = text;
-      });
+        if (text === " ") {
+          dest.value = "";
+          return;
+        }
+        if (text.startsWith("(")) {
+          dest.value = text;
+        } else {
+          const json = JSON.parse(text);
+          dest.value = JSON.stringify(json, null, 2);
+        }
+      };
+      src.addEventListener("keyup", e => change(e.target.value));
+      resize();
+      change(src.value);
     </script>
   </body>
 </html>

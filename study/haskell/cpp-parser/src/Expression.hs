@@ -1,7 +1,12 @@
+{-# LANGUAGE DeriveGeneric #-}
+
 module Expression where
 
 import Text.Parsec
 import Text.Parsec.String
+
+import Data.Aeson (FromJSON, ToJSON)
+import GHC.Generics
 
 import Primitive
 
@@ -19,7 +24,10 @@ data Expression =
   ExBinary String Expression Expression |
   ExTernary Expression Expression Expression |
   ExFunction Expression [Expression]
-  deriving (Show)
+  deriving (Show, Generic)
+
+instance FromJSON Expression
+instance ToJSON Expression
 
 type PE = Parser Expression
 

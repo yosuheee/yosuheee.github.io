@@ -1,18 +1,30 @@
+{-# LANGUAGE DeriveGeneric #-}
+
 module Statement where
 
 import Text.Parsec
 import Text.Parsec.String
 
+import Data.Aeson (FromJSON, ToJSON)
+import GHC.Generics
+
 import Primitive
 import Primitive.Identity (p_identity_char_and_digit)
 import Expression
 
+data Type = Type String deriving (Show, Generic)
+
+data Variable = 
+  SetVar String Expression |
+  UnsetVar String
+  deriving (Show, Generic)
+
+data InitStmt = InitStmt Type [Variable] deriving (Show, Generic)
+
 data LabelPrefix =
   SLCase Expression |
   SLDefault |
-  SLIdentity String deriving Show
-
-data InitStmt = InitStmt Type [Variable] deriving Show
+  SLIdentity String deriving (Show, Generic)
 
 data Statement =
   StBreak |
@@ -29,7 +41,18 @@ data Statement =
   StWhile Expression Statement |
   StDoWhile Statement Expression |
   StFor (Maybe InitStmt) (Maybe Expression) (Maybe Expression) Statement
-  deriving Show
+  deriving (Show, Generic)
+
+instance FromJSON Type
+instance FromJSON Variable
+instance FromJSON InitStmt
+instance FromJSON LabelPrefix
+instance FromJSON Statement
+instance ToJSON Type
+instance ToJSON Variable
+instance ToJSON InitStmt
+instance ToJSON LabelPrefix
+instance ToJSON Statement
 
 type PS = Parser Statement
 
@@ -152,11 +175,6 @@ p_statement_declarator = try $ do
   spaces
   return $ StDeclarator typ decls
 
-data Variable = 
-  SetVar String Expression |
-  UnsetVar String
-  deriving Show
-
 p_declarators :: Parser [Variable]
 p_declarators = try $ do
   let decl = p_set_declarator <|> p_unset_declarator
@@ -178,8 +196,6 @@ p_unset_declarator = try $ do
   name <- p_identity
   spaces
   return $ UnsetVar name
-
-data Type = Type String deriving Show
 
 p_simple_type :: Parser Type
 p_simple_type = try $ do

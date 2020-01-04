@@ -8,6 +8,7 @@ dependencies:
 - warp
 - http-types
 - bytestring
+- aeson
 
 executables:
   cpp-parser-exe:

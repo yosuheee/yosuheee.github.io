@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+
 module Main where
 
 import Network.Wai (responseLBS, Application, requestMethod, pathInfo, getRequestBodyChunk)
@@ -7,10 +8,12 @@ import Network.Wai.Handler.Warp (run, Port)
 import System.Environment (getEnvironment)
 import Data.List (lookup)
 import Data.Maybe
-import Data.ByteString.Lazy.Internal (packChars)
-import Data.ByteString.Internal (unpackChars)
+import Data.ByteString.Lazy.Internal as DBL
+import Data.ByteString.Internal as DB
 
 import Text.Parsec
+import Data.Aeson as DA
+
 import Statement
 
 import Util
@@ -27,14 +30,17 @@ helloApp req respond = do
   body <- getRequestBodyChunk req
   value <-
     if requestMethod req == "POST" && pathInfo req == ["parse"] then do
-      let input = unpackChars body
+      let input = DB.unpackChars body
       if input == "" then
         return " "
       else
-        return $ exec (p_statement <* eof) input
+        return $
+          case parse p_statement "" input of
+            Left err -> show err
+            Right val -> DBL.unpackChars . DA.encode $ val
     else
       readFile "app/index.html"
-  respond $ responseLBS status200 [] $ packChars value
+  respond $ responseLBS status200 [] $ DBL.packChars value
 
 getPort :: IO Port
 getPort = getEnvironment >>= return . port
