@@ -108,3 +108,18 @@ spec = do
       exec p_statement_switch "switch (a) { case 1: return 0; }" `shouldBe`
         (show $ StSwitch (ExIdentity "a")
           (StCompound [StLabel (SLCase (ExInteger 1)) (StReturn (ExInteger 0))]))
+      exec p_statement "switch (a) { case 1: return 0; }" `shouldBe`
+        (show $ StSwitch (ExIdentity "a")
+          (StCompound [StLabel (SLCase (ExInteger 1)) (StReturn (ExInteger 0))]))
+
+  describe "while" $ do
+    it "while () ..." $ do
+      exec p_statement_while "while (1) 2;" `shouldBe`
+        (show $ StWhile (ExInteger 1) (StExpression (ExInteger 2)))
+      exec p_statement "while (1) 2;" `shouldBe`
+        (show $ StWhile (ExInteger 1) (StExpression (ExInteger 2)))
+    it "do ... while ();" $ do
+      exec p_statement_do_while "do 1; while (2);" `shouldBe`
+        (show $ StDoWhile (StExpression (ExInteger 1)) (ExInteger 2))
+      exec p_statement "do 1; while (2);" `shouldBe`
+        (show $ StDoWhile (StExpression (ExInteger 1)) (ExInteger 2))

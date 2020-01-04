@@ -4,6 +4,7 @@ import Text.Parsec
 import Text.Parsec.String
 
 import Primitive
+import Primitive.Identity (p_identity_char_and_digit)
 import Expression
 
 data LabelPrefix =
@@ -22,7 +23,9 @@ data Statement =
   StDeclarator Type [Variable] |
   StIf Expression Statement |
   StIfElse Expression Statement Statement |
-  StSwitch Expression Statement
+  StSwitch Expression Statement |
+  StWhile Expression Statement |
+  StDoWhile Statement Expression
   deriving Show
 
 type PS = Parser Statement
@@ -38,7 +41,10 @@ p_statement =
   p_statement_declarator <|>
   p_statement_label <|>
   p_statement_if_else <|>
-  p_statement_if
+  p_statement_if <|>
+  p_statement_switch <|>
+  p_statement_while <|>
+  p_statement_do_while
 
 p_statement_label :: PS
 p_statement_label =
@@ -232,3 +238,35 @@ p_statement_switch = try $ do
   stmt <- p_statement
   spaces
   return $ StSwitch cond stmt
+
+p_statement_while :: PS
+p_statement_while = try $ do
+  string "while"
+  spaces
+  char '('
+  spaces
+  cond <- p_expression
+  spaces
+  char ')'
+  spaces
+  stmt <- p_statement
+  spaces
+  return $ StWhile cond stmt
+
+p_statement_do_while :: PS
+p_statement_do_while = try $ do
+  string "do"
+  notFollowedBy p_identity_char_and_digit
+  spaces
+  stmt <- p_statement
+  string "while"
+  spaces
+  char '('
+  spaces
+  cond <- p_expression
+  spaces
+  char ')'
+  spaces
+  char ';'
+  spaces
+  return $ StDoWhile stmt cond
