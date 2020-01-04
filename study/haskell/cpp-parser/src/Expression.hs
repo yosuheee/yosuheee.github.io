@@ -17,7 +17,8 @@ data Expression =
   ExSuffix String Expression |
   ExPrefix String Expression |
   ExBinary String Expression Expression |
-  ExTernary Expression Expression Expression
+  ExTernary Expression Expression Expression |
+  ExFunction String [Expression]
   deriving (Show)
 
 type PE = Parser Expression
@@ -138,3 +139,14 @@ p_throw = try $ do
   skipMany1 space
   val <- p_priority_5_15
   return $ ExPrefix "throw" val
+
+p_expression_function :: PE
+p_expression_function = try $ do
+  name <- p_identity
+  spaces
+  char '('
+  spaces
+  args <- sepBy p_expression (spaces >> char ',' >> spaces)
+  spaces
+  char ')'
+  return $ ExFunction name args

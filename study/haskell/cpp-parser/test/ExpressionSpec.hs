@@ -100,6 +100,11 @@ spec = do
       ["&"], ["^"], ["|"], ["&&"], ["||"],
       ["=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", "&=", "^=", "|="]]
 
+  describe "function" $ do
+    it "standard" $ do
+      exec p_expression_function "func(1, a)" `shouldBe`
+        (show $ ExFunction "func" [ExInteger 1, ExIdentity "a"])
+
 it_spec_binop :: String -> SpecWith (Arg Expectation)
 it_spec_binop op =
   it ("accept '1 " ++ op ++ " 2'") $
