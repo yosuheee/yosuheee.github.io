@@ -46,6 +46,8 @@ spec = do
       (show $ StCompound [StCompound [StExpression (ExInteger 1)], StExpression (ExInteger 2), StCompound []])
     exec p_statement "{1;}" `shouldBe`
       (show $ StCompound [StExpression (ExInteger 1)])
+    exec p_statement "{}" `shouldBe` (show $ StCompound [])
+    exec p_statement "{ }" `shouldBe` (show $ StCompound [])
 
   it "simple type" $ do
     exec p_simple_type "char" `shouldBe` (show $ Type "char")

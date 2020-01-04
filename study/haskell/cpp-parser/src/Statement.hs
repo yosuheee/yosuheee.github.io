@@ -135,8 +135,8 @@ p_statement_expression = try $ do
 p_statement_compound :: PS
 p_statement_compound = try $ do
   char '{'
-  body <- many $ spaces *> p_statement
   spaces
+  body <- many $ p_statement <* spaces
   char '}'
   spaces
   return . StCompound $ body
