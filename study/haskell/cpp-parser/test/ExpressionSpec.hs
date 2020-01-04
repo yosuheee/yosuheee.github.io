@@ -128,6 +128,24 @@ spec = do
                   (ExBinary "[]" (ExIdentity "a") (ExInteger 1))
                   (ExIdentity "b"))
                 (ExIdentity "c"))))
+    it "top level parser" $ do
+      exec p_expression "a.b.c" `shouldBe`
+        (show $ ExBinary "." (ExBinary "." (ExIdentity "a") (ExIdentity "b")) (ExIdentity "c"))
+      exec p_expression "a->b->c" `shouldBe`
+        (show $ ExBinary "->" (ExBinary "->" (ExIdentity "a") (ExIdentity "b")) (ExIdentity "c"))
+      exec p_expression "a(1)(2)" `shouldBe`
+        (show $ ExFunction (ExFunction (ExIdentity "a") [(ExInteger 1)]) [(ExInteger 2)])
+      exec p_expression "a[1][2]" `shouldBe`
+        (show $ ExBinary "[]" (ExBinary "[]" (ExIdentity "a") (ExInteger 1)) (ExInteger 2))
+      exec p_expression "a[1].b->c++--" `shouldBe`
+        (show $
+          ExSuffix "--"
+            (ExSuffix "++"
+              (ExBinary "->"
+                (ExBinary "."
+                  (ExBinary "[]" (ExIdentity "a") (ExInteger 1))
+                  (ExIdentity "b"))
+                (ExIdentity "c"))))
 
   describe "bug blank" $ do
     it "function" $ do
