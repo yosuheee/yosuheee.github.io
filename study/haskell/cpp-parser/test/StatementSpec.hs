@@ -31,6 +31,7 @@ spec = do
 
   it "simple type" $ do
     exec p_simple_type "char" `shouldBe` (show $ Type "char")
+    exec p_simple_type "long double" `shouldBe` (show $ Type "long double")
 
   it "simple declarator" $ do
     exec p_set_declarator "a = 1" `shouldBe` (show $ SetVar "a" (ExInteger 1))

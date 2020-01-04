@@ -78,7 +78,6 @@ p_simple_type = try $ do
     "signed char", "unsigned char", "char",
     "char8_t", "char16_t", "char32_t", "wchar_t",
     "bool",
-    "int", "short", "long",
     "signed short int", "unsigned short int",
     "signed long int",  "unsigned long int",
     "signed int",       "unsigned int",
@@ -86,5 +85,6 @@ p_simple_type = try $ do
     "signed long",      "unsigned long",
     "signed",           "unsigned",
     "long double", "float", "double",
+    "int", "short", "long",
     "void" ]
   return . Type $ typ
