@@ -10,6 +10,7 @@ data DblLiteral = DblLiteral DblSuffix String String deriving Show
 p_double :: Parser Double
 p_double = do
   str <- p_dbl_literal
+  spaces
   let DblLiteral _ fst snd = str
       a = read fst :: Double
       x = read snd :: Double

@@ -34,11 +34,18 @@ p_primitive =
   (ExInteger <$> p_integer) <|>
   (ExString <$> p_string) <|>
   (ExChar <$> p_char) <|>
+  p_expression_function <|>
   (ExIdentity <$> p_identity)
 
 p_priority_1 :: PE
 p_priority_1 = try $ do
-  char '(' *> spaces *> p_expression <* spaces <* char ')'
+  char '('
+  spaces
+  expr <- p_expression
+  spaces
+  char ')'
+  spaces
+  return expr
 
 p_priority_2 :: PE
 p_priority_2 = try $ do
@@ -146,7 +153,8 @@ p_expression_function = try $ do
   spaces
   char '('
   spaces
-  args <- sepBy p_expression (spaces >> char ',' >> spaces)
+  args <- sepBy p_expression (char ',' >> spaces)
   spaces
   char ')'
+  spaces
   return $ ExFunction name args

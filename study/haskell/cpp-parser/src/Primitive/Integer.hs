@@ -16,6 +16,7 @@ data IntLiteral =
 p_integer :: Parser Integer
 p_integer = do
   int <- p_int_literal
+  spaces
   return $
     case int of
       IBin _ s -> from_bin s

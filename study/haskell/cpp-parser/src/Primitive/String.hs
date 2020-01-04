@@ -18,6 +18,7 @@ data StrLiteral = StrLiteral StrPrefix StrSuffix String deriving Show
 p_string :: Parser String
 p_string = do
   str <- p_str_literal
+  spaces
   let StrLiteral _ _ s = str
   return s
 

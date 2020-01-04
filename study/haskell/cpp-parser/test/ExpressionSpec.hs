@@ -104,6 +104,27 @@ spec = do
     it "standard" $ do
       exec p_expression_function "func(1, a)" `shouldBe`
         (show $ ExFunction "func" [ExInteger 1, ExIdentity "a"])
+  
+  describe "bug blank" $ do
+    it "function" $ do
+      exec p_expression_function "func(1 )" `shouldBe`
+        (show $ ExFunction "func" [ExInteger 1])
+      exec p_expression_function "func(1 ,2)" `shouldBe`
+        (show $ ExFunction "func" [ExInteger 1, ExInteger 2])
+      exec p_expression_function "func(a ,b)" `shouldBe`
+        (show $ ExFunction "func" [ExIdentity "a", ExIdentity "b"])
+      exec p_expression_function "func(\"a\" ,\"b\")" `shouldBe`
+        (show $ ExFunction "func" [ExString "a", ExString "b"])
+      exec p_expression_function "func('a' ,'b')" `shouldBe`
+        (show $ ExFunction "func" [ExChar 'a', ExChar 'b'])
+      exec p_expression_function "func(1.2 ,1.3)" `shouldBe`
+        (show $ ExFunction "func" [ExDouble 1.2, ExDouble 1.3])
+      exec p_expression_function "func(true ,false)" `shouldBe`
+        (show $ ExFunction "func" [ExBoolean True, ExBoolean False])
+      exec p_expression_function "func(f() ,g())" `shouldBe`
+        (show $ ExFunction "func" [ExFunction "f" [], ExFunction "g" []])
+      exec p_expression_function "func((1) ,(2))" `shouldBe`
+        (show $ ExFunction "func" [ExInteger 1, ExInteger 2])
 
 it_spec_binop :: String -> SpecWith (Arg Expectation)
 it_spec_binop op =

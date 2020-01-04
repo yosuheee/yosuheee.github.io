@@ -12,6 +12,7 @@ data ChrLiteral =
 p_char :: Parser Char
 p_char = do
   chr <- p_chr_literal
+  spaces
   let ChrLiteral _ c = chr
   return c
 

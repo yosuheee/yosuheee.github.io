@@ -7,6 +7,7 @@ p_identity :: Parser String
 p_identity = do
   fst <- p_identity_char
   snd <- many p_identity_char_and_digit
+  spaces
   return $ [fst] ++ snd
 
 p_underscore :: Parser Char

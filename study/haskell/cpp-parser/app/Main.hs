@@ -25,13 +25,12 @@ helloApp req respond = do
   body <- getRequestBodyChunk req
   value <-
     if requestMethod req == "POST" && pathInfo req == ["parse"] then do
-      let
-        input = unpackChars body
-        result = 
+      let input = unpackChars body
+      if input == "" then return " " else
+        return $
           case parse p_statement "" input of
-            Left  err -> ""
-            Right val -> show $ val
-      return result
+            Left  err -> show err
+            Right val -> show val
     else
       readFile "app/index.html"
   respond $ responseLBS status200 [] $ packChars value
