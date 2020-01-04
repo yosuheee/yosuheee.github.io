@@ -4,6 +4,8 @@ import Test.Hspec
 import Text.Parsec
 import Text.Parsec.String
 
+import Util
+
 import Primitive.Identity
 
 spec :: Spec
@@ -32,9 +34,3 @@ spec = do
       exec p_identity_and_digit_char "a" `shouldBe` (show 'a')
       exec p_identity_and_digit_char "A" `shouldBe` (show 'A')
       exec p_identity_and_digit_char "1" `shouldBe` (show '1')
-
-exec :: Show a => Parser a -> String -> String
-exec p input =
-  case parse p "" input of
-    Left  err -> show err
-    Right val -> show val

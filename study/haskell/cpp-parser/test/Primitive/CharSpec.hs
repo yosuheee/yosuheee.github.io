@@ -4,6 +4,8 @@ import Test.Hspec
 import Text.Parsec
 import Text.Parsec.String
 
+import Util
+
 import Primitive.Char
 
 spec :: Spec
@@ -45,9 +47,3 @@ spec = do
     exec p_chr_literal "'\\r'" `shouldBe` (show $ ChrLiteral CSNone '\r')
     exec p_chr_literal "'\\t'" `shouldBe` (show $ ChrLiteral CSNone '\t')
     exec p_chr_literal "'\\0'" `shouldBe` (show $ ChrLiteral CSNone '\0')
-
-exec :: Show a => Parser a -> String -> String
-exec p input =
-  case parse p "" input of
-    Left  err -> show err
-    Right val -> show val

@@ -4,6 +4,8 @@ import Test.Hspec
 import Text.Parsec
 import Text.Parsec.String
 
+import Util
+
 import Primitive.Double
 
 spec :: Spec
@@ -56,9 +58,3 @@ spec = do
     exec p_dbl_literal ".3e+2L" `shouldBe` (show $ DblLiteral DSL "0.3" "2")
     exec p_dbl_literal "0.158l" `shouldBe` (show $ DblLiteral DSl "0.158" "0")
     exec p_dbl_literal "1.23E-13f" `shouldBe` (show $ DblLiteral DSf "1.23" "-13")
-
-exec :: Show a => Parser a -> String -> String
-exec p input =
-  case parse p "" input of
-    Left  err -> show err
-    Right val -> show val

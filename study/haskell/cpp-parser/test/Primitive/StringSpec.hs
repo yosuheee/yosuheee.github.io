@@ -4,6 +4,8 @@ import Test.Hspec
 import Text.Parsec
 import Text.Parsec.String
 
+import Util
+
 import Primitive.String
 
 spec :: Spec
@@ -75,9 +77,3 @@ spec = do
     exec p_str_literal "\"test\\0\"" `shouldBe` expected "test\0"
     exec p_str_literal "\"test\\xff\"" `shouldBe` expected "test\\xff"
     exec p_str_literal "\"test\\o77\"" `shouldBe` expected "test\\o77"
-
-exec :: Show a => Parser a -> String -> String
-exec p input =
-  case parse p "" input of
-    Left  err -> show err
-    Right val -> show val

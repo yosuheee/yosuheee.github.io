@@ -4,6 +4,8 @@ import Test.Hspec
 import Text.Parsec
 import Text.Parsec.String
 
+import Util
+
 import Expression
 import Statement
 
@@ -20,9 +22,3 @@ spec = do
       (show $ StCompound [StCompound [StExpression (ExInteger 1)], StExpression (ExInteger 2), StCompound []])
     exec p_statement_compound "{{1;} 2;{}}" `shouldBe`
       (show $ StCompound [StCompound [StExpression (ExInteger 1)], StExpression (ExInteger 2), StCompound []])
-
-exec :: Show a => Parser a -> String -> String
-exec p input =
-  case parse p "" input of
-    Left  err -> show err
-    Right val -> show val

@@ -4,6 +4,8 @@ import Test.Hspec
 import Text.Parsec
 import Text.Parsec.String
 
+import Util
+
 import Primitive.Integer
 
 spec :: Spec
@@ -56,9 +58,3 @@ spec = do
       exec p_int_literal "10l" `shouldBe` (show $ IDec ISL "10")
     it "u" $ do
       exec p_int_literal "10u" `shouldBe` (show $ IDec ISU "10")
-
-exec :: Show a => Parser a -> String -> String
-exec p input =
-  case parse p "" input of
-    Left  err -> show err
-    Right val -> show val

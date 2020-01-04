@@ -4,6 +4,8 @@ import Test.Hspec
 import Text.Parsec
 import Text.Parsec.String
 
+import Util
+
 import Primitive
 import Primitive.Integer
 import Lib
@@ -70,9 +72,3 @@ spec = do
   describe "p_func" $ do
     it "accept \"a()\"" $ do
       exec p_func "a()" `shouldBe` "(\"a\",[])"
-
-exec :: Show a => Parser a -> String -> String
-exec p input =
-  case parse p "" input of
-    Left  err -> show err
-    Right val -> show val

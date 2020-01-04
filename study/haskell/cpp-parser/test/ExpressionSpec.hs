@@ -5,6 +5,8 @@ import Test.Hspec
 import Text.Parsec
 import Text.Parsec.String
 
+import Util
+
 import Primitive.Char
 import Primitive.Double
 import Primitive.Integer
@@ -74,22 +76,14 @@ spec = do
       show $ ExPrefix "--" (ExIdentity "a"))
 
   it "p_priority_3" $ do
-    exec p_priority_3 "++a" `shouldBe` (
-      show $ ExSuffix "++" (ExIdentity "a"))
-    exec p_priority_3 "--a" `shouldBe` (
-      show $ ExSuffix "--" (ExIdentity "a"))
-    exec p_priority_3 "+a" `shouldBe` (
-      show $ ExSuffix "+" (ExIdentity "a"))
-    exec p_priority_3 "-a" `shouldBe` (
-      show $ ExSuffix "-" (ExIdentity "a"))
-    exec p_priority_3 "!1" `shouldBe` (
-      show $ ExSuffix "!" (ExInteger 1))
-    exec p_priority_3 "~1" `shouldBe` (
-      show $ ExSuffix "~" (ExInteger 1))
-    exec p_priority_3 "*a" `shouldBe` (
-      show $ ExSuffix "*" (ExIdentity "a"))
-    exec p_priority_3 "&a" `shouldBe` (
-      show $ ExSuffix "&" (ExIdentity "a"))
+    exec p_priority_3 "++a" `shouldBe` (show $ ExSuffix "++" (ExIdentity "a"))
+    exec p_priority_3 "--a" `shouldBe` (show $ ExSuffix "--" (ExIdentity "a"))
+    exec p_priority_3 "+a"  `shouldBe` (show $ ExSuffix "+" (ExIdentity "a"))
+    exec p_priority_3 "-a"  `shouldBe` (show $ ExSuffix "-" (ExIdentity "a"))
+    exec p_priority_3 "!1"  `shouldBe` (show $ ExSuffix "!" (ExInteger 1))
+    exec p_priority_3 "~1"  `shouldBe` (show $ ExSuffix "~" (ExInteger 1))
+    exec p_priority_3 "*a"  `shouldBe` (show $ ExSuffix "*" (ExIdentity "a"))
+    exec p_priority_3 "&a"  `shouldBe` (show $ ExSuffix "&" (ExIdentity "a"))
 
   describe "binary operator" $ do
     flip forM_ it_spec_binop $ concat [
@@ -101,12 +95,6 @@ spec = do
       ["==", "!="],
       ["&"], ["^"], ["|"], ["&&"], ["||"],
       ["=", "+=", "-=", "*=", "/=", "%=", "<<=", ">>=", "&=", "^=", "|="]]
-
-exec :: Show a => Parser a -> String -> String
-exec p input =
-  case parse p "" input of
-    Left  err -> show err
-    Right val -> show val
 
 it_spec_binop :: String -> SpecWith (Arg Expectation)
 it_spec_binop op =
