@@ -14,8 +14,8 @@ data Expression =
   ExInteger Integer |
   ExString String |
   ExIdentity String |
-  ExPrefix String Expression |
   ExSuffix String Expression |
+  ExPrefix String Expression |
   ExBinary String Expression Expression |
   ExTernary Expression Expression Expression
   deriving (Show)
@@ -38,7 +38,7 @@ p_priority_2 :: PE
 p_priority_2 = try $ do
   value <- p_primitive
   prefs <- many p_prefs
-  return $ foldl (\a c -> ExPrefix c a) value prefs
+  return $ foldl (\a c -> ExSuffix c a) value prefs
   where
     p_prefs = choice
       [ try (string "++")
@@ -48,7 +48,7 @@ p_priority_3 :: PE
 p_priority_3 = try $ do
   suffs <- many p_suffs
   value <- p_priority_2
-  return $ foldr (\a c -> ExSuffix a c) value suffs
+  return $ foldr (\a c -> ExPrefix a c) value suffs
   where
     p_suffs = choice
       [ try (string "++")
@@ -123,4 +123,4 @@ p_throw = try $ do
   string "throw"
   skipMany1 space
   val <- p_priority_5_15
-  return $ ExSuffix "throw" val
+  return $ ExPrefix "throw" val

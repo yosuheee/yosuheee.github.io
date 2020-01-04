@@ -23,25 +23,25 @@ spec = do
         (show $ ExTernary (ExInteger 1) (ExInteger 2) (ExInteger 3))
     it "accept 'throw 123'" $ do
       exec p_expression "throw 123" `shouldBe`
-        (show $ ExSuffix "throw" (ExInteger 123))
+        (show $ ExPrefix "throw" (ExInteger 123))
     it "accept '1 + ++a + a++'" $ do
       exec p_expression "1 + ++a + a++" `shouldBe`
-        (show $ ExBinary "+" (ExBinary "+" (ExInteger 1) (ExSuffix "++" (ExIdentity "a"))) (ExPrefix "++" (ExIdentity "a")))
+        (show $ ExBinary "+" (ExBinary "+" (ExInteger 1) (ExPrefix "++" (ExIdentity "a"))) (ExSuffix "++" (ExIdentity "a")))
     it "accept '+1 + ++a + a++'" $ do
       exec p_expression "+1 + ++a + a++" `shouldBe`
-        (show $ ExBinary "+" (ExBinary "+" (ExSuffix "+" (ExInteger 1)) (ExSuffix "++" (ExIdentity "a"))) (ExPrefix "++" (ExIdentity "a")))
+        (show $ ExBinary "+" (ExBinary "+" (ExPrefix "+" (ExInteger 1)) (ExPrefix "++" (ExIdentity "a"))) (ExSuffix "++" (ExIdentity "a")))
     it "accept '1 && 2'" $ do
       exec p_expression "1 && 2" `shouldBe`
         (show $ ExBinary "&&" (ExInteger 1) (ExInteger 2))
     it "accept '!~1'" $ do
       exec p_expression "!~1" `shouldBe`
-        (show $ ExSuffix "!" (ExSuffix "~" (ExInteger 1)))
+        (show $ ExPrefix "!" (ExPrefix "~" (ExInteger 1)))
     it "accept '++a++'" $ do
       exec p_expression "++a--" `shouldBe`
-        (show $ ExSuffix "++" (ExPrefix "--" (ExIdentity "a")))
+        (show $ ExPrefix "++" (ExSuffix "--" (ExIdentity "a")))
     it "accept 'a++--'" $ do
       exec p_expression "a++--" `shouldBe`
-        (show $ ExPrefix "--" (ExPrefix "++" (ExIdentity "a")))
+        (show $ ExSuffix "--" (ExSuffix "++" (ExIdentity "a")))
     it "accept 'true' or 'false" $ do
       exec p_expression "true" `shouldBe` (show $ ExBoolean True)
       exec p_expression "false" `shouldBe` (show $ ExBoolean False)
@@ -56,7 +56,7 @@ spec = do
   describe "p_throw" $ do
     it "accept 'throw 1'" $ do
       exec p_throw "throw 1" `shouldBe`
-        (show $ ExSuffix "throw" (ExInteger 1))
+        (show $ ExPrefix "throw" (ExInteger 1))
 
   it "p_priority_5_15" $ do
     exec p_priority_5_15 "1 + 2" `shouldBe` (show $
@@ -72,19 +72,19 @@ spec = do
 
   it "p_priority_2" $ do
     exec p_priority_2 "a++" `shouldBe` (
-      show $ ExPrefix "++" (ExIdentity "a"))
+      show $ ExSuffix "++" (ExIdentity "a"))
     exec p_priority_2 "a--" `shouldBe` (
-      show $ ExPrefix "--" (ExIdentity "a"))
+      show $ ExSuffix "--" (ExIdentity "a"))
 
   it "p_priority_3" $ do
-    exec p_priority_3 "++a" `shouldBe` (show $ ExSuffix "++" (ExIdentity "a"))
-    exec p_priority_3 "--a" `shouldBe` (show $ ExSuffix "--" (ExIdentity "a"))
-    exec p_priority_3 "+a"  `shouldBe` (show $ ExSuffix "+" (ExIdentity "a"))
-    exec p_priority_3 "-a"  `shouldBe` (show $ ExSuffix "-" (ExIdentity "a"))
-    exec p_priority_3 "!1"  `shouldBe` (show $ ExSuffix "!" (ExInteger 1))
-    exec p_priority_3 "~1"  `shouldBe` (show $ ExSuffix "~" (ExInteger 1))
-    exec p_priority_3 "*a"  `shouldBe` (show $ ExSuffix "*" (ExIdentity "a"))
-    exec p_priority_3 "&a"  `shouldBe` (show $ ExSuffix "&" (ExIdentity "a"))
+    exec p_priority_3 "++a" `shouldBe` (show $ ExPrefix "++" (ExIdentity "a"))
+    exec p_priority_3 "--a" `shouldBe` (show $ ExPrefix "--" (ExIdentity "a"))
+    exec p_priority_3 "+a"  `shouldBe` (show $ ExPrefix "+" (ExIdentity "a"))
+    exec p_priority_3 "-a"  `shouldBe` (show $ ExPrefix "-" (ExIdentity "a"))
+    exec p_priority_3 "!1"  `shouldBe` (show $ ExPrefix "!" (ExInteger 1))
+    exec p_priority_3 "~1"  `shouldBe` (show $ ExPrefix "~" (ExInteger 1))
+    exec p_priority_3 "*a"  `shouldBe` (show $ ExPrefix "*" (ExIdentity "a"))
+    exec p_priority_3 "&a"  `shouldBe` (show $ ExPrefix "&" (ExIdentity "a"))
 
   describe "binary operator" $ do
     flip forM_ it_spec_binop $ concat [
