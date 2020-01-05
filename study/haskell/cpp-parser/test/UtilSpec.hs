@@ -8,11 +8,22 @@ import Util
 import Expression
 
 spec :: Spec
-spec =
+spec = do
   describe "library spec" $ do
+    it "accept '\\n' and ' '" $ do
+      exec space "\n" `shouldBe` "'\\n'"
+      exec space " " `shouldBe` "' '"
+
+    it "accept \"\"" $ do
+      exec spaces "" `shouldBe` "()"
+
     it "option & optionMaybe" $ do
       let p = optionMaybe (try $ string "anaconda")
       exec p "ab" `shouldBe` "Nothing"
 
     it "<?>" $ do
       exec p_expression "" `shouldBe` (message 1 1 "expression")
+
+  describe "p_spaces_not_crlf" $ do
+    it "line feed" $ do
+      exec p_spaces_not_crlf "   \n   " `shouldBe` (show $ "   ")

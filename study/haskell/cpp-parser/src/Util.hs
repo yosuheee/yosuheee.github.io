@@ -14,3 +14,7 @@ message line num token =
   "(line " ++ (show line) ++ ", column " ++ (show num) ++ "):\n" ++
   "unexpected end of input\n" ++ 
   "expecting " ++ token
+
+p_spaces_not_crlf :: Parser String
+p_spaces_not_crlf = try $ do
+  many $ notFollowedBy endOfLine >> space

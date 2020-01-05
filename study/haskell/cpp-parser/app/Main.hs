@@ -17,7 +17,7 @@ import Text.Parsec
 import Data.Aeson as DA (FromJSON, ToJSON, encode, decode)
 import GHC.Generics
 
-import Statement
+import Lib
 
 import Util
 
@@ -46,7 +46,7 @@ helloApp req respond = do
         return " "
       else
         return $
-          case parse (spaces *> p_statement <* eof) "" input of
+          case parse p_main "" input of
             Left err -> show err
             Right val ->
               if kind mydat == "json" then
