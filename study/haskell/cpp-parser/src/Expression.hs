@@ -146,12 +146,50 @@ p_priority_3 = try $ do
       , string "+", string "-", string "!"
       , string "~", string "*", string "&" ]
 
+p_priority_4 :: PE
+p_priority_4 = try $ do
+  expr <- p_priority_3
+  spaces
+  rest <- many $ parsers <* spaces
+  let result = foldl merge expr rest
+  spaces
+  return result
+  where
+    parsers =
+      p_p4_member <|>
+      p_p4_pointer
+    merge a c =
+      case c of
+        E4Member str -> (ExBinary ".*" a $ ExIdentity str)
+        E4Pointer str -> (ExBinary "->*" a $ ExIdentity str)
+
+data E4Data =
+  E4Member String |
+  E4Pointer String
+  deriving Show
+
+p_p4_member :: Parser E4Data
+p_p4_member = try $ do
+  string ".*"
+  spaces
+  id <- p_identity
+  spaces
+  return $ E4Member id
+
+p_p4_pointer :: Parser E4Data
+p_p4_pointer = try $ do
+  string "->*"
+  spaces
+  id <- p_identity
+  spaces
+  return $ E4Pointer id
+
 p_priority_5_15 :: PE
 p_priority_5_15 = p_priority_12_15
 
 p_priority_5_10 :: PE
 p_priority_5_10 =
-  foldl (flip p_binops) p_priority_3 $
+  foldl (flip p_binops) p_priority_4 $
     map (\(f, s) -> (f, map string s)) [
       (InfixL, ["*", "/", "%"]),
       (InfixL, ["+", "-"]),

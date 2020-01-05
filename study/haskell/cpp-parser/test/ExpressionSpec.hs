@@ -147,6 +147,18 @@ spec = do
                   (ExIdentity "b"))
                 (ExIdentity "c"))))
 
+  describe "priority 4" $ do
+    it ".*" $ do
+      exec p_priority_4 "a.*b" `shouldBe`
+        (show $ ExBinary ".*" (ExIdentity "a") (ExIdentity "b"))
+      exec p_expression "a.*b" `shouldBe`
+        (show $ ExBinary ".*" (ExIdentity "a") (ExIdentity "b"))
+    it "->*" $ do
+      exec p_priority_4 "a->*b" `shouldBe`
+        (show $ ExBinary "->*" (ExIdentity "a") (ExIdentity "b"))
+      exec p_expression "a->*b" `shouldBe`
+        (show $ ExBinary "->*" (ExIdentity "a") (ExIdentity "b"))
+
   describe "bug blank" $ do
     it "function" $ do
       exec p_priority_2 "func(1 )" `shouldBe`
