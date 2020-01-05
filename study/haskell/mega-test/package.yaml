@@ -1,0 +1,29 @@
+name:     mega-test
+version:  0.1.0.0
+
+dependencies:
+- base >= 4.7 && < 5
+- megaparsec
+- text
+
+executables:
+  mega-test-exe:
+    main:         Main.hs
+    source-dirs:  app
+    ghc-options:
+    - -O0
+    dependencies:
+    - mega-test
+
+library:
+  source-dirs:    src
+
+tests:
+  mega-test-test:
+    main:         Spec.hs
+    source-dirs:  test
+    ghc-options:
+    - -O0
+    dependencies:
+    - hspec
+    - mega-test
