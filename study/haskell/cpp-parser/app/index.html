@@ -17,16 +17,16 @@
       position: absolute;
       width: 100%;
       top: 0;
-      height: 5vh;
-      padding-top: calc((5vh - 20px) / 2);
+      height: 8vh;
+      padding-top: calc((8vh - 20px) / 2);
       text-align: center;
       font-size: 20px;
     }
     #textarea {
       position: absolute;
-      top: 5vh;
+      top: 8vh;
       width: 100vw;
-      height: 95vh;
+      height: 92vh;
       padding: 0;
       margin: 0;
       display: grid;
@@ -42,17 +42,18 @@
   <body>
     <div id="container">
       <div id="header">
-        <input type="checkbox" id="immediately" name="immediately" checked="checked">
-        <label for="immediately">Show Errors Immediately</label>
-        <span style="padding: 0 32px">|</span>
         Encode:
         <label><input type="radio" name="type" value="json">&nbsp;JSON</label>
         <label><input type="radio" name="type" value="data">&nbsp;Data</label>
         <span style="padding: 0 32px">|</span>
         Tab Size:
         <label><input type="radio" name="tab" value="2">&nbsp;2</label>
+        <label><input type="radio" name="tab" value="3">&nbsp;3</label>
         <label><input type="radio" name="tab" value="4">&nbsp;4</label>
         <label><input type="radio" name="tab" value="8">&nbsp;8</label>
+        <span style="padding: 0 32px">|</span>
+        <input type="checkbox" id="immediately" name="immediately" checked="checked">
+        <label for="immediately">Show Errors Immediately</label>
         <span style="padding: 0 32px">|</span>
         <input type="checkbox" id="save_code" name="save_code" checked="checked">
         <label for="save_code">Save Code</label>
@@ -97,14 +98,14 @@
           const co = (localStorage.getItem("save_code") || "true") === "true";
           const ta = localStorage.getItem("tab") || "8";
           const ty = localStorage.getItem("type") || "data";
-          const source = localStorage.getItem("source") || "1 + 2 * 3;";
+          const source = localStorage.getItem("source") || "";
 
           immed.checked = im;
           code.checked = co;
           tabs.forEach(elem => { if (elem.value === ta) elem.checked = true; });
           types.forEach(elem => { if (elem.value === ty) elem.checked = true; });
           
-          src.value = co ? source : "1 + 2 * 3;";
+          src.value = co ? source : "";
         };
 
         const set_values_to_storage = () => {
@@ -141,10 +142,7 @@
           dest.value = await change(state())
         });
         code.addEventListener("click", () => {
-          const co = code.checked;
           set_values_to_storage();
-          localStorage.setItem("save_code", co);
-          if (!co) localStorage.removeItem("source");
         });
         types.forEach(elem => {
           elem.addEventListener("click", async () => {
