@@ -54,14 +54,27 @@ p_priority_0 = try $ do
   spaces
   return expr
 
-p_priority_2 :: PE
-p_priority_2 = try $ do
+p_priority_1 :: PE
+p_priority_1 = try $ do
   expr <- p_primitive
   spaces
-  rest <- many $ parsers <* spaces
-  let result = foldl merge expr rest
+  rest <- many $ ExIdentity <$> p_p1_scope <* spaces
+  return $ foldl (ExBinary "::") expr rest
+
+p_p1_scope :: Parser String
+p_p1_scope = try $ do
+  string "::"
   spaces
-  return result
+  id <- p_identity
+  spaces
+  return id
+
+p_priority_2 :: PE
+p_priority_2 = try $ do
+  expr <- p_priority_1
+  spaces
+  rest <- many $ parsers <* spaces
+  return $ foldl merge expr rest
   where
     parsers =
       p_p2_dot <|>

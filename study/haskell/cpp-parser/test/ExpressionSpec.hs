@@ -105,6 +105,13 @@ spec = do
       exec p_priority_2 "func(1, a)" `shouldBe`
         (show $ ExFunction (ExIdentity "func") [ExInteger 1, ExIdentity "a"])
   
+  describe "priority 1" $ do
+    it "::" $ do
+      exec p_priority_1 "a::b::c" `shouldBe`
+        (show $ ExBinary "::" (ExBinary "::" (ExIdentity "a") (ExIdentity "b")) (ExIdentity "c"))
+      exec p_expression "a::b::c" `shouldBe`
+        (show $ ExBinary "::" (ExBinary "::" (ExIdentity "a") (ExIdentity "b")) (ExIdentity "c"))
+
   describe "chain" $ do
     it "dot" $ do
       exec p_priority_2 "a.b.c" `shouldBe`
