@@ -2,8 +2,7 @@ module ExpressionSpec (spec) where
 
 import Control.Monad (forM_)
 import Test.Hspec
-import Text.Parsec
-import Text.Parsec.String
+import Text.Parsec (eof)
 
 import Util
 

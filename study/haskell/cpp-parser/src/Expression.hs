@@ -36,27 +36,30 @@ p_expression = p_priority_16 <?> "expression"
 
 p_primitive :: PE
 p_primitive =
-  p_priority_0 <|>
   (ExBoolean <$> p_boolean) <|>
   (ExDouble <$> p_double) <|>
   (ExInteger <$> p_integer) <|>
   (ExString <$> p_string) <|>
-  (ExChar <$> p_char) <|>
-  (ExIdentity <$> p_identity)
+  (ExChar <$> p_char)
 
 p_priority_0 :: PE
-p_priority_0 = try $ do
-  char '('
-  spaces
-  expr <- p_expression
-  spaces
-  char ')'
-  spaces
-  return expr
+p_priority_0 = 
+  p_paren <|>
+  p_primitive <|>
+  (ExIdentity <$> p_identity)
+  where
+    p_paren = try $ do
+      char '('
+      spaces
+      expr <- p_expression
+      spaces
+      char ')'
+      spaces
+      return expr
 
 p_priority_1 :: PE
 p_priority_1 = try $ do
-  expr <- p_primitive
+  expr <- p_priority_0
   spaces
   rest <- many $ ExIdentity <$> p_p1_scope <* spaces
   return $ foldl (ExBinary "::") expr rest

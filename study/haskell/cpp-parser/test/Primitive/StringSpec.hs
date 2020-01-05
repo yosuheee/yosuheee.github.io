@@ -1,8 +1,6 @@
 module Primitive.StringSpec where
 
 import Test.Hspec
-import Text.Parsec
-import Text.Parsec.String
 
 import Util
 

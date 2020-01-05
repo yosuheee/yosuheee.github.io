@@ -1,8 +1,7 @@
 module Primitive.IdentitySpec (spec) where
 
 import Test.Hspec
-import Text.Parsec
-import Text.Parsec.String
+import Text.Parsec (eof)
 
 import Util
 
