@@ -65,3 +65,11 @@ spec = do
           AtIdentity "a",
           AtFunction "f" $ AtArgument [AtInteger 1, AtInteger 2],
           AtNamespaceFunction ["cats"] "meow" $ AtArgument [AtInteger 5] ])
+
+  describe "all" $ do
+    it "standard" $ do
+      exec p_attributes_blocks "[[a]] [[b]]" `shouldBe`
+        (show $ [AtList [AtIdentity "a"], AtList [AtIdentity "b"]])
+    it "no blank" $ do
+      exec p_attributes_blocks "[[a]][[b]]" `shouldBe`
+        (show $ [AtList [AtIdentity "a"], AtList [AtIdentity "b"]])

@@ -1,7 +1,12 @@
+{-# LANGUAGE DeriveGeneric #-}
+
 module Attribute where
 
 import Text.Parsec
 import Text.Parsec.String
+
+import Data.Aeson (FromJSON, ToJSON)
+import GHC.Generics
 
 import Primitive.Identity
 import Primitive.Integer
@@ -9,22 +14,36 @@ import Primitive.Integer
 data AtList =
   AtUsingList String [Attribute] |
   AtList [Attribute]
-  deriving (Show)
+  deriving (Show, Generic)
 
 data Attribute =
   AtIdentity String |
   AtNamespace [String] String |
   AtFunction String AtArgument |
   AtNamespaceFunction [String] String AtArgument
-  deriving (Show)
+  deriving (Show, Generic)
 
 data AtArgument =
   AtArgument [AtPrimitive]
-  deriving (Show)
+  deriving (Show, Generic)
 
 data AtPrimitive =
   AtInteger Integer
-  deriving (Show)
+  deriving (Show, Generic)
+
+instance FromJSON AtList
+instance FromJSON Attribute
+instance FromJSON AtArgument
+instance FromJSON AtPrimitive
+instance ToJSON AtList
+instance ToJSON Attribute
+instance ToJSON AtArgument
+instance ToJSON AtPrimitive
+
+p_attributes_blocks :: Parser [AtList]
+p_attributes_blocks = try $ do
+  blocks <- many1 $ p_attributes_block <* spaces
+  return blocks
 
 p_attributes_block :: Parser AtList
 p_attributes_block = 
@@ -59,10 +78,6 @@ p_attribute =
   p_attribute_namespace <|>
   p_attribute_function <|>
   p_attribute_identity
-
-p_attribute_primitive :: Parser AtPrimitive
-p_attribute_primitive =
-  (AtInteger <$> p_integer)
 
 p_attribute_identity :: Parser Attribute
 p_attribute_identity = try $ do
@@ -100,6 +115,10 @@ p_attribute_namespace_function = try $ do
   spaces
   return $ AtNamespaceFunction prefs tail args
   
+p_attribute_primitive :: Parser AtPrimitive
+p_attribute_primitive =
+  (AtInteger <$> p_integer)
+
 p_arguments :: Parser AtArgument
 p_arguments = try $ do
   attrs <- sepBy (try $ p_attribute_primitive <* spaces) (try (char ',' >> spaces))
