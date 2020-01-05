@@ -44,18 +44,21 @@
       <div id="header">
         <input type="checkbox" id="immediately" name="immediately" checked="checked">
         <label for="immediately">Show Errors Immediately</label>
-        <span style="padding: 0 48px">|</span>
+        <span style="padding: 0 32px">|</span>
         Encode:
-        <label><input type="radio" name="type" value="json" checked="checked">&nbsp;JSON</label>
+        <label><input type="radio" name="type" value="json">&nbsp;JSON</label>
         <label><input type="radio" name="type" value="data">&nbsp;Data</label>
-        <span style="padding: 0 48px">|</span>
+        <span style="padding: 0 32px">|</span>
         Tab Size:
-        <label><input type="radio" name="tab" value="2" checked="checked">&nbsp;2</label>
+        <label><input type="radio" name="tab" value="2">&nbsp;2</label>
         <label><input type="radio" name="tab" value="4">&nbsp;4</label>
         <label><input type="radio" name="tab" value="8">&nbsp;8</label>
+        <span style="padding: 0 32px">|</span>
+        <input type="checkbox" id="save_code" name="save_code" checked="checked">
+        <label for="save_code">Save Code</label>
       </div>
       <div id="textarea">
-        <textarea id="src" name="source">a + b + c;</textarea>
+        <textarea id="src" name="source"></textarea>
         <textarea id="dest" name="destination"></textarea>
       </div>
     </div>
@@ -85,31 +88,78 @@
         const src = document.getElementById("src");
         const dest = document.getElementById("dest");
         const immed = document.getElementById("immediately");
-        const tabs = document.querySelectorAll("input[name=\"tab\"]");
-        const types = document.querySelectorAll("input[name=\"type\"]");
+        const tabs = Array.from(document.querySelectorAll("input[name=\"tab\"]"));
+        const types = Array.from(document.querySelectorAll("input[name=\"type\"]"));
+        const code = document.getElementById("save_code");
+
+        const set_values_to_elems = () => {
+          const im = (localStorage.getItem("immediately") || "true") === "true";
+          const co = (localStorage.getItem("save_code") || "true") === "true";
+          const ta = localStorage.getItem("tab") || "8";
+          const ty = localStorage.getItem("type") || "data";
+          const source = localStorage.getItem("source") || "1 + 2 * 3;";
+
+          immed.checked = im;
+          code.checked = co;
+          tabs.forEach(elem => { if (elem.value === ta) elem.checked = true; });
+          types.forEach(elem => { if (elem.value === ty) elem.checked = true; });
+          
+          src.value = co ? source : "1 + 2 * 3;";
+        };
+
+        const set_values_to_storage = () => {
+          const im = immed.checked;
+          const ta = tabs.filter(e => e.checked)[0].value;
+          const ty = types.filter(e => e.checked)[0].value;
+          const co = code.checked;
+          const source = src.value;
+
+          localStorage.setItem("immediately", im);
+          localStorage.setItem("save_code", co);
+          localStorage.setItem("tab", ta);
+          localStorage.setItem("type", ty);
+
+          if (co) localStorage.setItem("source", source);
+          else localStorage.removeItem("source");
+        };
 
         const state = () => {
           const source = src.value;
           const destination = dest.value;
           const immediately = immed.checked;
-          const tab = +Array.from(tabs).filter(e => e.checked)[0].value;
-          const type = Array.from(types).filter(e => e.checked)[0].value;
+          const tab = +tabs.filter(e => e.checked)[0].value;
+          const type = types.filter(e => e.checked)[0].value;
           return { source, destination, immediately, tab, type };
         };
 
         src.addEventListener("keyup", async () => {
+          set_values_to_storage();
           dest.value = await change(state())
         });
         immed.addEventListener("click", async () => {
+          set_values_to_storage();
           dest.value = await change(state())
         });
+        code.addEventListener("click", () => {
+          const co = code.checked;
+          set_values_to_storage();
+          localStorage.setItem("save_code", co);
+          if (!co) localStorage.removeItem("source");
+        });
         types.forEach(elem => {
-          elem.addEventListener("click", async () => dest.value = await change(state()));
+          elem.addEventListener("click", async () => {
+            set_values_to_storage();
+            dest.value = await change(state())
+          });
         });
         tabs.forEach(elem => {
-          elem.addEventListener("click", async () => dest.value = await change(state()));
+          elem.addEventListener("click", async () => {
+            set_values_to_storage();
+            dest.value = await change(state())
+          });
         });
         
+        set_values_to_elems();
         dest.value = await change(state());
       });
     </script>
