@@ -4,6 +4,8 @@ import Data.Char (ord, toUpper)
 import Text.Parsec
 import Text.Parsec.String
 
+import Util
+
 data IntSuffix = ISNone | ISU | ISL | ISLU | ISLL | ISLLU deriving Show
 
 data IntLiteral =
@@ -16,7 +18,7 @@ data IntLiteral =
 p_integer :: Parser Integer
 p_integer = do
   int <- p_int_literal
-  spaces
+  ___
   return $
     case int of
       IBin _ s -> from_bin s

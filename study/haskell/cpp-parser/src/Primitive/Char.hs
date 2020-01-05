@@ -3,6 +3,8 @@ module Primitive.Char where
 import Text.Parsec
 import Text.Parsec.String
 
+import Util
+
 data ChrPrefix =
   CSu8 | CSu | CSU | CSL | CSNone deriving Show
 
@@ -12,7 +14,7 @@ data ChrLiteral =
 p_char :: Parser Char
 p_char = do
   chr <- p_chr_literal
-  spaces
+  ___
   let ChrLiteral _ c = chr
   return c
 

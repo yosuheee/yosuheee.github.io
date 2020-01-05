@@ -10,6 +10,7 @@ import GHC.Generics
 
 import Primitive.Identity
 import Primitive.Integer
+import Util
 
 data AtList =
   AtUsingList String [Attribute] |
@@ -42,34 +43,36 @@ instance ToJSON AtPrimitive
 
 p_attributes_blocks :: Parser [AtList]
 p_attributes_blocks = try $ do
-  blocks <- many1 $ p_attributes_block <* spaces
-  return blocks
-
-p_attributes_block :: Parser AtList
-p_attributes_block = 
-  p_attribute_using_list <|>
-  p_attribute_list
+  many1 $ block <* ___
+  where
+    block =
+      p_attribute_using_list <|>
+      p_attribute_list
 
 p_attribute_using_list :: Parser AtList
 p_attribute_using_list = try $ do
   string "[["
-  spaces
-  string "using"
-  skipMany1 space
+  ___
+  string "using "
+  ___
   name <- p_identity
-  spaces
+  ___
   char ':'
-  spaces
-  attrs <- sepBy (try $ p_attribute <* spaces) (try $ char ',' >> spaces)
+  ___
+  attrs <- sepByComma $ p_attribute <* ___
+  ___
   string "]]"
+  ___
   return $ AtUsingList name attrs
 
 p_attribute_list :: Parser AtList
 p_attribute_list = try $ do
   string "[["
-  spaces
-  attrs <- sepBy (try $ p_attribute <* spaces) (try $ char ',' >> spaces)
+  ___
+  attrs <- sepByComma $ p_attribute <* ___
+  ___
   string "]]"
+  ___
   return $ AtList attrs
 
 p_attribute :: Parser Attribute
@@ -82,37 +85,41 @@ p_attribute =
 p_attribute_identity :: Parser Attribute
 p_attribute_identity = try $ do
   name <- p_identity
-  spaces
+  ___
   return $ AtIdentity name
 
 p_attribute_function :: Parser Attribute
 p_attribute_function = try $ do
   name <- p_identity
-  spaces
+  ___
   char '('
-  spaces
+  ___
   args <- p_arguments
+  ___
   char ')'
-  spaces
+  ___
   return $ AtFunction name args
 
 p_attribute_namespace :: Parser Attribute
 p_attribute_namespace = try $ do
-  prefs <- many1 . try $ p_identity <* (spaces >> string "::" >> spaces)
+  prefs <- many1 . try $ p_identity <* (___ >> string "::" >> ___)
+  ___
   tail <- p_identity
-  spaces
+  ___
   return $ AtNamespace prefs tail
 
 p_attribute_namespace_function :: Parser Attribute
 p_attribute_namespace_function = try $ do
-  prefs <- many1 . try $ p_identity <* (spaces >> string "::" >> spaces)
+  prefs <- many1 . try $ p_identity <* (___ >> string "::" >> ___)
+  ___
   tail <- p_identity
-  spaces
+  ___
   char '('
-  spaces
+  ___
   args <- p_arguments
+  ___
   char ')'
-  spaces
+  ___
   return $ AtNamespaceFunction prefs tail args
   
 p_attribute_primitive :: Parser AtPrimitive
@@ -121,5 +128,6 @@ p_attribute_primitive =
 
 p_arguments :: Parser AtArgument
 p_arguments = try $ do
-  attrs <- sepBy (try $ p_attribute_primitive <* spaces) (try (char ',' >> spaces))
+  attrs <- sepByComma $ p_attribute_primitive <* ___
+  ___
   return $ AtArgument attrs

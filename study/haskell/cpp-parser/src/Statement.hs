@@ -11,6 +11,7 @@ import GHC.Generics
 import Primitive
 import Primitive.Identity (p_identity_char_and_digit)
 import Expression
+import Util
 
 data Type = Type String deriving (Show, Generic)
 
@@ -82,87 +83,87 @@ p_statement_label =
 
 p_statement_label_case :: PS
 p_statement_label_case = try $ do
-  string "case"
-  skipMany1 space
+  string "case "
+  ___
   expr <- p_expression
-  spaces
+  ___
   char ':'
-  spaces
+  ___
   stmt <- p_statement
-  spaces
+  ___
   return $ StLabel (SLCase expr) stmt
 
 p_statement_label_default :: PS
 p_statement_label_default = try $ do
   string "default"
-  spaces
+  ___
   char ':'
-  spaces
+  ___
   stmt <- p_statement
-  spaces
+  ___
   return $ StLabel SLDefault stmt
 
 p_statement_label_identity :: PS
 p_statement_label_identity = try $ do
   id <- p_identity
-  spaces
+  ___
   char ':'
-  spaces
+  ___
   stmt <- p_statement
-  spaces
+  ___
   return $ StLabel (SLIdentity id) stmt
 
 p_statement_break :: PS
 p_statement_break = try $ do
   string "break"
-  spaces
+  ___
   char ';'
-  spaces
+  ___
   return StBreak
 
 p_statement_continue :: PS
 p_statement_continue = try $ do
   string "continue"
-  spaces
+  ___
   char ';'
-  spaces
+  ___
   return StContinue
 
 p_statement_return :: PS
 p_statement_return = try $ do
-  string "return"
-  many1 space
+  string "return "
+  ___
   expr <- p_expression
-  spaces
+  ___
   char ';'
-  spaces
+  ___
   return . StReturn $ expr
 
 p_statement_goto :: PS
 p_statement_goto = try $ do
-  string "goto"
-  many1 space
+  string "goto "
+  ___
   id <- p_identity
-  spaces
+  ___
   char ';'
-  spaces
+  ___
   return $ StGoto id 
 
 p_statement_expression :: PS
 p_statement_expression = try $ do
   exp <- p_expression
-  spaces
+  ___
   char ';'
-  spaces
+  ___
   return . StExpression $ exp
 
 p_statement_compound :: PS
 p_statement_compound = try $ do
   char '{'
-  spaces
-  body <- many $ p_statement <* spaces
+  ___
+  body <- many $ p_statement <* ___
   char '}'
-  spaces
+  ___
   return . StCompound $ body
 
 p_statement_declarator :: PS
@@ -170,31 +171,31 @@ p_statement_declarator = try $ do
   typ <- p_simple_type
   many1 space
   decls <- p_declarators
-  spaces
+  ___
   char ';'
-  spaces
+  ___
   return $ StDeclarator typ decls
 
 p_declarators :: Parser [Variable]
 p_declarators = try $ do
   let decl = p_set_declarator <|> p_unset_declarator
-  decls <- sepBy decl (char ',' >> spaces)
+  decls <- sepBy decl (char ',' >> ___)
   return decls
 
 p_set_declarator :: Parser Variable
 p_set_declarator = try $ do
   name <- p_identity
-  spaces
+  ___
   char '='
-  spaces
+  ___
   expr <- p_expression
-  spaces
+  ___
   return $ SetVar name expr
 
 p_unset_declarator :: Parser Variable
 p_unset_declarator = try $ do
   name <- p_identity
-  spaces
+  ___
   return $ UnsetVar name
 
 p_simple_type :: Parser Type
@@ -217,105 +218,106 @@ p_simple_type = try $ do
 p_statement_if :: PS
 p_statement_if = try $ do
   string "if"
-  spaces
+  ___
   char '('
-  spaces
+  ___
   cond <- p_expression
-  spaces
+  ___
   char ')'
-  spaces
+  ___
   true_stat <- p_statement
-  spaces
+  ___
   return $ StIf cond true_stat
 
 p_statement_if_else :: PS
 p_statement_if_else = try $ do
   string "if"
-  spaces
+  ___
   char '('
-  spaces
+  ___
   cond <- p_expression
-  spaces
+  ___
   char ')'
-  spaces
+  ___
   true_stat <- p_statement
-  spaces
+  ___
   string "else"
-  spaces
+  ___
   false_stat <- p_statement
-  spaces
+  ___
   return $ StIfElse cond true_stat false_stat
 
 p_statement_switch :: PS
 p_statement_switch = try $ do
   string "switch"
-  spaces
+  ___
   char '('
-  spaces
+  ___
   cond <- p_expression
-  spaces
+  ___
   char ')'
-  spaces
+  ___
   stmt <- p_statement
-  spaces
+  ___
   return $ StSwitch cond stmt
 
 p_statement_while :: PS
 p_statement_while = try $ do
   string "while"
-  spaces
+  ___
   char '('
-  spaces
+  ___
   cond <- p_expression
-  spaces
+  ___
   char ')'
-  spaces
+  ___
   stmt <- p_statement
-  spaces
+  ___
   return $ StWhile cond stmt
 
 p_statement_do_while :: PS
 p_statement_do_while = try $ do
   string "do"
   notFollowedBy p_identity_char_and_digit
-  spaces
+  ___
   stmt <- p_statement
+  ___
   string "while"
-  spaces
+  ___
   char '('
-  spaces
+  ___
   cond <- p_expression
-  spaces
+  ___
   char ')'
-  spaces
+  ___
   char ';'
-  spaces
+  ___
   return $ StDoWhile stmt cond
 
 p_statement_for :: PS
 p_statement_for = try $ do
   string "for"
-  spaces
+  ___
   char '('
-  spaces
+  ___
   fst <-
     optionMaybe $ do
       typ <- p_simple_type
       many1 space
       decls <- p_declarators
-      spaces
+      ___
       return $ InitStmt typ decls
-  spaces
+  ___
   char ';'
-  spaces
-  snd <- option Nothing (Just <$> p_expression)
-  spaces
+  ___
+  snd <- optionMaybe p_expression
+  ___
   char ';'
-  spaces
-  thd <- option Nothing (Just <$> p_expression)
-  spaces
+  ___
+  thd <- optionMaybe p_expression
+  ___
   char ')'
-  spaces
+  ___
   stmt <- p_statement
-  spaces
+  ___
   return $ StFor fst snd thd stmt

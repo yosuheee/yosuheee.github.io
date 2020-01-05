@@ -3,11 +3,13 @@ module Primitive.Identity where
 import Text.Parsec
 import Text.Parsec.String
 
+import Util
+
 p_identity :: Parser String
 p_identity = do
   fst <- p_identity_char
   snd <- many p_identity_char_and_digit
-  spaces
+  ___
   let word = [fst] ++ snd
   let lst = [ "for" ]
   if elem word lst then

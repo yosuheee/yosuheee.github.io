@@ -3,6 +3,8 @@ module Primitive.Double where
 import Text.Parsec
 import Text.Parsec.String
 
+import Util
+
 data DblSuffix = DSNone | DSf | DSF | DSl | DSL deriving Show
 
 data DblLiteral = DblLiteral DblSuffix String String deriving Show
@@ -10,7 +12,7 @@ data DblLiteral = DblLiteral DblSuffix String String deriving Show
 p_double :: Parser Double
 p_double = do
   str <- p_dbl_literal
-  spaces
+  ___
   let DblLiteral _ fst snd = str
       a = read fst :: Double
       x = read snd :: Double

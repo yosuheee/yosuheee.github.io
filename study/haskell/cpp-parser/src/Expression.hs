@@ -9,6 +9,7 @@ import Data.Aeson (FromJSON, ToJSON)
 import GHC.Generics
 
 import Primitive
+import Util
 
 data Infix = InfixL | InfixR deriving (Show)
 
@@ -60,23 +61,25 @@ p_priority_0 =
 p_priority_1 :: PE
 p_priority_1 = try $ do
   expr <- p_priority_0
-  spaces
-  rest <- many $ ExIdentity <$> p_p1_scope <* spaces
+  ___
+  rest <- many $ ExIdentity <$> p_p1_scope <* ___
+  ___
   return $ foldl (ExBinary "::") expr rest
 
 p_p1_scope :: Parser String
 p_p1_scope = try $ do
   string "::"
-  spaces
+  ___
   id <- p_identity
-  spaces
+  ___
   return id
 
 p_priority_2 :: PE
 p_priority_2 = try $ do
   expr <- p_priority_1
-  spaces
-  rest <- many $ parsers <* spaces
+  ___
+  rest <- many $ parsers <* ___
+  ___
   return $ foldl merge expr rest
   where
     parsers =
@@ -107,47 +110,49 @@ data E2Data =
 p_p2_increment :: Parser E2Data
 p_p2_increment = try $ do
   string "++"
-  spaces
+  ___
   return E2Increment
 
 p_p2_decrement :: Parser E2Data
 p_p2_decrement = try $ do
   string "--"
-  spaces
+  ___
   return E2Decrement
 
 p_p2_array :: Parser E2Data
 p_p2_array = try $ do
   char '['
-  spaces
+  ___
   expr <- p_expression
+  ___
   char ']'
-  spaces
+  ___
   return $ E2Array expr
 
 p_p2_dot :: Parser E2Data
 p_p2_dot = try $ do
   char '.'
-  spaces
+  ___
   id <- p_identity
-  spaces
+  ___
   return $ E2Dot id
 
 p_p2_address :: Parser E2Data
 p_p2_address = try $ do
   string "->"
-  spaces
+  ___
   id <- p_identity
-  spaces
+  ___
   return $ E2Address id
 
 p_p2_function :: Parser E2Data
 p_p2_function = try $ do
   char '('
-  spaces
-  args <- sepBy p_expression (char ',' >> spaces)
+  ___
+  args <- sepByComma p_expression
+  ___
   char ')'
-  spaces
+  ___
   return $ E2Function args
 
 p_priority_3 :: PE
@@ -165,11 +170,10 @@ p_priority_3 = try $ do
 p_priority_4 :: PE
 p_priority_4 = try $ do
   expr <- p_priority_3
-  spaces
-  rest <- many $ parsers <* spaces
-  let result = foldl merge expr rest
-  spaces
-  return result
+  ___
+  rest <- many $ parsers <* ___
+  ___
+  return $ foldl merge expr rest
   where
     parsers =
       p_p4_member <|>
@@ -187,17 +191,17 @@ data E4Data =
 p_p4_member :: Parser E4Data
 p_p4_member = try $ do
   string ".*"
-  spaces
+  ___
   id <- p_identity
-  spaces
+  ___
   return $ E4Member id
 
 p_p4_pointer :: Parser E4Data
 p_p4_pointer = try $ do
   string "->*"
-  spaces
+  ___
   id <- p_identity
-  spaces
+  ___
   return $ E4Pointer id
 
 p_priority_5_15 :: PE
@@ -261,19 +265,21 @@ p_binops (ifx, ops) p_high_priority = try $ do
 p_ternary :: PE
 p_ternary = try $ do
   fst <- p_priority_5_15
-  spaces
+  ___
   char '?'
-  spaces
+  ___
   snd <- p_priority_5_15
-  spaces
+  ___
   char ':'
-  spaces
+  ___
   trd <- p_priority_5_15
+  ___
   return $ ExTernary fst snd trd
 
 p_throw :: PE
 p_throw = try $ do
-  string "throw"
-  skipMany1 space
+  string "throw "
+  ___
   val <- p_priority_5_15
+  ___
   return $ ExPrefix "throw" val

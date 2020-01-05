@@ -27,3 +27,7 @@ spec = do
   describe "p_spaces_not_crlf" $ do
     it "line feed" $ do
       exec p_spaces_not_crlf "   \n   " `shouldBe` (show $ "   ")
+    it "line feed" $ do
+      exec __ "   \n   " `shouldBe` (show $ "   ")
+    it "all blank" $ do
+      exec ___ "   \n   " `shouldBe` (show $ "   \n   ")

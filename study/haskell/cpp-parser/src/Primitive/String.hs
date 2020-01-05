@@ -4,6 +4,7 @@ import Text.Parsec
 import Text.Parsec.String
 
 import Primitive.Char (p_escaped_char)
+import Util
 
 data StrPrefix =
   SPu8 | SPL | SPu | SPU | 
@@ -18,7 +19,7 @@ data StrLiteral = StrLiteral StrPrefix StrSuffix String deriving Show
 p_string :: Parser String
 p_string = do
   str <- p_str_literal
-  spaces
+  ___
   let StrLiteral _ _ s = str
   return s
 

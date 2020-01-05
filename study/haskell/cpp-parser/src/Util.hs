@@ -18,3 +18,12 @@ message line num token =
 p_spaces_not_crlf :: Parser String
 p_spaces_not_crlf = try $ do
   many $ notFollowedBy endOfLine >> space
+
+__ :: Parser String
+__ = many $ notFollowedBy endOfLine *> space
+
+___ :: Parser String
+___ = many space
+
+sepByComma :: Parser a -> Parser [a]
+sepByComma p = sepBy p (char ',' >> ___)

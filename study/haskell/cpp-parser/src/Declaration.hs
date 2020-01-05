@@ -59,14 +59,14 @@ p_primitive_filename = try $ do
 p_primitive_include :: Parser String
 p_primitive_include = try $ do
   char '#'
-  p_spaces_not_crlf
+  __
   string "include"
-  p_spaces_not_crlf
+  __
   char '<'
-  p_spaces_not_crlf
+  __
   name <- p_primitive_filename
-  p_spaces_not_crlf
+  __
   char '>'
-  p_spaces_not_crlf
+  __
   endOfLine
   return name
