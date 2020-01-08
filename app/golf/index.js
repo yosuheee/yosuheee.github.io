@@ -47,6 +47,25 @@ window.addEventListener("DOMContentLoaded", () => {
   gl.enable(gl.DEPTH_TEST);
 
   {
+    const container = document.getElementById("container");
+
+    const resize = () => {
+      const style = window.getComputedStyle(container);
+      gl.canvas.width = parseInt(style.width, 10);
+      gl.canvas.height = parseInt(style.height, 10);
+      ctx.canvas.width = parseInt(style.width, 10);
+      ctx.canvas.height = parseInt(style.height, 10);
+      gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+    };
+
+    resize();
+
+    document.getElementById("screen").addEventListener("click", () => {
+      container.requestFullscreen();
+    });
+  }
+
+  {
     const stage = make_random_stage();
     const qtree = make_qtree(stage);
 
