@@ -5,72 +5,73 @@ import { Env } from "./game.js";
 import { intersection_of_plane_and_line, triangle_contains_point } from "/module/math/geometry/index.js";
 
 export function display_bar(ctx, power, now) {
-  const INNER_Y = 417;
-  const IMPACT_X = 140;
+const x = 100, y = 412;
+
   const IMPACT_W = 6;
+  
   const UNIT = 36;
 
   ctx.fillStyle = "rgb(100, 100, 100)";
-  ctx.fillRect(100, 412, 417, 32);
+  ctx.fillRect(x, y, 417, 32);
   ctx.fillStyle = "rgb(206, 206, 206)";
-  ctx.fillRect(101, 413, 415, 30);
+  ctx.fillRect(x + 1, y + 1, 415, 30);
 
   {
-    const g = ctx.createLinearGradient(0, INNER_Y, 0, INNER_Y + 10);
+    const g = ctx.createLinearGradient(0, y + 5, 0, y + 15);
     g.addColorStop(0, "rgb(0, 94, 132)");
     g.addColorStop(1, "rgb(21, 66, 85)");
     ctx.fillStyle = g;
-    ctx.fillRect(105, INNER_Y, UNIT * 11, 10);
+    ctx.fillRect(x + 5, y + 5, UNIT * 11, 10);
   }
   {
-    const g = ctx.createLinearGradient(0, INNER_Y, 0, INNER_Y + 10);
+    const g = ctx.createLinearGradient(0, y + 5, 0, y + 15);
     g.addColorStop(0, "rgb(22, 52, 50)");
     g.addColorStop(1, "rgb(28, 42, 45)");
     ctx.fillStyle = g;
-    ctx.fillRect(105, INNER_Y, UNIT, 10);
+    ctx.fillRect(x + 5, y + 5, UNIT, 10);
   }
   {
-    const g = ctx.createLinearGradient(0, INNER_Y, 0, INNER_Y + 10);
+    const g = ctx.createLinearGradient(0, y + 5, 0, y + 15);
     g.addColorStop(0, "rgb(7, 217, 255)");
     g.addColorStop(1, "rgb(17, 145, 234)");
     ctx.fillStyle = g;
     const p = power < 0 ? 0 : power;
-    ctx.fillRect(IMPACT_X + 1, INNER_Y, UNIT * 10 * p / 100, 10);
+    ctx.fillRect(x + 41, y + 5, UNIT * 10 * p / 100, 10);
   }
   {
-    const g = ctx.createLinearGradient(0, INNER_Y, 0, INNER_Y + 10);
+    const g = ctx.createLinearGradient(0, y + 5, 0, y + 15);
     g.addColorStop(0, "rgb(252, 81, 255)");
     g.addColorStop(1, "rgb(251, 71, 252)");
     ctx.fillStyle = g;
-    ctx.fillRect(IMPACT_X - 18, INNER_Y, UNIT, 10);
+    ctx.fillRect(x + 22, y + 5, UNIT, 10);
   }
 
   {
     ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
-    ctx.fillRect(105, INNER_Y, UNIT * 11, 1);
+    ctx.fillRect(x + 5, y + 5, UNIT * 11, 1);
     ctx.fillStyle = "rgba(0, 0, 0, 0.15)";
-    ctx.fillRect(105, INNER_Y, UNIT * 11, 2);
+    ctx.fillRect(x + 5, y + 5, UNIT * 11, 2);
   }
 
   for (let i = 0; i < 9; i++) {
-    const x = IMPACT_X + (i + 1) * UNIT;
+    const p = x + 40 + (i + 1) * UNIT;
     ctx.fillStyle = "rgb(10, 10, 10)";
     if (i === 4) {
-      ctx.fillRect(x, INNER_Y, 1, 10);
+      ctx.fillRect(p, y + 5, 1, 10);
     } else {
-      ctx.fillRect(x, INNER_Y + 5, 1, 5);
+      ctx.fillRect(p, y + 10, 1, 5);
     }
   }
   {
     ctx.fillStyle = "rgb(255, 255, 255)";
-    ctx.fillRect(IMPACT_X - IMPACT_W / 2, 417, IMPACT_W, 10);
+    ctx.fillRect(x + 40 - IMPACT_W / 2, y + 5, IMPACT_W, 10);
   }
   {
-    const c = Math.round(IMPACT_X + UNIT * 10 * now / 100);
+    const c = Math.round(x + 40 + UNIT * 10 * now / 100);
     ctx.fillStyle = "rgb(2, 2, 2)";
-    ctx.fillRect(c - 4, 414, 8, 16);
+    ctx.fillRect(c - 4, y + 2, 8, 16);
     ctx.fillStyle = "rgb(233, 233, 233)";
-    ctx.fillRect(c - 3, 415, 6, 14);
+    ctx.fillRect(c - 3, y + 3, 6, 14);
   }
 }
 

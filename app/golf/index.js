@@ -78,48 +78,7 @@ window.addEventListener("DOMContentLoaded", () => {
         Game.camera.up = V3(0, 1, 0);
         Game.camera.position = p.add(V3(-3, 1, 0).rotate(V3(0, 1, 0), Game.hit.angle));
       } else if (Game.world.status === WORLD_STATUS.normal) {
-        switch (Game.bar.status) {
-  
-        case BAR_STATUS.initial:
-          Game.bar.status = BAR_STATUS.power_undecided;
-          Game.bar.start = new Date().getTime();
-          break;
-  
-        case BAR_STATUS.power_undecided:
-          Game.bar.status = BAR_STATUS.power_decided;
-          const now = new Date().getTime() - Game.bar.start;
-          const speed = Env.bar.speed;
-          const pow = (speed * 100 - Math.abs(now - speed * 110)) / speed;
-          Game.bar.power = pow;
-          break;
-  
-        case BAR_STATUS.power_decided:
-          Game.world.status = WORLD_STATUS.animation;
-          Game.bar.status = BAR_STATUS.hide;
-          Game.distance.status = DISTANCE_STATUS.show;
-  
-          const ok = await calculate(Game);
-
-          if (!ok) {
-            await sleep(1000);
-
-            const p = xyz_from_xz(Game.world.stage, Game.world.qtree, 0, 0);
-
-            Game.world.positions = [p];
-            Game.hit.angle = 0;
-
-            Game.camera.center = p;
-            Game.camera.up = V3(0, 1, 0);
-            Game.camera.position = p.add(V3(-3, 1, 0).rotate(V3(0, 1, 0), Game.hit.angle));
-          }
-  
-          Game.world.positions = Game.world.positions.slice(-1);
-          Game.world.status = WORLD_STATUS.normal;
-          Game.bar.status = BAR_STATUS.initial;
-          Game.distance.status = DISTANCE_STATUS.hide;
-
-          break;
-        }
+        power_bar(Game);
       }
     } else if (e.code === "ArrowLeft") {
       if (Game.world.status === WORLD_STATUS.normal ||
@@ -202,8 +161,59 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  ctx.canvas.addEventListener("mousedown", async e => {
+    if (Game.world.status === WORLD_STATUS.normal) {
+      power_bar(Game);
+    }
+  });
+
   top_view_loop(Game);
   normal_view_loop(Game);
   bar_loop(Game);
   animation_loop(Game, gl, ctx, prg);
 });
+
+async function power_bar(Game) {
+  switch (Game.bar.status) {
+
+  case BAR_STATUS.initial:
+    Game.bar.status = BAR_STATUS.power_undecided;
+    Game.bar.start = new Date().getTime();
+    break;
+
+  case BAR_STATUS.power_undecided:
+    Game.bar.status = BAR_STATUS.power_decided;
+    const now = new Date().getTime() - Game.bar.start;
+    const speed = Env.bar.speed;
+    const pow = (speed * 100 - Math.abs(now - speed * 110)) / speed;
+    Game.bar.power = pow;
+    break;
+
+  case BAR_STATUS.power_decided:
+    Game.world.status = WORLD_STATUS.animation;
+    Game.bar.status = BAR_STATUS.hide;
+    Game.distance.status = DISTANCE_STATUS.show;
+
+    const ok = await calculate(Game);
+
+    if (!ok) {
+      await sleep(1000);
+
+      const p = xyz_from_xz(Game.world.stage, Game.world.qtree, 0, 0);
+
+      Game.world.positions = [p];
+      Game.hit.angle = 0;
+
+      Game.camera.center = p;
+      Game.camera.up = V3(0, 1, 0);
+      Game.camera.position = p.add(V3(-3, 1, 0).rotate(V3(0, 1, 0), Game.hit.angle));
+    }
+
+    Game.world.positions = Game.world.positions.slice(-1);
+    Game.world.status = WORLD_STATUS.normal;
+    Game.bar.status = BAR_STATUS.initial;
+    Game.distance.status = DISTANCE_STATUS.hide;
+
+    break;
+  }
+}

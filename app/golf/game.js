@@ -24,6 +24,10 @@ export const Game = {
     start: new Date().getTime(),
     current: new Date().getTime(),
     power: -1,
+    position: {
+      x: 0,
+      y: 0,
+    }
   },
   distance: {
     status: DISTANCE_STATUS.hide,
