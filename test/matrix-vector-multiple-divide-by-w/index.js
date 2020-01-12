@@ -11,7 +11,7 @@ void main(void) {
     vec4(0.0, 0.0, 1.0, 0.0),
     vec4(0.0, 0.0, 0.0, 1.0)
   );
-  gl_Position = ident * vec4(position, 3.0);
+  gl_Position = ident * vec4(position, 2.0);
 }
 `;
 
