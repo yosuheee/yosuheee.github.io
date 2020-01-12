@@ -18,3 +18,7 @@ export async function fetcht(file) {
   const response = await fetch(file);
   return await response.text();
 }
+
+export function $(func) {
+  window.addEventListener("DOMContentLoaded", func);
+}

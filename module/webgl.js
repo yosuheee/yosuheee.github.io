@@ -48,6 +48,11 @@ export function buffer(gl, type, value) {
   return vbo;
 }
 
+export function clear(gl, r, g, b, a = 1.0) {
+  gl.clearColor(r, g, b, a);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+}
+
 export const VERTEX_SOURCE = `
   attribute vec3 position;
   attribute vec4 color;
