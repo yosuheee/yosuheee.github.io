@@ -1,5 +1,6 @@
 node_modules/
 temp/
 .vscode
+a.out
 main
 yarn-error.log
