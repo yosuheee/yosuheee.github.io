@@ -149,4 +149,22 @@ void solve() {
     assert("abd" > "abc");
     assert("abc" == "abc");
   }
+  {
+    // immediately invoked function expression
+    int a = 1, b = 2;
+    bool ok = [&]{
+      return a < b;
+    }();
+    assert(ok);
+
+    bool ok2 = [&](){
+      return a < b;
+    }();
+    assert(ok2);
+
+    bool ng = [](int x, int y){
+      return x > y;
+    }(a, b);
+    assert(!ng);
+  }
 }
