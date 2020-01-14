@@ -43,23 +43,13 @@ template <typename T, typename S> ostream& operator<<(ostream &os, pair<T, S> &p
 void solve() {
   int n;
   cin >> n;
-  vector<pair<f80, f80>> xy(n);
-  rep(i, n) {
-    int x, y;
-    cin >> x >> y;
-    xy[i] = make_pair(x, y);
-  }
-  vector<int> ord(n);
-  iota(all(ord), 0);
+  vi32 x(n), y(n);
+  rep(i, n) cin >> x[i] >> y[i];
+  function<f80(int, int)> dist = [&](int i, int j) {
+    return sqrt(pow(x[i] - x[j], 2) + pow(y[i] - y[j], 2));
+  };
   f80 ans = 0;
-  do {
-    f80 acc = 0;
-    rep(i, n - 1) {
-      acc += sqrt(pow(xy[ord[i + 1]].first - xy[ord[i]].first, 2) +
-                  pow(xy[ord[i + 1]].second - xy[ord[i]].second, 2));
-    }
-    ans += acc;
-  } while (next_permutation(all(ord)));
-  reps(i, n) ans /= i;
+  rep(i, n) rep(j, i) ans += dist(i, j);
+  ans *= 2.0 / n;
   cout << ans << endl;
 }
