@@ -40,6 +40,26 @@ template <typename T> ostream& operator<<(ostream &os, vector<T> &v) { rep(i, v.
 template <typename T, typename S> istream& operator>>(istream &is, pair<T, S> &p) { is >> p.first >> p.second; return is; }
 template <typename T, typename S> ostream& operator<<(ostream &os, pair<T, S> &p) { os << p.first << ' ' << p.second; return os; }
 
+i64 dp[310][310];
+
 void solve() {
-  
+  int n, k;
+  cin >> n >> k;
+  vi64 h(n + 1);
+  reps(i, n) cin >> h[i];
+
+  rep(i, 310) rep(j, 310) dp[i][j] = 1e18;
+  dp[0][0] = 0;
+
+  reps(i, n) reps(j, n) {
+    i64 mi = 1e18;
+    rep(l, i) {
+      amin(mi, dp[l][j - 1] + max(h[i] - h[l], 0ll));
+    }
+    dp[i][j] = mi;
+  }
+
+  i64 ans = 1e18;
+  repc(i, n) amin(ans, dp[i][n - k]);
+  cout << ans << endl;
 }
