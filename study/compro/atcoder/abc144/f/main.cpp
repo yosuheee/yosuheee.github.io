@@ -43,47 +43,34 @@ template <typename T, typename S> ostream& operator<<(ostream &os, pair<T, S> &p
 void solve() {
   int n, m;
   cin >> n >> m;
-  vector<pair<int, int>> es;
+  vector<vi32> edges(n);
   rep(i, m) {
     int s, t;
     cin >> s >> t;
     s--, t--;
-    es.emplace_back(s, t);
+    edges[s].push_back(t);
   }
   f80 ans = 1e18;
-  rep(i, m + 1) {
-    vector<vi32> edges(n);
-    rep(j, m) {
-      if (i == j) continue;
-      int s, t;
-      tie(s, t) = es[j];
-      edges[s].push_back(t);
-    }
-    map<int, int> ma;
-    int cnt = 0;
-    queue<pair<int, int>> q;
-    q.emplace(0, 0);
-    while (q.size()) {
-      int v, c;
-      tie(v, c) = q.front();
-      q.pop();
-      each(u, edges[v]) {
-        q.emplace(u, c + 1);
+  rep(i, n - 1) {
+    vf80 memo(n, -1e18);
+    memo[n - 1] = 0;
+    function<f80(int)> dfs = [&](int v) {
+      if (memo[v] != -1e18) return memo[v];
+      f80 ret = 0;
+      f80 ma = -1e18;
+      int cnt = edges[v].size();
+      for (auto u : edges[v]) {
+        f80 temp = dfs(u);
+        amax(ma, temp);
+        ret += temp;
       }
-      if (v == n - 1) {
-        cnt++;
-        ma[c]++;
+      if (v == i && cnt >= 2) {
+        ret -= ma;
+        return memo[v] = (ret / (cnt - 1)) + 1;
       }
-    }
-    f80 e = 0;
-    for (auto m : ma) {
-      int sum, c;
-      tie(sum, c) = m;
-      e += (f80) sum * c / cnt;
-      cerr << i << " " << sum << " " << c << endl;
-    }
-    cout << e << endl;
-    if (e != 0) amin(ans, e);
+      return memo[v] = (ret / cnt) + 1;
+    };
+    amin(ans, dfs(0));
   }
   cout << ans << endl;
 }
